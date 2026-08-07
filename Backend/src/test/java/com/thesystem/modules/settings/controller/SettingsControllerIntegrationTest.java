@@ -123,6 +123,9 @@ class SettingsControllerIntegrationTest {
 
     @Test
     void shouldResetNamespace() throws Exception {
+        Mockito.when(TestConfig.settingsService.getNamespaceSettings(any(UUID.class), any(String.class)))
+                .thenReturn(new NamespaceSettingsResponse("notification", Map.of()));
+
         mockMvc.perform(post("/settings/notification/reset"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))

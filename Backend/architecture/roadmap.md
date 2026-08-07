@@ -37,14 +37,39 @@
 - [x] User module integration tests
 - [x] docs/user/README.md
 
-## Phase 4: Core Modules (v0.5.0 - v0.7.0)
+## Phase 4: Settings Engine (v0.5.1) - COMPLETED
 
-- [ ] Goal module (goals CRUD)
-- [ ] Task module (tasks CRUD)
-- [ ] Memory module (memories CRUD)
-- [ ] AI module (AI interactions)
+- [x] Settings module (configuration management)
+- [x] V6 migration to evolve settings table
+- [x] SettingType and Visibility enums
+- [x] SettingDefinition record and registry
+- [x] InMemorySettingRegistry with lock mechanism
+- [x] Setting entity with JSONB support
+- [x] SettingRepository
+- [x] SettingsService interface and implementation
+- [x] SettingsController with 11 endpoints
+- [x] SettingsExceptionHandler
+- [x] Settings module unit and integration tests
+- [x] docs/settings/README.md
 
-## Phase 5: Supporting Modules (v0.8.0 - v1.0.0)
+## Phase 5: Goal Engine (v0.6.0) - COMPLETED
+
+- [x] Goal module (goals CRUD)
+- [x] V7 migration for goals and goal_milestones tables
+- [x] Goal entity with lifecycle, progress, strategy
+- [x] GoalMilestone entity with display_order
+- [x] Goal enums (status, priority, difficulty, type, visibility, completion strategy)
+- [x] Goal DTOs and mapper
+- [x] GoalService interface and implementation
+- [x] GoalController with 20 endpoints
+- [x] GoalExceptionHandler
+- [x] Domain events for goal lifecycle
+- [x] Goal module unit and integration tests
+- [x] docs/goal/README.md
+
+## Phase 6: Core Modules (v0.7.0 - v0.9.0)
+
+## Phase 5: Supporting Modules (v0.9.0 - v1.0.0)
 
 - [ ] XP module (gamification)
 - [ ] Habit module (habit tracking)
@@ -54,7 +79,6 @@
 - [ ] Notification module (notifications)
 - [ ] Calendar module (calendar integration)
 - [ ] Integration module (third-party integrations)
-- [ ] Settings module (user settings)
 
 ## Phase 6: Production Readiness (v1.0.0)
 

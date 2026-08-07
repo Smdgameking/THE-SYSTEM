@@ -32,7 +32,7 @@ public class Setting extends BaseEntity {
     @Column(name = "value")
     private String value;
 
-    @Column(name = "value_json")
+    @Column(name = "value_json", columnDefinition = "jsonb")
     private String valueJson;
 
     @Enumerated(EnumType.STRING)

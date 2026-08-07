@@ -65,6 +65,90 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build verification successful
 - Production-quality code standards
 
+## [0.6.0] - 2026-08-07
+
+### Added
+- Goal Engine module (objective management)
+- V7__create_goals_and_milestones.sql: goals and goal_milestones tables
+- Goal enums: GoalStatus, GoalPriority, GoalDifficulty, GoalType, GoalVisibility, CompletionStrategy
+- Goal entity with all approved fields (title, description, category, priority, difficulty, status, visibility, estimated_xp, progress, completion_percentage, target_date, completion_strategy, tags JSONB, custom_metadata JSONB)
+- GoalMilestone entity with display_order, is_completed, completed_date
+- GoalRepository and GoalMilestoneRepository with optimized queries
+- Goal DTOs: GoalResponse, GoalDetailResponse, CreateGoalRequest, UpdateGoalRequest, MilestoneResponse, CreateMilestoneRequest, UpdateMilestoneRequest, GoalStatisticsResponse
+- GoalMapper (MapStruct) with custom JSON/list conversions
+- GoalService interface and implementation with full lifecycle management
+- GoalController with 20 endpoints covering CRUD, lifecycle, milestones, statistics
+- GoalExceptionHandler
+- Domain events: GoalCreatedEvent, GoalUpdatedEvent, GoalStartedEvent, GoalPausedEvent, GoalCompletedEvent, GoalArchivedEvent, GoalDeletedEvent, GoalProgressUpdatedEvent
+- State machine for goal lifecycle transitions (DRAFT → ACTIVE → PAUSED/COMPLETED/FAILED → ARCHIVED)
+- Completion strategy pattern (MANUAL, TASK_BASED, XP_BASED, MILESTONE_BASED, PERCENTAGE, CUSTOM)
+- Milestone CRUD with display_order management
+- Goal statistics endpoint
+- Goal module unit tests (8 test cases)
+- Goal module integration tests (7 test cases)
+- docs/goal/README.md
+
+### Database
+- V7 migration creates goals and goal_milestones tables
+- UUID primary keys, audit fields, soft delete
+- JSONB columns for tags and custom_metadata
+- Indexes on user_id, status, priority, category, target_date
+- Unique constraint on goal_milestones (goal_id, display_order)
+- Foreign keys with ON DELETE CASCADE
+
+### Security
+- Users manage only their own goals
+- Reuses existing JWT authentication
+- No duplicated authentication logic
+
+## [0.5.1] - 2026-08-07
+
+### Added
+- Settings Engine module (configuration management)
+- V6__evolve_settings_table.sql: Evolved settings table with namespace, key, value_type, value_json, description, is_system
+- SettingType enum (STRING, BOOLEAN, INTEGER, DOUBLE, JSON, ENUM)
+- Visibility enum (PUBLIC, ENGINE, ADMIN, PRIVATE)
+- SettingDefinition record with validator, visibility, owningEngine
+- InMemorySettingRegistry with startup registration and lock mechanism
+- Setting entity with JSONB support
+- SettingRepository with namespace and system queries
+- Setting DTOs: SettingResponse, NamespaceSettingsResponse, SetSettingRequest, SettingDefinitionResponse
+- SettingMapper (MapStruct)
+- SettingsService interface and implementation
+- SettingsController with 11 endpoints:
+  - GET /settings/{namespace}/{key}
+  - PUT /settings/{namespace}/{key}
+  - DELETE /settings/{namespace}/{key}
+  - GET /settings/{namespace}
+  - PUT /settings/{namespace}
+  - POST /settings/{namespace}/reset
+  - GET /settings/system/{namespace}/{key}
+  - PUT /settings/system/{namespace}/{key}
+  - GET /settings/definitions/{namespace}/{key}
+  - GET /settings/definitions/namespace/{namespace}
+  - GET /settings/definitions/engine/{engine}
+- SettingsExceptionHandler
+- Configuration Registry with immutability enforcement
+- Registry lock after startup
+- Type-safe value conversion and validation
+- UserDetailsServiceImpl for role-based authorization
+- SecurityUtils.isAdmin() helper
+- Settings module unit tests (6 test cases)
+- Settings module integration tests (8 test cases)
+- docs/settings/README.md
+
+### Database
+- V6 migration evolves settings table
+- Added namespace, key, value_type, value_json, description, is_system columns
+- Unique constraints for user and system settings
+- JSONB support for complex configuration values
+- Partial indexes for user/system setting separation
+
+### Security
+- Users can manage only their own settings
+- Admins can manage system settings
+- Registry locked after startup prevents runtime definition changes
+
 ## [0.4.0] - 2026-08-07
 
 ### Added
