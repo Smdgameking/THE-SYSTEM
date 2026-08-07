@@ -35,7 +35,7 @@ public class XpAccount extends BaseEntity {
     private Integer lifetimeXp = 0;
 
     @Column(name = "level_progress", nullable = false)
-    private Integer levelProgress = 0;
+    private Double levelProgress = 0.0;
 
     public XpAccount() {
     }
@@ -96,11 +96,11 @@ public class XpAccount extends BaseEntity {
         this.lifetimeXp = lifetimeXp;
     }
 
-    public Integer getLevelProgress() {
+    public Double getLevelProgress() {
         return levelProgress;
     }
 
-    public void setLevelProgress(Integer levelProgress) {
+    public void setLevelProgress(Double levelProgress) {
         this.levelProgress = levelProgress;
     }
 }

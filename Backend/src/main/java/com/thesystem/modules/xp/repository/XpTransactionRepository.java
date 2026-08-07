@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface XpTransactionRepository extends JpaRepository<XpTransaction, UUID> {
 
     List<XpTransaction> findByUserIdAndDeletedAtIsNull(UUID userId);
@@ -21,7 +24,9 @@ public interface XpTransactionRepository extends JpaRepository<XpTransaction, UU
 
     Optional<XpTransaction> findBySourceEngineAndSourceIdAndSourceTypeAndDeletedAtIsNull(String sourceEngine, UUID sourceId, String sourceType);
 
-    List<XpTransaction> findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(UUID userId);
+    List<XpTransaction> findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(UUID userId);
+
+    Page<XpTransaction> findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(UUID userId, Pageable pageable);
 
     @Query("SELECT SUM(t.amount) FROM XpTransaction t WHERE t.userId = :userId AND t.deletedAt IS NULL AND t.amount > 0")
     Integer sumPositiveAmountByUserId(@Param("userId") UUID userId);

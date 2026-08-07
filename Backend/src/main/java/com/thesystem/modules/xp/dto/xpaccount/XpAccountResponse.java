@@ -11,7 +11,7 @@ public record XpAccountResponse(
         Integer totalXpEarned,
         Integer totalXpSpent,
         Integer lifetimeXp,
-        Integer levelProgress,
+        Double levelProgress,
         Instant createdAt,
         Instant updatedAt
 ) {

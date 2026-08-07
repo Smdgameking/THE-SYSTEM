@@ -11,7 +11,7 @@ public record StatisticsResponse(
         Integer monthlyXp,
         Integer lifetimeXp,
         Integer currentLevel,
-        Integer levelProgress,
+        Double levelProgress,
         Integer tasksCompleted,
         Integer goalsCompleted,
         Integer achievementsUnlocked,

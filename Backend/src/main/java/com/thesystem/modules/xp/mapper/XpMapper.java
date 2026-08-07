@@ -2,12 +2,15 @@ package com.thesystem.modules.xp.mapper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thesystem.modules.xp.dto.AchievementDefinitionResponse;
-import com.thesystem.modules.xp.dto.RewardHistoryResponse;
-import com.thesystem.modules.xp.dto.UserAchievementResponse;
-import com.thesystem.modules.xp.dto.XpAccountResponse;
-import com.thesystem.modules.xp.dto.XpPolicyResponse;
-import com.thesystem.modules.xp.dto.XpTransactionResponse;
+import com.thesystem.modules.xp.dto.achievement.AchievementResponse;
+import com.thesystem.modules.xp.dto.achievement.UserAchievementResponse;
+import com.thesystem.modules.xp.dto.level.LevelInfo;
+import com.thesystem.modules.xp.dto.level.ProgressResponse;
+import com.thesystem.modules.xp.dto.policy.PolicyEvaluationResponse;
+import com.thesystem.modules.xp.dto.policy.PolicyResponse;
+import com.thesystem.modules.xp.dto.reward.RewardHistoryResponse;
+import com.thesystem.modules.xp.dto.transaction.TransactionResponse;
+import com.thesystem.modules.xp.dto.xpaccount.XpAccountResponse;
 import com.thesystem.modules.xp.entity.AchievementDefinition;
 import com.thesystem.modules.xp.entity.RewardHistory;
 import com.thesystem.modules.xp.entity.UserAchievement;
@@ -24,21 +27,36 @@ import java.util.Map;
 public interface XpMapper {
 
     @Mapping(target = "metadata", source = "metadata", qualifiedByName = "stringToMap")
-    XpTransactionResponse toXpTransactionResponse(XpTransaction transaction);
+    TransactionResponse toTransactionResponse(XpTransaction transaction);
 
     @Mapping(target = "requirementValue", source = "requirementValue", qualifiedByName = "stringToMap")
-    AchievementDefinitionResponse toAchievementDefinitionResponse(AchievementDefinition definition);
+    AchievementResponse toAchievementResponse(AchievementDefinition definition);
 
+    @Mapping(target = "achievementCode", expression = "java(getAchievementCode(userAchievement))")
+    @Mapping(target = "achievementName", expression = "java(getAchievementName(userAchievement))")
+    @Mapping(target = "category", expression = "java(getAchievementCategory(userAchievement))")
     @Mapping(target = "progressMetadata", source = "progressMetadata", qualifiedByName = "stringToMap")
     UserAchievementResponse toUserAchievementResponse(UserAchievement userAchievement);
 
     @Mapping(target = "conditions", source = "conditions", qualifiedByName = "stringToMap")
-    XpPolicyResponse toXpPolicyResponse(XpPolicy policy);
+    PolicyResponse toPolicyResponse(XpPolicy policy);
 
     @Mapping(target = "metadata", source = "metadata", qualifiedByName = "stringToMap")
     RewardHistoryResponse toRewardHistoryResponse(RewardHistory rewardHistory);
 
     XpAccountResponse toXpAccountResponse(XpAccount account);
+
+    default String getAchievementCode(UserAchievement userAchievement) {
+        return "";
+    }
+
+    default String getAchievementName(UserAchievement userAchievement) {
+        return "";
+    }
+
+    default com.thesystem.modules.xp.enums.AchievementCategory getAchievementCategory(UserAchievement userAchievement) {
+        return com.thesystem.modules.xp.enums.AchievementCategory.TASK;
+    }
 
     @Named("stringToMap")
     default Map<String, Object> stringToMap(String value) {
