@@ -561,7 +561,7 @@ public class TaskServiceImpl implements TaskService {
                 attachments = objectMapper.readValue(task.getAttachments(), new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
             }
         } catch (Exception e) {
-            return;
+            throw new BusinessException(ErrorCodes.VALIDATION_ERROR, "Failed to parse task attachments");
         }
         attachments.removeIf(a -> attachmentId.toString().equals(a.get("id")));
         task.setAttachments(toJson(attachments));

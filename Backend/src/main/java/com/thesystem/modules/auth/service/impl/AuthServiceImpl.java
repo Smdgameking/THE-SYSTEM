@@ -7,9 +7,11 @@ import com.thesystem.modules.auth.dto.RefreshTokenRequest;
 import com.thesystem.modules.auth.dto.RegisterRequest;
 import com.thesystem.modules.auth.dto.TokenResponse;
 import com.thesystem.modules.auth.dto.UserResponse;
+import com.thesystem.modules.auth.entity.RefreshToken;
 import com.thesystem.modules.auth.entity.Role;
 import com.thesystem.modules.auth.entity.User;
 import com.thesystem.modules.auth.entity.UserRole;
+import com.thesystem.modules.auth.repository.RefreshTokenRepository;
 import com.thesystem.modules.auth.repository.RoleRepository;
 import com.thesystem.modules.auth.repository.UserRepository;
 import com.thesystem.modules.auth.repository.UserRoleRepository;
@@ -20,7 +22,10 @@ import com.thesystem.security.service.PasswordEncoderService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +35,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoderService passwordEncoderService;
     private final JwtTokenService jwtTokenService;
     private final UserMapper userMapper;
@@ -38,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
             UserRepository userRepository,
             RoleRepository roleRepository,
             UserRoleRepository userRoleRepository,
+            RefreshTokenRepository refreshTokenRepository,
             PasswordEncoderService passwordEncoderService,
             JwtTokenService jwtTokenService,
             UserMapper userMapper
@@ -45,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoderService = passwordEncoderService;
         this.jwtTokenService = jwtTokenService;
         this.userMapper = userMapper;
@@ -74,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtTokenService.generateAccessToken(savedUser.getId(), savedUser.getEmail());
         String refreshToken = jwtTokenService.generateRefreshToken(savedUser.getId());
+        saveRefreshToken(savedUser.getId(), refreshToken);
 
         return new TokenResponse(accessToken, refreshToken, "Bearer", 900L);
     }
@@ -90,6 +99,7 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtTokenService.generateAccessToken(user.getId(), user.getEmail());
         String refreshToken = jwtTokenService.generateRefreshToken(user.getId());
+        saveRefreshToken(user.getId(), refreshToken);
 
         return new TokenResponse(accessToken, refreshToken, "Bearer", 900L);
     }
@@ -97,20 +107,22 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public TokenResponse refreshToken(RefreshTokenRequest request) {
-        UUID userId;
-        try {
-            userId = jwtTokenService.getUserIdFromToken(request.refreshToken());
-        } catch (BusinessException e) {
-            throw new BusinessException(ErrorCodes.UNAUTHORIZED, "Invalid refresh token");
-        }
+        String tokenHash = hashToken(request.refreshToken());
+        RefreshToken storedToken = refreshTokenRepository.findByTokenHashAndRevokedFalseAndExpiresAtAfter(tokenHash, Instant.now())
+                .orElseThrow(() -> new BusinessException(ErrorCodes.UNAUTHORIZED, "Invalid refresh token"));
 
+        storedToken.setRevoked(true);
+        refreshTokenRepository.save(storedToken);
+
+        UUID userId = storedToken.getUserId();
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.UNAUTHORIZED, "User not found"));
 
         String accessToken = jwtTokenService.generateAccessToken(user.getId(), user.getEmail());
-        String refreshToken = jwtTokenService.generateRefreshToken(user.getId());
+        String newRefreshToken = jwtTokenService.generateRefreshToken(user.getId());
+        saveRefreshToken(user.getId(), newRefreshToken);
 
-        return new TokenResponse(accessToken, refreshToken, "Bearer", 900L);
+        return new TokenResponse(accessToken, newRefreshToken, "Bearer", 900L);
     }
 
     @Override
@@ -123,7 +135,37 @@ public class AuthServiceImpl implements AuthService {
             return;
         }
 
-        List<UserRole> userRoles = userRoleRepository.findByUserId(userId);
-        userRoleRepository.deleteAll(userRoles);
+        List<RefreshToken> activeTokens = refreshTokenRepository.findByUserIdAndRevokedFalse(userId);
+        for (RefreshToken token : activeTokens) {
+            token.setRevoked(true);
+        }
+        refreshTokenRepository.saveAll(activeTokens);
+    }
+
+    private void saveRefreshToken(UUID userId, String token) {
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUserId(userId);
+        refreshToken.setTokenHash(hashToken(token));
+        refreshToken.setExpiresAt(Instant.now().plusMillis(604800000L));
+        refreshToken.setRevoked(false);
+        refreshTokenRepository.save(refreshToken);
+    }
+
+    private String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new BusinessException(ErrorCodes.VALIDATION_ERROR, "Failed to hash refresh token");
+        }
     }
 }

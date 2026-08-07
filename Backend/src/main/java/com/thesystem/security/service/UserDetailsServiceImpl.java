@@ -34,7 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByIdAndDeletedAtIsNull(java.util.UUID.fromString(userId))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        Collection<GrantedAuthority> authorities = userRoleRepository.findByUserId(user.getId())
+        Collection<GrantedAuthority> authorities = userRoleRepository.findByUserIdAndDeletedAtIsNull(user.getId())
                 .stream()
                 .map(UserRole::getRoleId)
                 .map(roleRepository::findById)

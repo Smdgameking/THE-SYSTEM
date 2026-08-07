@@ -33,4 +33,7 @@ public interface XpTransactionRepository extends JpaRepository<XpTransaction, UU
 
     @Query("SELECT SUM(t.amount) FROM XpTransaction t WHERE t.userId = :userId AND t.deletedAt IS NULL AND t.amount < 0")
     Integer sumNegativeAmountByUserId(@Param("userId") UUID userId);
+
+    @Query("SELECT SUM(t.amount) FROM XpTransaction t WHERE t.userId = :userId AND t.deletedAt IS NULL AND t.amount > 0 AND t.createdAt >= :start")
+    Integer sumPositiveAmountByUserIdAndCreatedAtAfter(@Param("userId") UUID userId, @Param("start") java.time.Instant start);
 }

@@ -47,7 +47,7 @@ class AuthControllerIntegrationTest {
 
         Mockito.when(TestConfig.authService.register(any(RegisterRequest.class))).thenReturn(tokenResponse);
 
-        mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -64,7 +64,7 @@ class AuthControllerIntegrationTest {
 
         Mockito.when(TestConfig.authService.login(any(LoginRequest.class))).thenReturn(tokenResponse);
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -79,7 +79,7 @@ class AuthControllerIntegrationTest {
 
         Mockito.when(TestConfig.authService.refreshToken(any(RefreshTokenRequest.class))).thenReturn(tokenResponse);
 
-        mockMvc.perform(post("/api/auth/refresh")
+        mockMvc.perform(post("/api/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -91,7 +91,7 @@ class AuthControllerIntegrationTest {
     void shouldLogoutUser() throws Exception {
         RefreshTokenRequest request = new RefreshTokenRequest("refreshToken");
 
-        mockMvc.perform(post("/api/auth/logout")
+        mockMvc.perform(post("/api/v1/auth/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -103,7 +103,7 @@ class AuthControllerIntegrationTest {
     void shouldReturnBadRequestForInvalidEmail() throws Exception {
         RegisterRequest request = new RegisterRequest("invalid-email", "password123");
 
-        mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -115,7 +115,7 @@ class AuthControllerIntegrationTest {
     void shouldReturnBadRequestForShortPassword() throws Exception {
         RegisterRequest request = new RegisterRequest("test@example.com", "short");
 
-        mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())

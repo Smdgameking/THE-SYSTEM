@@ -109,7 +109,7 @@ class XpControllerIntegrationTest {
                 "Task completed", Map.of(), Instant.now()
         );
 
-        Mockito.when(TestConfig.xpService.getTransaction(any(UUID.class))).thenReturn(response);
+        Mockito.when(TestConfig.xpService.getTransaction(any(UUID.class), any(UUID.class))).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/xp/transactions/" + transactionId))
                 .andExpect(status().isOk())

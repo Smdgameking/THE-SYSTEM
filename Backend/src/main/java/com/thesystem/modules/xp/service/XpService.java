@@ -66,9 +66,10 @@ public interface XpService {
      * Retrieves a specific transaction by its ID.
      *
      * @param transactionId the unique identifier of the transaction
+     * @param userId        the unique identifier of the requesting user
      * @return the transaction details
      */
-    TransactionResponse getTransaction(UUID transactionId);
+    TransactionResponse getTransaction(UUID transactionId, UUID userId);
 
     /**
      * Lists transactions for a user with pagination.

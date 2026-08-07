@@ -82,7 +82,7 @@ class GoalControllerIntegrationTest {
 
         Mockito.when(TestConfig.goalService.createGoal(any(UUID.class), any(CreateGoalRequest.class))).thenReturn(response);
 
-        mockMvc.perform(post("/goals")
+        mockMvc.perform(post("/api/v1/goals")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -105,7 +105,7 @@ class GoalControllerIntegrationTest {
 
         Mockito.when(TestConfig.goalService.getGoal(any(UUID.class), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(get("/goals/" + goalId))
+        mockMvc.perform(get("/api/v1/goals/" + goalId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.title").value("Test Goal"));
@@ -126,7 +126,7 @@ class GoalControllerIntegrationTest {
 
         Mockito.when(TestConfig.goalService.startGoal(any(UUID.class), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(post("/goals/" + goalId + "/start"))
+        mockMvc.perform(post("/api/v1/goals/" + goalId + "/start"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.status").value("ACTIVE"));
@@ -147,7 +147,7 @@ class GoalControllerIntegrationTest {
 
         Mockito.when(TestConfig.goalService.completeGoal(any(UUID.class), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(post("/goals/" + goalId + "/complete"))
+        mockMvc.perform(post("/api/v1/goals/" + goalId + "/complete"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.status").value("COMPLETED"));
@@ -162,7 +162,7 @@ class GoalControllerIntegrationTest {
 
         Mockito.when(TestConfig.goalService.createMilestone(any(UUID.class), any(UUID.class), any())).thenReturn(response);
 
-        mockMvc.perform(post("/goals/" + goalId + "/milestones")
+        mockMvc.perform(post("/api/v1/goals/" + goalId + "/milestones")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new com.thesystem.modules.goal.dto.CreateMilestoneRequest("Milestone 1", "Description", 0))))
                 .andExpect(status().isCreated())
@@ -180,7 +180,7 @@ class GoalControllerIntegrationTest {
 
         Mockito.when(TestConfig.goalService.getStatistics(any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(get("/goals/statistics"))
+        mockMvc.perform(get("/api/v1/goals/statistics"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.totalGoals").value(10));

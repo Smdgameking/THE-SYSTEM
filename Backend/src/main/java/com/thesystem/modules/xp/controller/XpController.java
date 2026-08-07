@@ -55,7 +55,8 @@ public class XpController {
     @Operation(summary = "Get transaction by ID")
     public ResponseEntity<ApiResponse<TransactionResponse>> getTransaction(
             @PathVariable @Parameter(description = "Transaction ID") UUID id) {
-        TransactionResponse response = xpService.getTransaction(id);
+        UUID userId = SecurityUtils.getCurrentUserId();
+        TransactionResponse response = xpService.getTransaction(id, userId);
         return ResponseEntity.ok(ApiResponse.ok(response, "Transaction retrieved successfully", UUID.randomUUID().toString()));
     }
 

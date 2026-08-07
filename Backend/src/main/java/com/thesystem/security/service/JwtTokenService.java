@@ -8,6 +8,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -25,6 +27,13 @@ public class JwtTokenService {
 
     @Value("${thesystem.jwt.refresh-token-expiration-ms}")
     private long refreshTokenExpirationMs;
+
+    @PostConstruct
+    public void validateSecret() {
+        if (jwtSecret == null || jwtSecret.isBlank() || jwtSecret.length() < 32) {
+            throw new IllegalStateException("JWT secret must be configured via THE_SYSTEM_JWT_SECRET environment variable");
+        }
+    }
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);

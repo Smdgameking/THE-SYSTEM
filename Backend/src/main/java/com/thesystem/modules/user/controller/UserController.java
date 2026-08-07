@@ -6,6 +6,9 @@ import com.thesystem.modules.user.dto.UpdateProfileRequest;
 import com.thesystem.modules.user.dto.UserProfileResponse;
 import com.thesystem.modules.user.service.UserService;
 import com.thesystem.security.util.SecurityUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
+@Tag(name = "User")
 public class UserController {
 
     private final UserService userService;
@@ -29,6 +33,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
+    @Operation(summary = "Get current user profile")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getMyProfile() {
         UUID userId = SecurityUtils.getCurrentUserId();
         UserProfileResponse response = userService.getMyProfile(userId);
@@ -36,6 +41,7 @@ public class UserController {
     }
 
     @PutMapping("/me")
+    @Operation(summary = "Update current user profile")
     public ResponseEntity<ApiResponse<UserProfileResponse>> updateMyProfile(@Valid @RequestBody UpdateProfileRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId();
         UserProfileResponse response = userService.updateMyProfile(userId, request);
@@ -43,13 +49,15 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<PublicUserResponse>> getPublicProfile(@PathVariable UUID id) {
+    @Operation(summary = "Get public profile by user ID")
+    public ResponseEntity<ApiResponse<PublicUserResponse>> getPublicProfile(@PathVariable @Parameter(description = "User ID") UUID id) {
         PublicUserResponse response = userService.getPublicProfile(id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Public profile retrieved successfully", UUID.randomUUID().toString()));
     }
 
     @GetMapping("/username/{username}")
-    public ResponseEntity<ApiResponse<PublicUserResponse>> getPublicProfileByUsername(@PathVariable String username) {
+    @Operation(summary = "Get public profile by username")
+    public ResponseEntity<ApiResponse<PublicUserResponse>> getPublicProfileByUsername(@PathVariable @Parameter(description = "Username") String username) {
         PublicUserResponse response = userService.getPublicProfileByUsername(username);
         return ResponseEntity.ok(ApiResponse.ok(response, "Public profile retrieved successfully", UUID.randomUUID().toString()));
     }

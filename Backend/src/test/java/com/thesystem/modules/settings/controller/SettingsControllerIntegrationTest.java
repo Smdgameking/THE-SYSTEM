@@ -69,7 +69,7 @@ class SettingsControllerIntegrationTest {
         Mockito.when(TestConfig.settingsService.getSetting(any(UUID.class), any(String.class), any(String.class)))
                 .thenReturn(response);
 
-        mockMvc.perform(get("/settings/notification/email_enabled"))
+        mockMvc.perform(get("/api/v1/settings/notification/email_enabled"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.namespace").value("notification"))
@@ -87,7 +87,7 @@ class SettingsControllerIntegrationTest {
         Mockito.when(TestConfig.settingsService.setSetting(any(UUID.class), any(String.class), any(String.class), any()))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/settings/notification/email_enabled")
+        mockMvc.perform(put("/api/v1/settings/notification/email_enabled")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new SetSettingRequest(true))))
                 .andExpect(status().isOk())
@@ -97,7 +97,7 @@ class SettingsControllerIntegrationTest {
 
     @Test
     void shouldDeleteSetting() throws Exception {
-        mockMvc.perform(delete("/settings/notification/email_enabled"))
+        mockMvc.perform(delete("/api/v1/settings/notification/email_enabled"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Setting deleted successfully"));
@@ -115,7 +115,7 @@ class SettingsControllerIntegrationTest {
         Mockito.when(TestConfig.settingsService.getNamespaceSettings(any(UUID.class), any(String.class)))
                 .thenReturn(response);
 
-        mockMvc.perform(get("/settings/notification"))
+        mockMvc.perform(get("/api/v1/settings/notification"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.namespace").value("notification"));
@@ -126,7 +126,7 @@ class SettingsControllerIntegrationTest {
         Mockito.when(TestConfig.settingsService.getNamespaceSettings(any(UUID.class), any(String.class)))
                 .thenReturn(new NamespaceSettingsResponse("notification", Map.of()));
 
-        mockMvc.perform(post("/settings/notification/reset"))
+        mockMvc.perform(post("/api/v1/settings/notification/reset"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Namespace reset to defaults"));
@@ -142,7 +142,7 @@ class SettingsControllerIntegrationTest {
         Mockito.when(TestConfig.settingsService.getDefinition("notification", "email_enabled"))
                 .thenReturn(response);
 
-        mockMvc.perform(get("/settings/definitions/notification/email_enabled"))
+        mockMvc.perform(get("/api/v1/settings/definitions/notification/email_enabled"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.key").value("email_enabled"));
@@ -158,7 +158,7 @@ class SettingsControllerIntegrationTest {
         Mockito.when(TestConfig.settingsService.getDefinitionsByNamespace("notification"))
                 .thenReturn(responses);
 
-        mockMvc.perform(get("/settings/definitions/namespace/notification"))
+        mockMvc.perform(get("/api/v1/settings/definitions/namespace/notification"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").isArray())
@@ -174,7 +174,7 @@ class SettingsControllerIntegrationTest {
         Mockito.when(TestConfig.settingsService.getDefinitionsByOwningEngine("notification"))
                 .thenReturn(responses);
 
-        mockMvc.perform(get("/settings/definitions/engine/notification"))
+        mockMvc.perform(get("/api/v1/settings/definitions/engine/notification"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data[0].owningEngine").value("notification"));

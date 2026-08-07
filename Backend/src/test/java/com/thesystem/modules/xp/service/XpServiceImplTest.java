@@ -56,6 +56,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -593,7 +594,7 @@ class XpServiceImplTest {
         account.setLevelProgress(50.0);
 
         when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
-        when(xpTransactionRepository.sumPositiveAmountByUserId(userId)).thenReturn(100);
+        when(xpTransactionRepository.sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), any(Instant.class))).thenReturn(100);
 
         StatisticsResponse stats = xpService.getStatistics();
 
@@ -607,7 +608,7 @@ class XpServiceImplTest {
     @Test
     void shouldReturnDefaultStatisticsWhenAccountNotFound() {
         when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
-        when(xpTransactionRepository.sumPositiveAmountByUserId(userId)).thenReturn(null);
+        when(xpTransactionRepository.sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), any(Instant.class))).thenReturn(null);
 
         StatisticsResponse stats = xpService.getStatistics();
 

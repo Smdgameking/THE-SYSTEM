@@ -64,7 +64,7 @@ class UserControllerIntegrationTest {
 
         Mockito.when(TestConfig.userService.getMyProfile(any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(get("/users/me"))
+        mockMvc.perform(get("/api/v1/users/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.username").value("johndoe"))
@@ -82,7 +82,7 @@ class UserControllerIntegrationTest {
 
         Mockito.when(TestConfig.userService.updateMyProfile(any(UUID.class), any(UpdateProfileRequest.class))).thenReturn(response);
 
-        mockMvc.perform(put("/users/me")
+        mockMvc.perform(put("/api/v1/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -95,7 +95,7 @@ class UserControllerIntegrationTest {
     void shouldReturnBadRequestForShortUsername() throws Exception {
         UpdateProfileRequest request = new UpdateProfileRequest("ab", "John Doe", null, null, null, null, null);
 
-        mockMvc.perform(put("/users/me")
+        mockMvc.perform(put("/api/v1/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -112,7 +112,7 @@ class UserControllerIntegrationTest {
 
         Mockito.when(TestConfig.userService.getPublicProfile(userId)).thenReturn(response);
 
-        mockMvc.perform(get("/users/" + userId))
+        mockMvc.perform(get("/api/v1/users/" + userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.username").value("johndoe"))
@@ -127,7 +127,7 @@ class UserControllerIntegrationTest {
 
         Mockito.when(TestConfig.userService.getPublicProfileByUsername("johndoe")).thenReturn(response);
 
-        mockMvc.perform(get("/users/username/johndoe"))
+        mockMvc.perform(get("/api/v1/users/username/johndoe"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.username").value("johndoe"));

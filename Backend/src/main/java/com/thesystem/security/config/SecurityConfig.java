@@ -26,6 +26,15 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .addHeaderWriter((request, response) -> {
+                            response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+                            response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+                            response.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+                            response.setHeader("X-Content-Type-Options", "nosniff");
+                        })
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()

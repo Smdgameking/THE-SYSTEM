@@ -274,10 +274,17 @@ public class GoalServiceImpl implements GoalService {
         int oldProgress = goal.getCurrentProgress();
         double oldPercentage = goal.getCompletionPercentage();
 
-        // Placeholder for future engine integration
-        // Task Engine, XP Engine, and Milestone calculations will be implemented in future phases
         int newProgress = oldProgress;
         double newPercentage = oldPercentage;
+
+        if (goal.getCompletionStrategy() == CompletionStrategy.MILESTONE_BASED) {
+            List<GoalMilestone> milestones = milestoneRepository.findByGoalIdAndDeletedAtIsNullOrderByDisplayOrderAsc(goalId);
+            if (!milestones.isEmpty()) {
+                long completed = milestones.stream().filter(GoalMilestone::getIsCompleted).count();
+                newProgress = (int) Math.round((double) completed / milestones.size() * 100);
+                newPercentage = newProgress;
+            }
+        }
 
         goal.setCurrentProgress(newProgress);
         goal.setCompletionPercentage(newPercentage);

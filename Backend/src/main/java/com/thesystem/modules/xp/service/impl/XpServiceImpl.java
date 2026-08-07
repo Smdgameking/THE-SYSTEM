@@ -217,9 +217,12 @@ public class XpServiceImpl implements XpService {
 
     @Override
     @Transactional(readOnly = true)
-    public TransactionResponse getTransaction(UUID transactionId) {
+    public TransactionResponse getTransaction(UUID transactionId, UUID userId) {
         XpTransaction transaction = xpTransactionRepository.findById(transactionId)
                 .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
+        if (!transaction.getUserId().equals(userId)) {
+            throw new XpException("Access denied", "FORBIDDEN", 403);
+        }
         return xpMapper.toTransactionResponse(transaction);
     }
 
@@ -351,6 +354,9 @@ public class XpServiceImpl implements XpService {
     public AchievementResponse getAchievement(UUID achievementId) {
         AchievementDefinition definition = achievementDefinitionRepository.findById(achievementId)
                 .orElseThrow(() -> new AchievementNotFoundException("Achievement not found"));
+        if (definition.getIsHidden() && !SecurityUtils.isAdmin()) {
+            throw new AchievementNotFoundException("Achievement not found");
+        }
         return new AchievementResponse(
                 definition.getId(),
                 definition.getCode(),
@@ -646,7 +652,51 @@ public class XpServiceImpl implements XpService {
     @Override
     @Transactional
     public RewardResponse grantReward(UUID userId, UUID rewardId) {
-        throw new InvalidRewardException("Reward granting not yet implemented");
+        XpAccount account = xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)
+                .orElseGet(() -> createDefaultAccount(userId));
+
+        int baseAmount = 10;
+        int balanceBefore = account.getCurrentXp();
+        int balanceAfter = balanceBefore + baseAmount;
+
+        XpTransaction transaction = new XpTransaction();
+        transaction.setUserId(userId);
+        transaction.setTransactionType(TransactionType.BONUS);
+        transaction.setAmount(baseAmount);
+        transaction.setBalanceAfter(balanceAfter);
+        transaction.setSourceEngine("xp-engine");
+        transaction.setSourceId(rewardId);
+        transaction.setSourceType("REWARD");
+        transaction.setReason("Reward granted");
+        xpTransactionRepository.save(transaction);
+
+        RewardHistory rewardHistory = new RewardHistory();
+        rewardHistory.setUserId(userId);
+        rewardHistory.setRewardType(com.thesystem.modules.xp.enums.RewardType.ADMIN);
+        rewardHistory.setSourceType("REWARD");
+        rewardHistory.setSourceId(rewardId);
+        rewardHistory.setXpAmount(baseAmount);
+        rewardHistory.setBaseAmount(baseAmount);
+        rewardHistoryRepository.save(rewardHistory);
+
+        account.setCurrentXp(balanceAfter);
+        account.setTotalXpEarned(account.getTotalXpEarned() + baseAmount);
+        account.setLifetimeXp(account.getTotalXpEarned() - account.getTotalXpSpent());
+        xpAccountRepository.save(account);
+
+        return new RewardResponse(
+                rewardHistory.getId(),
+                userId,
+                "MANUAL",
+                "REWARD",
+                rewardId,
+                baseAmount,
+                null,
+                1.0,
+                baseAmount,
+                Instant.now(),
+                Map.of()
+        );
     }
 
     @Override
@@ -680,10 +730,18 @@ public class XpServiceImpl implements XpService {
                 .orElse(new XpAccount());
 
         Instant now = Instant.now();
+        java.time.ZoneId zoneId = java.time.ZoneId.systemDefault();
+        java.time.LocalDate today = java.time.LocalDate.now(zoneId);
+        java.time.LocalDate weekStart = today.with(java.time.DayOfWeek.MONDAY);
+        java.time.LocalDate monthStart = today.withDayOfMonth(1);
 
-        Integer dailyXp = xpTransactionRepository.sumPositiveAmountByUserId(userId);
-        Integer weeklyXp = xpTransactionRepository.sumPositiveAmountByUserId(userId);
-        Integer monthlyXp = xpTransactionRepository.sumPositiveAmountByUserId(userId);
+        Instant dayStart = today.atStartOfDay(zoneId).toInstant();
+        Instant weekStartInstant = weekStart.atStartOfDay(zoneId).toInstant();
+        Instant monthStartInstant = monthStart.atStartOfDay(zoneId).toInstant();
+
+        Integer dailyXp = xpTransactionRepository.sumPositiveAmountByUserIdAndCreatedAtAfter(userId, dayStart);
+        Integer weeklyXp = xpTransactionRepository.sumPositiveAmountByUserIdAndCreatedAtAfter(userId, weekStartInstant);
+        Integer monthlyXp = xpTransactionRepository.sumPositiveAmountByUserIdAndCreatedAtAfter(userId, monthStartInstant);
 
         return new StatisticsResponse(
                 dailyXp != null ? dailyXp : 0,
@@ -737,29 +795,10 @@ public class XpServiceImpl implements XpService {
     }
 
     private int evaluateAchievementProgress(AchievementDefinition definition, UUID userId) {
-        switch (definition.getRequirementType()) {
-            case COUNTER -> {
-                return Math.min(100, (int) (Math.random() * 100));
-            }
-            case STREAK -> {
-                return 0;
-            }
-            case MILESTONE -> {
-                return 0;
-            }
-            case COLLECTION -> {
-                return 0;
-            }
-            case SPEED -> {
-                return 0;
-            }
-            case CUSTOM -> {
-                return 0;
-            }
-            default -> {
-                return 0;
-            }
-        }
+        UserAchievement userAchievement = userAchievementRepository
+                .findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId())
+                .orElse(null);
+        return userAchievement != null ? userAchievement.getCurrentProgress() : 0;
     }
 
     private boolean matchesPolicy(XpPolicy policy, UUID userId) {

@@ -13,6 +13,9 @@ import com.thesystem.modules.goal.enums.GoalPriority;
 import com.thesystem.modules.goal.enums.GoalStatus;
 import com.thesystem.modules.goal.service.GoalService;
 import com.thesystem.security.util.SecurityUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +25,8 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/goals")
+@RequestMapping("/api/v1/goals")
+@Tag(name = "Goal")
 public class GoalController {
 
     private final GoalService goalService;
@@ -32,6 +36,7 @@ public class GoalController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a new goal")
     public ResponseEntity<ApiResponse<GoalResponse>> createGoal(@Valid @RequestBody CreateGoalRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalResponse response = goalService.createGoal(userId, request);
@@ -40,19 +45,21 @@ public class GoalController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<GoalDetailResponse>> getGoal(@PathVariable UUID id) {
+    @Operation(summary = "Get goal details")
+    public ResponseEntity<ApiResponse<GoalDetailResponse>> getGoal(@PathVariable @Parameter(description = "Goal ID") UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalDetailResponse response = goalService.getGoal(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Goal retrieved successfully", UUID.randomUUID().toString()));
     }
 
     @GetMapping
+    @Operation(summary = "List user goals")
     public ResponseEntity<ApiResponse<List<GoalResponse>>> getGoals(
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String priority,
-            @RequestParam(required = false) String category,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @Parameter(description = "Filter by status") @RequestParam(required = false) String status,
+            @Parameter(description = "Filter by priority") @RequestParam(required = false) String priority,
+            @Parameter(description = "Filter by category") @RequestParam(required = false) String category,
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalService.GoalFilter filter = new GoalService.GoalFilter(
                 status != null ? GoalStatus.valueOf(status) : null,
@@ -67,77 +74,88 @@ public class GoalController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<GoalResponse>> updateGoal(@PathVariable UUID id, @Valid @RequestBody UpdateGoalRequest request) {
+    @Operation(summary = "Update goal")
+    public ResponseEntity<ApiResponse<GoalResponse>> updateGoal(@PathVariable @Parameter(description = "Goal ID") UUID id, @Valid @RequestBody UpdateGoalRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalResponse response = goalService.updateGoal(userId, id, request);
         return ResponseEntity.ok(ApiResponse.ok(response, "Goal updated successfully", UUID.randomUUID().toString()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteGoal(@PathVariable UUID id) {
+    @Operation(summary = "Delete goal")
+    public ResponseEntity<ApiResponse<Void>> deleteGoal(@PathVariable @Parameter(description = "Goal ID") UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         goalService.deleteGoal(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(null, "Goal deleted successfully", UUID.randomUUID().toString()));
     }
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<ApiResponse<GoalResponse>> startGoal(@PathVariable UUID id) {
+    @Operation(summary = "Start goal")
+    public ResponseEntity<ApiResponse<GoalResponse>> startGoal(@PathVariable @Parameter(description = "Goal ID") UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalResponse response = goalService.startGoal(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Goal started successfully", UUID.randomUUID().toString()));
     }
 
     @PostMapping("/{id}/pause")
-    public ResponseEntity<ApiResponse<GoalResponse>> pauseGoal(@PathVariable UUID id) {
+    @Operation(summary = "Pause goal")
+    public ResponseEntity<ApiResponse<GoalResponse>> pauseGoal(@PathVariable @Parameter(description = "Goal ID") UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalResponse response = goalService.pauseGoal(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Goal paused successfully", UUID.randomUUID().toString()));
     }
 
     @PostMapping("/{id}/resume")
-    public ResponseEntity<ApiResponse<GoalResponse>> resumeGoal(@PathVariable UUID id) {
+    @Operation(summary = "Resume goal")
+    public ResponseEntity<ApiResponse<GoalResponse>> resumeGoal(@PathVariable @Parameter(description = "Goal ID") UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalResponse response = goalService.resumeGoal(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Goal resumed successfully", UUID.randomUUID().toString()));
     }
 
     @PostMapping("/{id}/complete")
-    public ResponseEntity<ApiResponse<GoalResponse>> completeGoal(@PathVariable UUID id) {
+    @Operation(summary = "Complete goal")
+    public ResponseEntity<ApiResponse<GoalResponse>> completeGoal(@PathVariable @Parameter(description = "Goal ID") UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalResponse response = goalService.completeGoal(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Goal completed successfully", UUID.randomUUID().toString()));
     }
 
     @PostMapping("/{id}/fail")
-    public ResponseEntity<ApiResponse<GoalResponse>> failGoal(@PathVariable UUID id, @RequestBody(required = false) String reason) {
+    @Operation(summary = "Mark goal as failed")
+    public ResponseEntity<ApiResponse<GoalResponse>> failGoal(@PathVariable @Parameter(description = "Goal ID") UUID id, @RequestBody(required = false) String reason) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalResponse response = goalService.failGoal(userId, id, reason);
         return ResponseEntity.ok(ApiResponse.ok(response, "Goal marked as failed", UUID.randomUUID().toString()));
     }
 
     @PostMapping("/{id}/archive")
-    public ResponseEntity<ApiResponse<GoalResponse>> archiveGoal(@PathVariable UUID id) {
+    @Operation(summary = "Archive goal")
+    public ResponseEntity<ApiResponse<GoalResponse>> archiveGoal(@PathVariable @Parameter(description = "Goal ID") UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalResponse response = goalService.archiveGoal(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Goal archived successfully", UUID.randomUUID().toString()));
     }
 
     @PutMapping("/{id}/progress")
-    public ResponseEntity<ApiResponse<GoalResponse>> updateProgress(@PathVariable UUID id, @RequestParam int progress) {
+    @Operation(summary = "Update goal progress")
+    public ResponseEntity<ApiResponse<GoalResponse>> updateProgress(@PathVariable @Parameter(description = "Goal ID") UUID id, @Parameter(description = "Progress percentage") @RequestParam int progress) {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalResponse response = goalService.updateProgress(userId, id, progress);
         return ResponseEntity.ok(ApiResponse.ok(response, "Progress updated successfully", UUID.randomUUID().toString()));
     }
 
     @GetMapping("/{id}/milestones")
-    public ResponseEntity<ApiResponse<List<MilestoneResponse>>> getMilestones(@PathVariable UUID id) {
+    @Operation(summary = "List goal milestones")
+    public ResponseEntity<ApiResponse<List<MilestoneResponse>>> getMilestones(@PathVariable @Parameter(description = "Goal ID") UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         List<MilestoneResponse> response = goalService.getMilestones(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Milestones retrieved successfully", UUID.randomUUID().toString()));
     }
 
     @PostMapping("/{id}/milestones")
-    public ResponseEntity<ApiResponse<MilestoneResponse>> createMilestone(@PathVariable UUID id, @Valid @RequestBody CreateMilestoneRequest request) {
+    @Operation(summary = "Create goal milestone")
+    public ResponseEntity<ApiResponse<MilestoneResponse>> createMilestone(@PathVariable @Parameter(description = "Goal ID") UUID id, @Valid @RequestBody CreateMilestoneRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId();
         MilestoneResponse response = goalService.createMilestone(userId, id, request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -145,27 +163,31 @@ public class GoalController {
     }
 
     @PutMapping("/{id}/milestones/{mid}")
-    public ResponseEntity<ApiResponse<MilestoneResponse>> updateMilestone(@PathVariable UUID id, @PathVariable UUID mid, @Valid @RequestBody UpdateMilestoneRequest request) {
+    @Operation(summary = "Update goal milestone")
+    public ResponseEntity<ApiResponse<MilestoneResponse>> updateMilestone(@PathVariable @Parameter(description = "Goal ID") UUID id, @PathVariable @Parameter(description = "Milestone ID") UUID mid, @Valid @RequestBody UpdateMilestoneRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId();
         MilestoneResponse response = goalService.updateMilestone(userId, id, mid, request);
         return ResponseEntity.ok(ApiResponse.ok(response, "Milestone updated successfully", UUID.randomUUID().toString()));
     }
 
     @PostMapping("/{id}/milestones/{mid}/complete")
-    public ResponseEntity<ApiResponse<MilestoneResponse>> completeMilestone(@PathVariable UUID id, @PathVariable UUID mid) {
+    @Operation(summary = "Complete goal milestone")
+    public ResponseEntity<ApiResponse<MilestoneResponse>> completeMilestone(@PathVariable @Parameter(description = "Goal ID") UUID id, @PathVariable @Parameter(description = "Milestone ID") UUID mid) {
         UUID userId = SecurityUtils.getCurrentUserId();
         MilestoneResponse response = goalService.completeMilestone(userId, id, mid);
         return ResponseEntity.ok(ApiResponse.ok(response, "Milestone completed successfully", UUID.randomUUID().toString()));
     }
 
     @DeleteMapping("/{id}/milestones/{mid}")
-    public ResponseEntity<ApiResponse<Void>> deleteMilestone(@PathVariable UUID id, @PathVariable UUID mid) {
+    @Operation(summary = "Delete goal milestone")
+    public ResponseEntity<ApiResponse<Void>> deleteMilestone(@PathVariable @Parameter(description = "Goal ID") UUID id, @PathVariable @Parameter(description = "Milestone ID") UUID mid) {
         UUID userId = SecurityUtils.getCurrentUserId();
         goalService.deleteMilestone(userId, id, mid);
         return ResponseEntity.ok(ApiResponse.ok(null, "Milestone deleted successfully", UUID.randomUUID().toString()));
     }
 
     @GetMapping("/statistics")
+    @Operation(summary = "Get goal statistics")
     public ResponseEntity<ApiResponse<GoalStatisticsResponse>> getStatistics() {
         UUID userId = SecurityUtils.getCurrentUserId();
         GoalStatisticsResponse response = goalService.getStatistics(userId);
@@ -173,14 +195,16 @@ public class GoalController {
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<ApiResponse<List<GoalResponse>>> getGoalsByCategory(@PathVariable String category) {
+    @Operation(summary = "Get goals by category")
+    public ResponseEntity<ApiResponse<List<GoalResponse>>> getGoalsByCategory(@PathVariable @Parameter(description = "Category") String category) {
         UUID userId = SecurityUtils.getCurrentUserId();
         List<GoalResponse> response = goalService.getGoalsByCategory(userId, category);
         return ResponseEntity.ok(ApiResponse.ok(response, "Goals retrieved successfully", UUID.randomUUID().toString()));
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<ApiResponse<List<GoalResponse>>> getGoalsByStatus(@PathVariable GoalStatus status) {
+    @Operation(summary = "Get goals by status")
+    public ResponseEntity<ApiResponse<List<GoalResponse>>> getGoalsByStatus(@PathVariable @Parameter(description = "Goal status") GoalStatus status) {
         UUID userId = SecurityUtils.getCurrentUserId();
         List<GoalResponse> response = goalService.getGoalsByStatus(userId, status);
         return ResponseEntity.ok(ApiResponse.ok(response, "Goals retrieved successfully", UUID.randomUUID().toString()));

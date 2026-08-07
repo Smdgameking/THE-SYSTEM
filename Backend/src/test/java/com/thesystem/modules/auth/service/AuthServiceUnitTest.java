@@ -6,9 +6,11 @@ import com.thesystem.modules.auth.dto.LoginRequest;
 import com.thesystem.modules.auth.dto.RefreshTokenRequest;
 import com.thesystem.modules.auth.dto.RegisterRequest;
 import com.thesystem.modules.auth.dto.TokenResponse;
+import com.thesystem.modules.auth.entity.RefreshToken;
 import com.thesystem.modules.auth.entity.Role;
 import com.thesystem.modules.auth.entity.User;
 import com.thesystem.modules.auth.repository.RoleRepository;
+import com.thesystem.modules.auth.repository.RefreshTokenRepository;
 import com.thesystem.modules.auth.repository.UserRepository;
 import com.thesystem.modules.auth.repository.UserRoleRepository;
 import com.thesystem.modules.auth.service.impl.AuthServiceImpl;
@@ -19,6 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -27,7 +31,10 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceUnitTest {
@@ -40,6 +47,9 @@ class AuthServiceUnitTest {
 
     @Mock
     private UserRoleRepository userRoleRepository;
+
+    @Mock
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
     private PasswordEncoderService passwordEncoderService;
@@ -55,7 +65,7 @@ class AuthServiceUnitTest {
     @BeforeEach
     void setUp() {
         authService = new AuthServiceImpl(
-                userRepository, roleRepository, userRoleRepository,
+                userRepository, roleRepository, userRoleRepository, refreshTokenRepository,
                 passwordEncoderService, jwtTokenService, userMapper
         );
     }
@@ -137,6 +147,7 @@ class AuthServiceUnitTest {
         when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(jwtTokenService.generateAccessToken(userId, user.getEmail())).thenReturn("newAccessToken");
         when(jwtTokenService.generateRefreshToken(userId)).thenReturn("newRefreshToken");
+        lenient().when(refreshTokenRepository.findByTokenHashAndRevokedFalseAndExpiresAtAfter(any(String.class), any())).thenReturn(Optional.of(new RefreshToken()));
 
         TokenResponse response = authService.refreshToken(request);
 
