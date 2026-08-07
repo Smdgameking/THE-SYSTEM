@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.2] - 2026-08-07
+
+### Added
+- Constitution consolidation and governance
+- 46 continuous constitutional rules in `architecture/backend-constitution.md`
+- Chapter organization for constitutional rules
+- Rule index appendix
+- Missing rules 27-42 added to Constitution
+- Rule 43: Architecture Compliance
+- Rule 44: Immutable Progress History
+- Rule 45: Idempotent Event Processing
+- Rule 46: Constitution Governance
+- Final consistency audit confirming no duplicates, no conflicts, continuous numbering
+
+### Changed
+- Backend Constitution is now the single source of truth for all engineering rules
+- All previously scattered rules consolidated into one document
+
 ## [0.2.0] - 2026-08-07
 
 ### Added
