@@ -7862,3 +7862,247 @@ This generated password is for development use only. Your security configuration
 2026-08-07 14:58:32.657 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
 2026-08-07 14:58:32.658 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
 2026-08-07 14:58:32.659 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2026-08-07 15:20:35.048 [Test worker] INFO  c.t.TheSystemApplicationTests - Starting TheSystemApplicationTests using Java 21.0.12 with PID 38702 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-07 15:20:35.050 [Test worker] DEBUG c.t.TheSystemApplicationTests - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-07 15:20:35.052 [Test worker] INFO  c.t.TheSystemApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2026-08-07 15:20:35.983 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-07 15:20:36.047 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 52 ms. Found 4 JPA repository interfaces.
+2026-08-07 15:20:38.031 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-07 15:20:38.060 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-07 15:20:38.205 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:thesystem user=SA
+2026-08-07 15:20:38.207 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-07 15:20:38.228 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-07 15:20:39.131 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-07 15:20:40.466 [Test worker] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 72f11ca3-2bda-43d1-843d-594a85418e43
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-08-07 15:20:40.477 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-08-07 15:20:41.132 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-07 15:20:42.428 [Test worker] INFO  c.t.TheSystemApplicationTests - Started TheSystemApplicationTests in 7.895 seconds (process running for 9.13)
+2026-08-07 15:20:43.068 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.auth.controller.AuthControllerIntegrationTest
+2026-08-07 15:20:43.105 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - Starting AuthControllerIntegrationTest using Java 21.0.12 with PID 38702 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-07 15:20:43.106 [Test worker] DEBUG c.t.m.a.c.AuthControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-07 15:20:43.106 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-07 15:20:43.382 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-07 15:20:43.398 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 13 ms. Found 4 JPA repository interfaces.
+2026-08-07 15:20:44.417 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-07 15:20:44.420 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-08-07 15:20:44.422 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:thesystem user=SA
+2026-08-07 15:20:44.423 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-08-07 15:20:44.424 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-07 15:20:44.542 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-07 15:20:45.310 [Test worker] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: bdedae4e-1201-49fd-af21-1f5ffee6fbb5
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-08-07 15:20:45.317 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-08-07 15:20:45.740 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-07 15:20:46.506 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-07 15:20:46.507 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-07 15:20:46.511 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 3 ms
+2026-08-07 15:20:46.569 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - Started AuthControllerIntegrationTest in 3.495 seconds (process running for 13.272)
+2026-08-07 15:20:47.929 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.user.controller.UserControllerIntegrationTest
+2026-08-07 15:20:47.994 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - Starting UserControllerIntegrationTest using Java 21.0.12 with PID 38702 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-07 15:20:47.994 [Test worker] DEBUG c.t.m.u.c.UserControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-07 15:20:47.995 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-07 15:20:48.550 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-07 15:20:48.575 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 21 ms. Found 4 JPA repository interfaces.
+2026-08-07 15:20:49.351 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-07 15:20:49.353 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2026-08-07 15:20:49.355 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection conn20: url=jdbc:h2:mem:thesystem user=SA
+2026-08-07 15:20:49.356 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2026-08-07 15:20:49.357 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-07 15:20:49.475 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-07 15:20:50.324 [Test worker] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 66436bcc-08ea-482a-bd85-87dbe7d0c3c3
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-08-07 15:20:50.330 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-08-07 15:20:50.761 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-07 15:20:51.795 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-07 15:20:51.795 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-07 15:20:51.798 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-07 15:20:51.854 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - Started UserControllerIntegrationTest in 3.912 seconds (process running for 18.557)
+2026-08-07 15:20:52.246 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-07 15:20:52.249 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-08-07 15:20:52.252 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-08-07 15:20:52.259 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-07 15:20:52.259 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-08-07 15:20:52.261 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2026-08-07 15:20:52.267 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-07 15:20:52.268 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2026-08-07 15:20:52.270 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+2026-08-07 15:21:26.762 [main] INFO  com.thesystem.TheSystemApplication - Starting TheSystemApplication using Java 21.0.12 with PID 39092 (/home/naga/Workspace/Projects/THE-SYSTEM/Backend/build/classes/java/main started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-07 15:21:26.763 [main] DEBUG com.thesystem.TheSystemApplication - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-07 15:21:26.763 [main] INFO  com.thesystem.TheSystemApplication - The following 1 profile is active: "dev"
+2026-08-07 15:21:27.367 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-07 15:21:27.418 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 42 ms. Found 4 JPA repository interfaces.
+2026-08-07 15:21:28.557 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-08-07 15:21:28.570 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-08-07 15:21:28.573 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-08-07 15:21:28.573 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-08-07 15:21:28.623 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-08-07 15:21:28.623 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1826 ms
+2026-08-07 15:21:28.887 [main] DEBUG c.t.s.jwt.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-08-07 15:21:28.888 [main] DEBUG o.s.w.f.ServerHttpObservationFilter - Filter 'webMvcObservationFilter' configured for use
+2026-08-07 15:21:28.889 [main] DEBUG o.s.web.filter.CorsFilter - Filter 'corsFilter' configured for use
+2026-08-07 15:21:29.090 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Scanning for classpath resources at 'classpath:db/callback' ...
+2026-08-07 15:21:29.090 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Determining location urls for classpath:db/callback using ClassLoader jdk.internal.loader.ClassLoaders$AppClassLoader@639fee48 ...
+2026-08-07 15:21:29.090 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Unable to resolve location classpath:db/callback.
+2026-08-07 15:21:29.090 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Scanning for classpath resources at 'classpath:db/migration' ...
+2026-08-07 15:21:29.090 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Determining location urls for classpath:db/migration using ClassLoader jdk.internal.loader.ClassLoaders$AppClassLoader@639fee48 ...
+2026-08-07 15:21:29.090 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Scanning URL: file:/home/naga/Workspace/Projects/THE-SYSTEM/Backend/build/resources/main/db/migration
+2026-08-07 15:21:29.091 [main] DEBUG o.f.c.i.s.c.FileSystemClassPathLocationScanner - Scanning starting at classpath root in filesystem: /home/naga/Workspace/Projects/THE-SYSTEM/Backend/build/resources/main/
+2026-08-07 15:21:29.091 [main] DEBUG o.f.c.i.s.c.FileSystemClassPathLocationScanner - Scanning for resources in path: /home/naga/Workspace/Projects/THE-SYSTEM/Backend/build/resources/main/db/migration (db/migration)
+2026-08-07 15:21:29.092 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Found resource: db/migration/V1__database_initialization.sql
+2026-08-07 15:21:29.093 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Found resource: db/migration/V2__create_auth_tables.sql
+2026-08-07 15:21:29.093 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Found resource: db/migration/V3__create_settings_table.sql
+2026-08-07 15:21:29.093 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Found resource: db/migration/V4__add_deleted_at_to_user_roles.sql
+2026-08-07 15:21:29.093 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Found resource: db/migration/V5__create_user_profiles_table.sql
+2026-08-07 15:21:29.093 [main] DEBUG o.f.c.i.s.classpath.ClassPathScanner - Scanning for classes at classpath:db/migration
+2026-08-07 15:21:29.097 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-07 15:21:29.173 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6e4e60f5
+2026-08-07 15:21:29.174 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-07 15:21:29.194 [main] DEBUG o.f.c.i.r.ResourceNameValidator - Validating V1__database_initialization.sql
+2026-08-07 15:21:29.195 [main] DEBUG o.f.c.i.r.ResourceNameValidator - Validating V2__create_auth_tables.sql
+2026-08-07 15:21:29.195 [main] DEBUG o.f.c.i.r.ResourceNameValidator - Validating V3__create_settings_table.sql
+2026-08-07 15:21:29.195 [main] DEBUG o.f.c.i.r.ResourceNameValidator - Validating V5__create_user_profiles_table.sql
+2026-08-07 15:21:29.195 [main] DEBUG o.f.c.i.r.ResourceNameValidator - Validating V4__add_deleted_at_to_user_roles.sql
+2026-08-07 15:21:29.199 [main] DEBUG o.f.c.i.d.DatabaseTypeRegister - Multiple databases found that handle url 'jdbc:postgresql://localhost:5432/thesystem': CockroachDB,PostgreSQL
+2026-08-07 15:21:29.199 [main] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://localhost:5432/thesystem (PostgreSQL 18.4)
+2026-08-07 15:21:29.200 [main] DEBUG org.flywaydb.core.FlywayExecutor - Database Type: PostgreSQL
+2026-08-07 15:21:29.200 [main] DEBUG org.flywaydb.core.FlywayExecutor - Driver: PostgreSQL JDBC Driver 42.7.5
+2026-08-07 15:21:29.200 [main] DEBUG org.flywaydb.core.FlywayExecutor - DDL Transactions Supported: true
+2026-08-07 15:21:29.201 [main] DEBUG o.f.c.i.s.SchemaHistoryFactory - Schemas: 
+2026-08-07 15:21:29.201 [main] DEBUG o.f.c.i.s.SchemaHistoryFactory - Default schema: null
+2026-08-07 15:21:29.209 [main] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-08-07 15:21:29.210 [main] DEBUG org.flywaydb.core.FlywayExecutor - Scanning for script callbacks ...
+2026-08-07 15:21:29.213 [main] DEBUG o.f.c.i.c.SqlScriptCallbackFactory - Scanning for SQL callbacks ...
+2026-08-07 15:21:29.219 [main] DEBUG o.f.core.internal.command.DbValidate - Validating migrations ...
+2026-08-07 15:21:29.222 [main] DEBUG o.f.c.a.c.ClassicConfiguration - CherryPickConfigurationExtension not found
+2026-08-07 15:21:29.229 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V1__database_initialization.sql (filename: V1__database_initialization.sql)
+2026-08-07 15:21:29.229 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V2__create_auth_tables.sql (filename: V2__create_auth_tables.sql)
+2026-08-07 15:21:29.229 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V3__create_settings_table.sql (filename: V3__create_settings_table.sql)
+2026-08-07 15:21:29.229 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V5__create_user_profiles_table.sql (filename: V5__create_user_profiles_table.sql)
+2026-08-07 15:21:29.229 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V4__add_deleted_at_to_user_roles.sql (filename: V4__add_deleted_at_to_user_roles.sql)
+2026-08-07 15:21:29.230 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V1__database_initialization.sql (filename: V1__database_initialization.sql)
+2026-08-07 15:21:29.230 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V2__create_auth_tables.sql (filename: V2__create_auth_tables.sql)
+2026-08-07 15:21:29.230 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V3__create_settings_table.sql (filename: V3__create_settings_table.sql)
+2026-08-07 15:21:29.230 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V5__create_user_profiles_table.sql (filename: V5__create_user_profiles_table.sql)
+2026-08-07 15:21:29.230 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V4__add_deleted_at_to_user_roles.sql (filename: V4__add_deleted_at_to_user_roles.sql)
+2026-08-07 15:21:29.231 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V1__database_initialization.sql (filename: V1__database_initialization.sql)
+2026-08-07 15:21:29.231 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V2__create_auth_tables.sql (filename: V2__create_auth_tables.sql)
+2026-08-07 15:21:29.231 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V3__create_settings_table.sql (filename: V3__create_settings_table.sql)
+2026-08-07 15:21:29.231 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V5__create_user_profiles_table.sql (filename: V5__create_user_profiles_table.sql)
+2026-08-07 15:21:29.231 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V4__add_deleted_at_to_user_roles.sql (filename: V4__add_deleted_at_to_user_roles.sql)
+2026-08-07 15:21:29.231 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V1__database_initialization.sql (filename: V1__database_initialization.sql)
+2026-08-07 15:21:29.231 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V2__create_auth_tables.sql (filename: V2__create_auth_tables.sql)
+2026-08-07 15:21:29.231 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V3__create_settings_table.sql (filename: V3__create_settings_table.sql)
+2026-08-07 15:21:29.231 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V5__create_user_profiles_table.sql (filename: V5__create_user_profiles_table.sql)
+2026-08-07 15:21:29.231 [main] DEBUG o.f.core.internal.scanner.Scanner - Filtering out resource: db/migration/V4__add_deleted_at_to_user_roles.sql (filename: V4__add_deleted_at_to_user_roles.sql)
+2026-08-07 15:21:29.247 [main] INFO  o.f.core.internal.command.DbValidate - Successfully validated 5 migrations (execution time 00:00.027s)
+2026-08-07 15:21:29.250 [main] DEBUG o.f.core.internal.command.DbSchemas - Skipping creation of existing schema: "public"
+2026-08-07 15:21:29.264 [main] DEBUG o.f.c.a.c.ClassicConfiguration - CherryPickConfigurationExtension not found
+2026-08-07 15:21:29.267 [main] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 4
+2026-08-07 15:21:29.269 [main] DEBUG o.f.core.internal.parser.Parser - Parsing V5__create_user_profiles_table.sql ...
+2026-08-07 15:21:29.278 [main] DEBUG o.f.c.i.sqlscript.ParserSqlScript - Found statement at line 5: -- =====================================================
+-- V5: Create user_profiles table
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS user_profiles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    username VARCHAR(50),
+    display_name VARCHAR(100),
+    bio TEXT,
+    avatar_url VARCHAR(500),
+    timezone VARCHAR(50),
+    locale VARCHAR(10),
+    country VARCHAR(2),
+    account_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    last_active_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by UUID,
+    updated_by UUID,
+    deleted_at TIMESTAMP NULL,
+    CONSTRAINT fk_user_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)
+2026-08-07 15:21:29.279 [main] DEBUG o.f.c.i.sqlscript.ParserSqlScript - Found statement at line 25: CREATE UNIQUE INDEX IF NOT EXISTS uq_user_profiles_user_id ON user_profiles(user_id)
+2026-08-07 15:21:29.279 [main] DEBUG o.f.c.i.sqlscript.ParserSqlScript - Found statement at line 26: CREATE UNIQUE INDEX IF NOT EXISTS uq_user_profiles_username ON user_profiles(username)
+2026-08-07 15:21:29.280 [main] DEBUG o.f.c.i.sqlscript.ParserSqlScript - Found statement at line 27: CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id)
+2026-08-07 15:21:29.280 [main] DEBUG o.f.c.i.sqlscript.ParserSqlScript - Found statement at line 28: CREATE INDEX IF NOT EXISTS idx_user_profiles_username ON user_profiles(username)
+2026-08-07 15:21:29.281 [main] DEBUG o.f.c.i.sqlscript.ParserSqlScript - Found statement at line 29: CREATE INDEX IF NOT EXISTS idx_user_profiles_deleted_at ON user_profiles(deleted_at)
+2026-08-07 15:21:29.282 [main] DEBUG o.f.c.i.sqlscript.ParserSqlScript - Found statement at line 30: CREATE INDEX IF NOT EXISTS idx_user_profiles_created_at ON user_profiles(created_at)
+2026-08-07 15:21:29.284 [main] DEBUG o.f.core.internal.command.DbMigrate - Starting migration of schema "public" to version "5 - create user profiles table" ...
+2026-08-07 15:21:29.287 [main] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "5 - create user profiles table"
+2026-08-07 15:21:29.289 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - Executing SQL: -- =====================================================
+-- V5: Create user_profiles table
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS user_profiles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    username VARCHAR(50),
+    display_name VARCHAR(100),
+    bio TEXT,
+    avatar_url VARCHAR(500),
+    timezone VARCHAR(50),
+    locale VARCHAR(10),
+    country VARCHAR(2),
+    account_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    last_active_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by UUID,
+    updated_by UUID,
+    deleted_at TIMESTAMP NULL,
+    CONSTRAINT fk_user_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)
+2026-08-07 15:21:29.294 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - 0 rows affected
+2026-08-07 15:21:29.295 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - Executing SQL: CREATE UNIQUE INDEX IF NOT EXISTS uq_user_profiles_user_id ON user_profiles(user_id)
+2026-08-07 15:21:29.296 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - 0 rows affected
+2026-08-07 15:21:29.296 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - Executing SQL: CREATE UNIQUE INDEX IF NOT EXISTS uq_user_profiles_username ON user_profiles(username)
+2026-08-07 15:21:29.297 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - 0 rows affected
+2026-08-07 15:21:29.297 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - Executing SQL: CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id)
+2026-08-07 15:21:29.298 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - 0 rows affected
+2026-08-07 15:21:29.298 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - Executing SQL: CREATE INDEX IF NOT EXISTS idx_user_profiles_username ON user_profiles(username)
+2026-08-07 15:21:29.299 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - 0 rows affected
+2026-08-07 15:21:29.299 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - Executing SQL: CREATE INDEX IF NOT EXISTS idx_user_profiles_deleted_at ON user_profiles(deleted_at)
+2026-08-07 15:21:29.300 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - 0 rows affected
+2026-08-07 15:21:29.300 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - Executing SQL: CREATE INDEX IF NOT EXISTS idx_user_profiles_created_at ON user_profiles(created_at)
+2026-08-07 15:21:29.301 [main] DEBUG o.f.c.i.s.DefaultSqlScriptExecutor - 0 rows affected
+2026-08-07 15:21:29.302 [main] DEBUG o.f.core.internal.command.DbMigrate - Successfully completed migration of schema "public" to version "5 - create user profiles table"
+2026-08-07 15:21:29.307 [main] DEBUG o.f.c.i.s.JdbcTableSchemaHistory - Schema History table "public"."flyway_schema_history" successfully updated to reflect changes
+2026-08-07 15:21:29.343 [main] DEBUG o.f.c.a.c.ClassicConfiguration - CherryPickConfigurationExtension not found
+2026-08-07 15:21:29.349 [main] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "public", now at version v5 (execution time 00:00.018s)
+2026-08-07 15:21:29.356 [main] DEBUG org.flywaydb.core.FlywayExecutor - Memory usage: 49 of 84M
+2026-08-07 15:21:29.715 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-07 15:21:30.606 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-07 15:21:31.277 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: fbf3ba14-69c3-4903-9aeb-16b9442bad10
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-08-07 15:21:31.284 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-08-07 15:21:31.440 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - 16 mappings in 'requestMappingHandlerMapping'
+2026-08-07 15:21:31.504 [main] DEBUG o.s.w.s.h.SimpleUrlHandlerMapping - Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
+2026-08-07 15:21:31.767 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 15 endpoints beneath base path '/actuator'
+2026-08-07 15:21:32.001 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2026-08-07 15:21:32.059 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - ControllerAdvice beans: 3 @ExceptionHandler, 1 ResponseBodyAdvice
+2026-08-07 15:21:32.492 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-08-07 15:21:32.503 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-08-07 15:21:32.516 [main] INFO  com.thesystem.TheSystemApplication - Started TheSystemApplication in 6.286 seconds (process running for 6.52)
+2026-08-07 15:21:55.450 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-07 15:21:55.453 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-08-07 15:21:55.459 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-07 15:21:55.462 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-08-07 15:21:55.470 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

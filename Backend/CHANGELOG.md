@@ -65,6 +65,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build verification successful
 - Production-quality code standards
 
+## [0.4.0] - 2026-08-07
+
+### Added
+- User Engine module (profile management)
+- V5__create_user_profiles_table.sql: user_profiles table
+- User entity and repository
+- UserProfile DTOs: UserProfileResponse, UpdateProfileRequest, PublicUserResponse
+- UserProfileMapper (MapStruct)
+- UserService interface and implementation
+- UserController with 4 endpoints:
+  - GET /users/me
+  - PUT /users/me
+  - GET /users/{id}
+  - GET /users/username/{username}
+- UserExceptionHandler
+- SecurityUtils for current user extraction
+- User module unit tests (6 test cases)
+- User module integration tests (6 test cases)
+- docs/user/README.md
+
+### Database
+- V5 migration creates user_profiles table with UUID PK, FK to users
+- Username uniqueness constraint
+- Audit fields on user_profiles
+- Soft delete support
+- Indexes on user_id, username, deleted_at, created_at
+
+### Security
+- All user endpoints require authentication
+- Users can only update their own profile
+- Reuses existing JWT authentication
+
+## [0.3.0] - 2026-08-07
+
+### Added
+- Security foundation
+- JWT token provider with access/refresh tokens
+- JWT authentication filter
+- BCrypt password encoder (cost factor 12)
+- Auth module complete with all Definition of Done items
+- Auth module unit and integration tests
+- docs/auth/README.md
+
 ## [0.1.0] - 2026-08-07
 
 ### Added
