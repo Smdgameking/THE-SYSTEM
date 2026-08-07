@@ -1293,3 +1293,435 @@
 2026-08-08 00:20:21.353 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
 2026-08-08 00:20:21.354 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown initiated...
 2026-08-08 00:20:21.356 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown completed.
+2026-08-08 00:21:33.192 [Test worker] INFO  c.t.TheSystemApplicationTests - Starting TheSystemApplicationTests using Java 21.0.12 with PID 198035 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:21:33.194 [Test worker] DEBUG c.t.TheSystemApplicationTests - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:21:33.195 [Test worker] INFO  c.t.TheSystemApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:21:34.486 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:21:34.664 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 161 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:21:36.994 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:21:37.029 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-08 00:21:37.232 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:21:37.235 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-08 00:21:37.266 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:21:38.795 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:21:40.164 [Test worker] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-08 00:21:42.028 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:21:42.840 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:21:44.259 [Test worker] INFO  c.t.TheSystemApplicationTests - Started TheSystemApplicationTests in 11.659 seconds (process running for 15.614)
+2026-08-08 00:21:44.464 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.auth.controller.AuthControllerIntegrationTest
+2026-08-08 00:21:44.529 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - Starting AuthControllerIntegrationTest using Java 21.0.12 with PID 198035 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:21:44.530 [Test worker] DEBUG c.t.m.a.c.AuthControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:21:44.530 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:21:44.903 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:21:44.955 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 50 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:21:45.609 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:21:45.611 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-08-08 00:21:45.613 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:21:45.614 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-08-08 00:21:45.615 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:21:45.895 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:21:46.742 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:21:47.014 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:21:47.588 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:21:47.589 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:21:47.592 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 3 ms
+2026-08-08 00:21:47.643 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - Started AuthControllerIntegrationTest in 3.17 seconds (process running for 18.998)
+2026-08-08 00:21:48.061 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.goal.controller.GoalControllerIntegrationTest
+2026-08-08 00:21:48.095 [Test worker] INFO  c.t.m.g.c.GoalControllerIntegrationTest - Starting GoalControllerIntegrationTest using Java 21.0.12 with PID 198035 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:21:48.096 [Test worker] DEBUG c.t.m.g.c.GoalControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:21:48.096 [Test worker] INFO  c.t.m.g.c.GoalControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:21:48.410 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:21:48.458 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 46 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:21:48.972 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:21:48.974 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2026-08-08 00:21:48.976 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection conn20: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:21:48.976 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2026-08-08 00:21:48.977 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:21:49.197 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:21:49.900 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:21:50.118 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:21:50.599 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:21:50.600 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:21:50.602 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-08 00:21:50.642 [Test worker] INFO  c.t.m.g.c.GoalControllerIntegrationTest - Started GoalControllerIntegrationTest in 2.577 seconds (process running for 21.998)
+2026-08-08 00:21:51.682 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.settings.controller.SettingsControllerIntegrationTest
+2026-08-08 00:21:51.710 [Test worker] INFO  c.t.m.s.c.SettingsControllerIntegrationTest - Starting SettingsControllerIntegrationTest using Java 21.0.12 with PID 198035 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:21:51.710 [Test worker] DEBUG c.t.m.s.c.SettingsControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:21:51.711 [Test worker] INFO  c.t.m.s.c.SettingsControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:21:51.992 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:21:52.029 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 35 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:21:52.536 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:21:52.538 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...
+2026-08-08 00:21:52.540 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-4 - Added connection conn30: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:21:52.541 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Start completed.
+2026-08-08 00:21:52.542 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:21:52.709 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:21:53.339 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:21:53.596 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:21:54.026 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:21:54.027 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:21:54.029 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-08 00:21:54.066 [Test worker] INFO  c.t.m.s.c.SettingsControllerIntegrationTest - Started SettingsControllerIntegrationTest in 2.379 seconds (process running for 25.421)
+2026-08-08 00:21:54.443 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.task.controller.TaskControllerIntegrationTest
+2026-08-08 00:21:54.469 [Test worker] INFO  c.t.m.t.c.TaskControllerIntegrationTest - Starting TaskControllerIntegrationTest using Java 21.0.12 with PID 198035 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:21:54.470 [Test worker] DEBUG c.t.m.t.c.TaskControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:21:54.470 [Test worker] INFO  c.t.m.t.c.TaskControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:21:54.769 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:21:54.803 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 31 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:21:55.263 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:21:55.264 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Starting...
+2026-08-08 00:21:55.266 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-5 - Added connection conn40: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:21:55.267 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Start completed.
+2026-08-08 00:21:55.268 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:21:55.420 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:21:55.961 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:21:56.208 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:21:56.644 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:21:56.644 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:21:56.647 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-08 00:21:56.685 [Test worker] INFO  c.t.m.t.c.TaskControllerIntegrationTest - Started TaskControllerIntegrationTest in 2.237 seconds (process running for 28.041)
+2026-08-08 00:21:58.039 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.user.controller.UserControllerIntegrationTest
+2026-08-08 00:21:58.064 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - Starting UserControllerIntegrationTest using Java 21.0.12 with PID 198035 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:21:58.065 [Test worker] DEBUG c.t.m.u.c.UserControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:21:58.065 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:21:58.340 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:21:58.398 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 42 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:21:58.831 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:21:58.833 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Starting...
+2026-08-08 00:21:58.835 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-6 - Added connection conn50: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:21:58.835 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Start completed.
+2026-08-08 00:21:58.836 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:21:58.984 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:21:59.522 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:21:59.735 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:22:00.089 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:22:00.097 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:22:00.099 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-08 00:22:00.131 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - Started UserControllerIntegrationTest in 2.088 seconds (process running for 31.487)
+2026-08-08 00:22:00.473 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.xp.controller.XpControllerIntegrationTest
+2026-08-08 00:22:00.498 [Test worker] INFO  c.t.m.x.c.XpControllerIntegrationTest - Starting XpControllerIntegrationTest using Java 21.0.12 with PID 198035 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:22:00.499 [Test worker] DEBUG c.t.m.x.c.XpControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:22:00.499 [Test worker] INFO  c.t.m.x.c.XpControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:22:00.737 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:22:00.769 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 29 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:22:01.250 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:22:01.251 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Starting...
+2026-08-08 00:22:01.253 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-7 - Added connection conn60: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:22:01.254 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Start completed.
+2026-08-08 00:22:01.254 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:22:01.396 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:22:02.001 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:22:02.197 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:22:02.604 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:22:02.605 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:22:02.607 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-08 00:22:02.636 [Test worker] INFO  c.t.m.x.c.XpControllerIntegrationTest - Started XpControllerIntegrationTest in 2.157 seconds (process running for 33.991)
+2026-08-08 00:22:03.747 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:22:03.750 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-08-08 00:22:03.754 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-08-08 00:22:03.759 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:22:03.760 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-08-08 00:22:03.761 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2026-08-08 00:22:03.765 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:22:03.766 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2026-08-08 00:22:03.768 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+2026-08-08 00:22:03.772 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:22:03.773 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown initiated...
+2026-08-08 00:22:03.774 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown completed.
+2026-08-08 00:22:03.778 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:22:03.778 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Shutdown initiated...
+2026-08-08 00:22:03.780 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Shutdown completed.
+2026-08-08 00:22:03.784 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:22:03.785 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Shutdown initiated...
+2026-08-08 00:22:03.786 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Shutdown completed.
+2026-08-08 00:22:03.790 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:22:03.791 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown initiated...
+2026-08-08 00:22:03.792 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown completed.
+2026-08-08 00:23:23.415 [Test worker] INFO  c.t.TheSystemApplicationTests - Starting TheSystemApplicationTests using Java 21.0.12 with PID 198568 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:23:23.417 [Test worker] DEBUG c.t.TheSystemApplicationTests - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:23:23.418 [Test worker] INFO  c.t.TheSystemApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:23:24.657 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:23:24.823 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 150 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:23:27.119 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:23:27.160 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-08 00:23:27.351 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:23:27.354 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-08 00:23:27.385 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:23:28.980 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:30.378 [Test worker] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-08 00:23:32.218 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:23:33.028 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:23:34.375 [Test worker] INFO  c.t.TheSystemApplicationTests - Started TheSystemApplicationTests in 11.523 seconds (process running for 15.518)
+2026-08-08 00:23:34.564 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.auth.controller.AuthControllerIntegrationTest
+2026-08-08 00:23:34.624 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - Starting AuthControllerIntegrationTest using Java 21.0.12 with PID 198568 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:23:34.624 [Test worker] DEBUG c.t.m.a.c.AuthControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:23:34.625 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:23:35.022 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:23:35.076 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 52 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:23:35.731 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:23:35.733 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-08-08 00:23:35.736 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:23:35.737 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-08-08 00:23:35.738 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:23:35.982 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:36.920 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:23:37.220 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:23:37.766 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:23:37.767 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:23:37.769 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-08 00:23:37.812 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - Started AuthControllerIntegrationTest in 3.239 seconds (process running for 18.956)
+2026-08-08 00:23:38.259 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.goal.controller.GoalControllerIntegrationTest
+2026-08-08 00:23:38.306 [Test worker] INFO  c.t.m.g.c.GoalControllerIntegrationTest - Starting GoalControllerIntegrationTest using Java 21.0.12 with PID 198568 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:23:38.307 [Test worker] DEBUG c.t.m.g.c.GoalControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:23:38.308 [Test worker] INFO  c.t.m.g.c.GoalControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:23:38.621 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:23:38.661 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 39 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:23:39.168 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:23:39.170 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2026-08-08 00:23:39.172 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection conn20: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:23:39.173 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2026-08-08 00:23:39.174 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:23:39.386 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:40.137 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:23:40.434 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:23:40.994 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:23:40.997 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:23:41.002 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-08 00:23:41.038 [Test worker] INFO  c.t.m.g.c.GoalControllerIntegrationTest - Started GoalControllerIntegrationTest in 2.769 seconds (process running for 22.182)
+2026-08-08 00:23:42.116 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.settings.controller.SettingsControllerIntegrationTest
+2026-08-08 00:23:42.148 [Test worker] INFO  c.t.m.s.c.SettingsControllerIntegrationTest - Starting SettingsControllerIntegrationTest using Java 21.0.12 with PID 198568 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:23:42.149 [Test worker] DEBUG c.t.m.s.c.SettingsControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:23:42.150 [Test worker] INFO  c.t.m.s.c.SettingsControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:23:42.434 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:23:42.470 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 34 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:23:42.963 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:23:42.965 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...
+2026-08-08 00:23:42.967 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-4 - Added connection conn30: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:23:42.968 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Start completed.
+2026-08-08 00:23:42.969 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:23:43.173 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:43.798 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:23:44.048 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:23:44.476 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:23:44.477 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:23:44.480 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 3 ms
+2026-08-08 00:23:44.509 [Test worker] INFO  c.t.m.s.c.SettingsControllerIntegrationTest - Started SettingsControllerIntegrationTest in 2.387 seconds (process running for 25.653)
+2026-08-08 00:23:44.862 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.task.controller.TaskControllerIntegrationTest
+2026-08-08 00:23:44.888 [Test worker] INFO  c.t.m.t.c.TaskControllerIntegrationTest - Starting TaskControllerIntegrationTest using Java 21.0.12 with PID 198568 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:23:44.888 [Test worker] DEBUG c.t.m.t.c.TaskControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:23:44.889 [Test worker] INFO  c.t.m.t.c.TaskControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:23:45.154 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:23:45.187 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 31 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:23:45.713 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:23:45.715 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Starting...
+2026-08-08 00:23:45.719 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-5 - Added connection conn40: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:23:45.719 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Start completed.
+2026-08-08 00:23:45.720 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:23:45.905 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:46.465 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:23:46.717 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:23:47.076 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:23:47.077 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:23:47.079 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-08 00:23:47.106 [Test worker] INFO  c.t.m.t.c.TaskControllerIntegrationTest - Started TaskControllerIntegrationTest in 2.239 seconds (process running for 28.251)
+2026-08-08 00:23:48.515 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.user.controller.UserControllerIntegrationTest
+2026-08-08 00:23:48.541 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - Starting UserControllerIntegrationTest using Java 21.0.12 with PID 198568 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:23:48.542 [Test worker] DEBUG c.t.m.u.c.UserControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:23:48.542 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:23:48.819 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:23:48.860 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 39 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:23:49.284 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:23:49.286 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Starting...
+2026-08-08 00:23:49.288 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-6 - Added connection conn50: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:23:49.288 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Start completed.
+2026-08-08 00:23:49.289 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:23:49.442 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:49.998 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:23:50.194 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:23:50.569 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:23:50.569 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:23:50.571 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-08-08 00:23:50.599 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - Started UserControllerIntegrationTest in 2.078 seconds (process running for 31.743)
+2026-08-08 00:23:50.949 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.xp.controller.XpControllerIntegrationTest
+2026-08-08 00:23:50.970 [Test worker] INFO  c.t.m.x.c.XpControllerIntegrationTest - Starting XpControllerIntegrationTest using Java 21.0.12 with PID 198568 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:23:50.970 [Test worker] DEBUG c.t.m.x.c.XpControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:23:50.971 [Test worker] INFO  c.t.m.x.c.XpControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:23:51.195 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:23:51.237 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 40 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:23:51.736 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:23:51.737 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Starting...
+2026-08-08 00:23:51.739 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-7 - Added connection conn60: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:23:51.739 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Start completed.
+2026-08-08 00:23:51.740 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:23:51.929 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:52.408 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:23:52.638 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:23:52.999 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:23:53.000 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:23:53.001 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-08-08 00:23:53.028 [Test worker] INFO  c.t.m.x.c.XpControllerIntegrationTest - Started XpControllerIntegrationTest in 2.075 seconds (process running for 34.173)
+2026-08-08 00:23:54.195 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:54.198 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-08-08 00:23:54.203 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-08-08 00:23:54.208 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:54.210 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-08-08 00:23:54.212 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2026-08-08 00:23:54.217 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:54.218 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2026-08-08 00:23:54.219 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+2026-08-08 00:23:54.223 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:54.225 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown initiated...
+2026-08-08 00:23:54.226 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown completed.
+2026-08-08 00:23:54.231 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:54.231 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Shutdown initiated...
+2026-08-08 00:23:54.233 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Shutdown completed.
+2026-08-08 00:23:54.237 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:54.238 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Shutdown initiated...
+2026-08-08 00:23:54.240 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Shutdown completed.
+2026-08-08 00:23:54.244 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:23:54.244 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown initiated...
+2026-08-08 00:23:54.246 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown completed.
+2026-08-08 00:48:24.065 [Test worker] INFO  c.t.TheSystemApplicationTests - Starting TheSystemApplicationTests using Java 21.0.12 with PID 207392 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:48:24.067 [Test worker] DEBUG c.t.TheSystemApplicationTests - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:48:24.069 [Test worker] INFO  c.t.TheSystemApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:48:25.335 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:48:25.508 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 155 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:48:27.744 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:48:27.787 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-08 00:48:27.994 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:48:27.997 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-08 00:48:28.032 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:48:29.582 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:31.053 [Test worker] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-08 00:48:33.017 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:48:33.880 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:48:35.374 [Test worker] INFO  c.t.TheSystemApplicationTests - Started TheSystemApplicationTests in 11.895 seconds (process running for 16.015)
+2026-08-08 00:48:35.581 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.auth.controller.AuthControllerIntegrationTest
+2026-08-08 00:48:35.618 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - Starting AuthControllerIntegrationTest using Java 21.0.12 with PID 207392 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:48:35.619 [Test worker] DEBUG c.t.m.a.c.AuthControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:48:35.620 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:48:36.048 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:48:36.103 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 52 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:48:36.743 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:48:36.745 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-08-08 00:48:36.747 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:48:36.748 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-08-08 00:48:36.749 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:48:36.995 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:37.864 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:48:38.167 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:48:38.749 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:48:38.751 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:48:38.754 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-08 00:48:38.801 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - Started AuthControllerIntegrationTest in 3.214 seconds (process running for 19.442)
+2026-08-08 00:48:39.263 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.goal.controller.GoalControllerIntegrationTest
+2026-08-08 00:48:39.293 [Test worker] INFO  c.t.m.g.c.GoalControllerIntegrationTest - Starting GoalControllerIntegrationTest using Java 21.0.12 with PID 207392 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:48:39.294 [Test worker] DEBUG c.t.m.g.c.GoalControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:48:39.294 [Test worker] INFO  c.t.m.g.c.GoalControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:48:39.583 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:48:39.625 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 40 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:48:40.180 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:48:40.183 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2026-08-08 00:48:40.202 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection conn20: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:48:40.203 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2026-08-08 00:48:40.205 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:48:40.442 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:41.165 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:48:41.377 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:48:41.837 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:48:41.838 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:48:41.841 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 3 ms
+2026-08-08 00:48:41.871 [Test worker] INFO  c.t.m.g.c.GoalControllerIntegrationTest - Started GoalControllerIntegrationTest in 2.603 seconds (process running for 22.512)
+2026-08-08 00:48:42.891 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.settings.controller.SettingsControllerIntegrationTest
+2026-08-08 00:48:42.920 [Test worker] INFO  c.t.m.s.c.SettingsControllerIntegrationTest - Starting SettingsControllerIntegrationTest using Java 21.0.12 with PID 207392 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:48:42.920 [Test worker] DEBUG c.t.m.s.c.SettingsControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:48:42.921 [Test worker] INFO  c.t.m.s.c.SettingsControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:48:43.257 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:48:43.294 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 35 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:48:43.782 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:48:43.784 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...
+2026-08-08 00:48:43.786 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-4 - Added connection conn30: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:48:43.786 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Start completed.
+2026-08-08 00:48:43.787 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:48:43.967 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:44.593 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:48:44.811 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:48:45.281 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:48:45.282 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:48:45.283 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-08-08 00:48:45.316 [Test worker] INFO  c.t.m.s.c.SettingsControllerIntegrationTest - Started SettingsControllerIntegrationTest in 2.418 seconds (process running for 25.957)
+2026-08-08 00:48:45.693 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.task.controller.TaskControllerIntegrationTest
+2026-08-08 00:48:45.715 [Test worker] INFO  c.t.m.t.c.TaskControllerIntegrationTest - Starting TaskControllerIntegrationTest using Java 21.0.12 with PID 207392 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:48:45.716 [Test worker] DEBUG c.t.m.t.c.TaskControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:48:45.716 [Test worker] INFO  c.t.m.t.c.TaskControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:48:45.964 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:48:45.995 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 30 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:48:46.486 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:48:46.488 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Starting...
+2026-08-08 00:48:46.494 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-5 - Added connection conn40: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:48:46.495 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Start completed.
+2026-08-08 00:48:46.496 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:48:46.684 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:47.247 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:48:47.486 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:48:47.873 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:48:47.874 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:48:47.876 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-08-08 00:48:47.905 [Test worker] INFO  c.t.m.t.c.TaskControllerIntegrationTest - Started TaskControllerIntegrationTest in 2.209 seconds (process running for 28.547)
+2026-08-08 00:48:49.309 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.user.controller.UserControllerIntegrationTest
+2026-08-08 00:48:49.336 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - Starting UserControllerIntegrationTest using Java 21.0.12 with PID 207392 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:48:49.337 [Test worker] DEBUG c.t.m.u.c.UserControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:48:49.337 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:48:49.637 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:48:49.681 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 40 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:48:50.140 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:48:50.141 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Starting...
+2026-08-08 00:48:50.143 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-6 - Added connection conn50: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:48:50.144 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Start completed.
+2026-08-08 00:48:50.145 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:48:50.299 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:50.814 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:48:51.027 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:48:51.403 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:48:51.404 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:48:51.405 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-08-08 00:48:51.431 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - Started UserControllerIntegrationTest in 2.116 seconds (process running for 32.072)
+2026-08-08 00:48:51.745 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.xp.controller.XpControllerIntegrationTest
+2026-08-08 00:48:51.770 [Test worker] INFO  c.t.m.x.c.XpControllerIntegrationTest - Starting XpControllerIntegrationTest using Java 21.0.12 with PID 207392 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-08 00:48:51.770 [Test worker] DEBUG c.t.m.x.c.XpControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-08 00:48:51.771 [Test worker] INFO  c.t.m.x.c.XpControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-08 00:48:51.990 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-08 00:48:52.046 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 54 ms. Found 18 JPA repository interfaces.
+2026-08-08 00:48:52.503 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-08 00:48:52.505 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Starting...
+2026-08-08 00:48:52.507 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-7 - Added connection conn60: url=jdbc:h2:mem:thesystem user=SA
+2026-08-08 00:48:52.507 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Start completed.
+2026-08-08 00:48:52.508 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-08 00:48:52.661 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:53.106 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-08 00:48:53.317 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-08 00:48:53.686 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-08 00:48:53.687 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-08 00:48:53.688 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-08-08 00:48:53.713 [Test worker] INFO  c.t.m.x.c.XpControllerIntegrationTest - Started XpControllerIntegrationTest in 1.964 seconds (process running for 34.354)
+2026-08-08 00:48:54.895 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:54.899 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-08-08 00:48:54.902 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-08-08 00:48:54.907 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:54.908 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-08-08 00:48:54.910 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2026-08-08 00:48:54.915 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:54.916 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2026-08-08 00:48:54.917 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+2026-08-08 00:48:54.920 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:54.921 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown initiated...
+2026-08-08 00:48:54.922 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown completed.
+2026-08-08 00:48:54.927 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:54.928 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Shutdown initiated...
+2026-08-08 00:48:54.930 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Shutdown completed.
+2026-08-08 00:48:54.934 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:54.935 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Shutdown initiated...
+2026-08-08 00:48:54.937 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Shutdown completed.
+2026-08-08 00:48:54.941 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-08 00:48:54.942 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown initiated...
+2026-08-08 00:48:54.943 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown completed.

@@ -9,8 +9,8 @@ import com.thesystem.modules.auth.dto.TokenResponse;
 import com.thesystem.modules.auth.entity.RefreshToken;
 import com.thesystem.modules.auth.entity.Role;
 import com.thesystem.modules.auth.entity.User;
-import com.thesystem.modules.auth.repository.RoleRepository;
 import com.thesystem.modules.auth.repository.RefreshTokenRepository;
+import com.thesystem.modules.auth.repository.RoleRepository;
 import com.thesystem.modules.auth.repository.UserRepository;
 import com.thesystem.modules.auth.repository.UserRoleRepository;
 import com.thesystem.modules.auth.service.impl.AuthServiceImpl;
@@ -21,8 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -31,7 +29,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -143,11 +141,16 @@ class AuthServiceUnitTest {
         RefreshTokenRequest request = new RefreshTokenRequest("validRefreshToken");
         User user = new User(userId, "test@example.com", "hashedPassword", false);
 
-        when(jwtTokenService.getUserIdFromToken("validRefreshToken")).thenReturn(userId);
+        RefreshToken storedToken = new RefreshToken();
+        storedToken.setUserId(userId);
+        storedToken.setExpiresAt(Instant.now().plusMillis(604800000L));
+        storedToken.setRevoked(false);
+
+        when(refreshTokenRepository.findByTokenHashAndRevokedFalseAndExpiresAtAfter(any(String.class), any(Instant.class)))
+                .thenReturn(Optional.of(storedToken));
         when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(jwtTokenService.generateAccessToken(userId, user.getEmail())).thenReturn("newAccessToken");
         when(jwtTokenService.generateRefreshToken(userId)).thenReturn("newRefreshToken");
-        lenient().when(refreshTokenRepository.findByTokenHashAndRevokedFalseAndExpiresAtAfter(any(String.class), any())).thenReturn(Optional.of(new RefreshToken()));
 
         TokenResponse response = authService.refreshToken(request);
 
