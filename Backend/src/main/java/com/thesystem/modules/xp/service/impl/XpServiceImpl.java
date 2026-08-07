@@ -1,0 +1,793 @@
+package com.thesystem.modules.xp.service.impl;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thesystem.modules.xp.dto.achievement.AchievementResponse;
+import com.thesystem.modules.xp.dto.achievement.UserAchievementResponse;
+import com.thesystem.modules.xp.dto.level.LevelInfo;
+import com.thesystem.modules.xp.dto.level.ProgressResponse;
+import com.thesystem.modules.xp.dto.policy.PolicyEvaluationResponse;
+import com.thesystem.modules.xp.dto.policy.PolicyRequest;
+import com.thesystem.modules.xp.dto.policy.PolicyResponse;
+import com.thesystem.modules.xp.dto.reward.RewardCalculationRequest;
+import com.thesystem.modules.xp.dto.reward.RewardHistoryResponse;
+import com.thesystem.modules.xp.dto.reward.RewardResponse;
+import com.thesystem.modules.xp.dto.statistics.LeaderboardEntry;
+import com.thesystem.modules.xp.dto.statistics.LeaderboardResponse;
+import com.thesystem.modules.xp.dto.statistics.StatisticsResponse;
+import com.thesystem.modules.xp.dto.transaction.TransactionCreateRequest;
+import com.thesystem.modules.xp.dto.transaction.TransactionHistoryFilter;
+import com.thesystem.modules.xp.dto.transaction.TransactionResponse;
+import com.thesystem.modules.xp.dto.xpaccount.XpAccountCreateRequest;
+import com.thesystem.modules.xp.dto.xpaccount.XpAccountResponse;
+import com.thesystem.modules.xp.entity.AchievementDefinition;
+import com.thesystem.modules.xp.entity.RewardHistory;
+import com.thesystem.modules.xp.entity.UserAchievement;
+import com.thesystem.modules.xp.entity.XpAccount;
+import com.thesystem.modules.xp.entity.XpPolicy;
+import com.thesystem.modules.xp.entity.XpTransaction;
+import com.thesystem.modules.xp.enums.AchievementCategory;
+import com.thesystem.modules.xp.enums.PolicyType;
+import com.thesystem.modules.xp.enums.TransactionType;
+import com.thesystem.modules.xp.event.XpAwardedEvent;
+import com.thesystem.modules.xp.event.XpRemovedEvent;
+import com.thesystem.modules.xp.exception.AchievementNotFoundException;
+import com.thesystem.modules.xp.exception.DuplicateTransactionException;
+import com.thesystem.modules.xp.exception.InvalidRewardException;
+import com.thesystem.modules.xp.exception.InvalidTransactionException;
+import com.thesystem.modules.xp.exception.LevelCalculationException;
+import com.thesystem.modules.xp.exception.PolicyNotFoundException;
+import com.thesystem.modules.xp.exception.XpAccountNotFoundException;
+import com.thesystem.modules.xp.mapper.XpMapper;
+import com.thesystem.modules.xp.repository.AchievementDefinitionRepository;
+import com.thesystem.modules.xp.repository.RewardHistoryRepository;
+import com.thesystem.modules.xp.repository.UserAchievementRepository;
+import com.thesystem.modules.xp.repository.XpAccountRepository;
+import com.thesystem.modules.xp.repository.XpPolicyRepository;
+import com.thesystem.modules.xp.repository.XpTransactionRepository;
+import com.thesystem.modules.xp.service.XpService;
+import com.thesystem.security.util.SecurityUtils;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+public class XpServiceImpl implements XpService {
+
+    private final XpAccountRepository xpAccountRepository;
+    private final XpTransactionRepository xpTransactionRepository;
+    private final AchievementDefinitionRepository achievementDefinitionRepository;
+    private final UserAchievementRepository userAchievementRepository;
+    private final XpPolicyRepository xpPolicyRepository;
+    private final RewardHistoryRepository rewardHistoryRepository;
+    private final XpMapper xpMapper;
+    private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher eventPublisher;
+
+    public XpServiceImpl(
+            XpAccountRepository xpAccountRepository,
+            XpTransactionRepository xpTransactionRepository,
+            AchievementDefinitionRepository achievementDefinitionRepository,
+            UserAchievementRepository userAchievementRepository,
+            XpPolicyRepository xpPolicyRepository,
+            RewardHistoryRepository rewardHistoryRepository,
+            XpMapper xpMapper,
+            ObjectMapper objectMapper,
+            ApplicationEventPublisher eventPublisher) {
+        this.xpAccountRepository = xpAccountRepository;
+        this.xpTransactionRepository = xpTransactionRepository;
+        this.achievementDefinitionRepository = achievementDefinitionRepository;
+        this.userAchievementRepository = userAchievementRepository;
+        this.xpPolicyRepository = xpPolicyRepository;
+        this.rewardHistoryRepository = rewardHistoryRepository;
+        this.xpMapper = xpMapper;
+        this.objectMapper = objectMapper;
+        this.eventPublisher = eventPublisher;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public XpAccountResponse getAccount(UUID userId) {
+        XpAccount account = xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new XpAccountNotFoundException("XP account not found"));
+        return xpMapper.toXpAccountResponse(account);
+    }
+
+    @Override
+    @Transactional
+    public XpAccountResponse createAccount(XpAccountCreateRequest request) {
+        UUID userId = SecurityUtils.getCurrentUserId();
+        if (xpAccountRepository.existsByUserIdAndDeletedAtIsNull(userId)) {
+            throw new InvalidTransactionException("XP account already exists");
+        }
+        XpAccount account = new XpAccount();
+        account.setUserId(userId);
+        account.setCurrentXp(0);
+        account.setCurrentLevel(1);
+        account.setTotalXpEarned(0);
+        account.setTotalXpSpent(0);
+        account.setLifetimeXp(0);
+        account.setLevelProgress(0.0);
+        XpAccount saved = xpAccountRepository.save(account);
+        return xpMapper.toXpAccountResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public TransactionResponse createTransaction(TransactionCreateRequest request) {
+        UUID userId = SecurityUtils.getCurrentUserId();
+        
+        String sourceEngine = request.sourceEngine();
+        UUID sourceId = request.sourceId();
+        String sourceType = request.sourceType();
+        
+        if (sourceEngine == null || sourceType == null) {
+            throw new InvalidTransactionException("sourceEngine and sourceType are required");
+        }
+        
+        Optional<XpTransaction> existing = xpTransactionRepository
+                .findBySourceEngineAndSourceIdAndSourceTypeAndDeletedAtIsNull(sourceEngine, sourceId, sourceType);
+        
+        if (existing.isPresent()) {
+            throw new DuplicateTransactionException("Transaction already exists for this source");
+        }
+        
+        XpAccount account = xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)
+                .orElseGet(() -> createDefaultAccount(userId));
+        
+        int amount = request.amount();
+        int balanceBefore = account.getCurrentXp();
+        int balanceAfter = balanceBefore + amount;
+        
+        if (balanceAfter < 0) {
+            throw new InvalidTransactionException("Insufficient XP balance");
+        }
+        
+        XpTransaction transaction = new XpTransaction();
+        transaction.setUserId(userId);
+        transaction.setTransactionType(request.transactionType());
+        transaction.setAmount(amount);
+        transaction.setBalanceAfter(balanceAfter);
+        transaction.setSourceEngine(sourceEngine);
+        transaction.setSourceId(sourceId);
+        transaction.setSourceType(sourceType);
+        transaction.setPolicyId(request.policyId());
+        transaction.setMultiplierApplied(request.multiplierApplied());
+        transaction.setBaseAmount(request.baseAmount());
+        transaction.setReason(request.reason());
+        transaction.setMetadata(request.metadata() != null ? toJsonString(request.metadata()) : null);
+        
+        XpTransaction savedTransaction = xpTransactionRepository.save(transaction);
+        
+        account.setCurrentXp(balanceAfter);
+        account.setTotalXpEarned(account.getTotalXpEarned() + Math.max(0, amount));
+        account.setTotalXpSpent(account.getTotalXpSpent() + Math.max(0, -amount));
+        account.setLifetimeXp(account.getTotalXpEarned() - account.getTotalXpSpent());
+        
+        int newLevel = calculateLevel(account.getLifetimeXp());
+        if (newLevel != account.getCurrentLevel()) {
+            int oldLevel = account.getCurrentLevel();
+            account.setCurrentLevel(newLevel);
+            eventPublisher.publishEvent(new LevelUpEvent(userId, oldLevel, newLevel, calculateXpForLevel(newLevel), Instant.now()));
+        }
+        
+        double progress = calculateProgress(account.getLifetimeXp(), newLevel);
+        account.setLevelProgress(progress);
+        
+        xpAccountRepository.save(account);
+        
+        if (amount > 0) {
+            eventPublisher.publishEvent(new XpAwardedEvent(
+                    Math.abs(amount), userId, sourceType, sourceId, request.transactionType(), Instant.now()));
+        } else if (amount < 0) {
+            eventPublisher.publishEvent(new XpRemovedEvent(Math.abs(amount), userId, request.reason(), Instant.now()));
+        }
+        
+        return xpMapper.toTransactionResponse(savedTransaction);
+    }
+    
+    private XpAccount createDefaultAccount(UUID userId) {
+        XpAccount account = new XpAccount();
+        account.setUserId(userId);
+        account.setCurrentXp(0);
+        account.setCurrentLevel(1);
+        account.setTotalXpEarned(0);
+        account.setTotalXpSpent(0);
+        account.setLifetimeXp(0);
+        account.setLevelProgress(0.0);
+        return xpAccountRepository.save(account);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TransactionResponse getTransaction(UUID transactionId) {
+        XpTransaction transaction = xpTransactionRepository.findById(transactionId)
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
+        return xpMapper.toTransactionResponse(transaction);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TransactionResponse> listTransactions(UUID userId, Pageable pageable) {
+        Page<XpTransaction> transactions = xpTransactionRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId, pageable);
+        return transactions.map(xpMapper::toTransactionResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TransactionResponse> getTransactionHistory(UUID userId, TransactionHistoryFilter filters) {
+        List<XpTransaction> transactions = xpTransactionRepository.findByUserIdAndDeletedAtIsNull(userId);
+        
+        if (filters.transactionTypes() != null && !filters.transactionTypes().isEmpty()) {
+            transactions = transactions.stream()
+                    .filter(t -> filters.transactionTypes().contains(t.getTransactionType()))
+                    .toList();
+        }
+        
+        if (filters.startDate() != null) {
+            Instant start = filters.startDate();
+            transactions = transactions.stream()
+                    .filter(t -> t.getCreatedAt().isAfter(start) || t.getCreatedAt().equals(start))
+                    .toList();
+        }
+        
+        if (filters.endDate() != null) {
+            Instant end = filters.endDate();
+            transactions = transactions.stream()
+                    .filter(t -> t.getCreatedAt().isBefore(end) || t.getCreatedAt().equals(end))
+                    .toList();
+        }
+        
+        return transactions.stream()
+                .map(xpMapper::toTransactionResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int calculateLevel(int xp) {
+        if (xp < 0) {
+            throw new LevelCalculationException("XP cannot be negative");
+        }
+        int level = 1;
+        long xpRequired = 0;
+        while (xpRequired <= xp) {
+            level++;
+            xpRequired = calculateXpForLevel(level);
+        }
+        return level - 1;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProgressResponse calculateProgress(UUID userId) {
+        XpAccount account = xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new XpAccountNotFoundException("XP account not found"));
+        
+        int currentLevel = account.getCurrentLevel();
+        long currentXp = account.getLifetimeXp();
+        long xpForCurrentLevel = calculateXpForLevel(currentLevel);
+        long xpForNextLevel = calculateXpForLevel(currentLevel + 1);
+        long xpInLevel = currentXp - xpForCurrentLevel;
+        long xpNeeded = xpForNextLevel - xpForCurrentLevel;
+        double progress = xpNeeded > 0 ? Math.min(100.0, (double) xpInLevel / xpNeeded * 100) : 100.0;
+        
+        return new ProgressResponse(
+                currentLevel,
+                currentXp,
+                xpForCurrentLevel,
+                xpForNextLevel,
+                xpInLevel,
+                xpNeeded,
+                Math.round(progress)
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LevelInfo getLevelInfo(int level) {
+        if (level < 1) {
+            throw new LevelCalculationException("Level must be >= 1");
+        }
+        long xpRequired = calculateXpForLevel(level);
+        long xpForNextLevel = level >= 100 ? xpRequired : calculateXpForLevel(level + 1);
+        
+        return new LevelInfo(
+                level,
+                xpRequired,
+                xpForNextLevel,
+                xpForNextLevel - xpRequired,
+                "Level " + level + " - " + getLevelTitle(level)
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AchievementResponse> getAllAchievements() {
+        List<AchievementDefinition> definitions = achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc();
+        return definitions.stream()
+                .map(def -> new AchievementResponse(
+                        def.getId(),
+                        def.getCode(),
+                        def.getName(),
+                        def.getDescription(),
+                        def.getCategory(),
+                        def.getIconUrl(),
+                        def.getRequirementType(),
+                        fromJsonString(def.getRequirementValue(), new TypeReference<Map<String, Object>>() {}),
+                        def.getXpReward(),
+                        def.getIsHidden(),
+                        def.getIsRepeatable(),
+                        def.getSortOrder(),
+                        def.getCreatedAt()
+                ))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AchievementResponse getAchievement(UUID achievementId) {
+        AchievementDefinition definition = achievementDefinitionRepository.findById(achievementId)
+                .orElseThrow(() -> new AchievementNotFoundException("Achievement not found"));
+        return new AchievementResponse(
+                definition.getId(),
+                definition.getCode(),
+                definition.getName(),
+                definition.getDescription(),
+                definition.getCategory(),
+                definition.getIconUrl(),
+                definition.getRequirementType(),
+                fromJsonString(definition.getRequirementValue(), new TypeReference<Map<String, Object>>() {}),
+                definition.getXpReward(),
+                definition.getIsHidden(),
+                definition.getIsRepeatable(),
+                definition.getSortOrder(),
+                definition.getCreatedAt()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserAchievementResponse> getUserAchievements(UUID userId) {
+        List<UserAchievement> userAchievements = userAchievementRepository.findByUserIdAndDeletedAtIsNull(userId);
+        return userAchievements.stream()
+                .map(ua -> new UserAchievementResponse(
+                        ua.getId(),
+                        ua.getUserId(),
+                        ua.getAchievementId(),
+                        "", // achievement code - would need join
+                        "", // achievement name - would need join
+                        AchievementCategory.TASK,
+                        ua.getCurrentProgress(),
+                        ua.getTargetProgress(),
+                        ua.getIsUnlocked(),
+                        ua.getUnlockedAt(),
+                        fromJsonString(ua.getProgressMetadata(), new TypeReference<Map<String, Object>>() {}),
+                        ua.getCreatedAt()
+                ))
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public List<AchievementResponse> checkAchievements(UUID userId) {
+        List<AchievementResponse> unlocked = new ArrayList<>();
+        List<AchievementDefinition> definitions = achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc();
+        
+        for (AchievementDefinition definition : definitions) {
+            UserAchievement userAchievement = userAchievementRepository
+                    .findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId())
+                    .orElse(null);
+            
+            if (userAchievement == null) {
+                userAchievement = new UserAchievement();
+                userAchievement.setUserId(userId);
+                userAchievement.setAchievementId(definition.getId());
+                userAchievement.setCurrentProgress(0);
+                userAchievement.setTargetProgress(100);
+                userAchievement.setUnlocked(false);
+                userAchievementRepository.save(userAchievement);
+            }
+            
+            if (!userAchievement.getIsUnlocked() || definition.getIsRepeatable()) {
+                int newProgress = evaluateAchievementProgress(definition, userId);
+                if (newProgress > userAchievement.getCurrentProgress()) {
+                    userAchievement.setCurrentProgress(newProgress);
+                }
+                
+                if (newProgress >= userAchievement.getTargetProgress() && !userAchievement.getIsUnlocked()) {
+                    userAchievement.setIsUnlocked(true);
+                    userAchievement.setUnlockedAt(Instant.now());
+                    userAchievementRepository.save(userAchievement);
+                    
+                    XpTransaction transaction = new XpTransaction();
+                    transaction.setUserId(userId);
+                    transaction.setTransactionType(TransactionType.ACHIEVEMENT);
+                    transaction.setAmount(definition.getXpReward());
+                    transaction.setBalanceAfter(0);
+                    transaction.setSourceEngine("xp-engine");
+                    transaction.setSourceId(definition.getId());
+                    transaction.setSourceType("ACHIEVEMENT");
+                    transaction.setReason("Achievement unlocked: " + definition.getName());
+                    xpTransactionRepository.save(transaction);
+                    
+                    eventPublisher.publishEvent(new AchievementUnlockedEvent(
+                            userId, definition.getId(), definition.getCode(), definition.getXpReward(), Instant.now()));
+                    
+                    unlocked.add(getAchievement(definition.getId()));
+                }
+            }
+        }
+        
+        return unlocked;
+    }
+
+    @Override
+    @Transactional
+    public UserAchievementResponse unlockAchievement(UUID userId, UUID achievementId) {
+        AchievementDefinition definition = achievementDefinitionRepository.findById(achievementId)
+                .orElseThrow(() -> new AchievementNotFoundException("Achievement not found"));
+        
+        UserAchievement userAchievement = userAchievementRepository
+                .findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, achievementId)
+                .orElseGet(() -> {
+                    UserAchievement ua = new UserAchievement();
+                    ua.setUserId(userId);
+                    ua.setAchievementId(achievementId);
+                    ua.setCurrentProgress(0);
+                    ua.setTargetProgress(100);
+                    ua.setIsUnlocked(false);
+                    return userAchievementRepository.save(ua);
+                });
+        
+        if (!userAchievement.getIsUnlocked()) {
+            userAchievement.setIsUnlocked(true);
+            userAchievement.setUnlockedAt(Instant.now());
+            userAchievement.setCurrentProgress(userAchievement.getTargetProgress());
+            userAchievementRepository.save(userAchievement);
+            
+            eventPublisher.publishEvent(new AchievementUnlockedEvent(
+                    userId, achievementId, definition.getCode(), definition.getXpReward(), Instant.now()));
+        }
+        
+        return new UserAchievementResponse(
+                userAchievement.getId(),
+                userAchievement.getUserId(),
+                userAchievement.getAchievementId(),
+                definition.getCode(),
+                definition.getName(),
+                definition.getCategory(),
+                userAchievement.getCurrentProgress(),
+                userAchievement.getTargetProgress(),
+                userAchievement.getIsUnlocked(),
+                userAchievement.getUnlockedAt(),
+                fromJsonString(userAchievement.getProgressMetadata(), new TypeReference<Map<String, Object>>() {}),
+                userAchievement.getCreatedAt()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PolicyResponse> getAllPolicies() {
+        List<XpPolicy> policies = xpPolicyRepository.findByDeletedAtIsNullOrderByPriorityDesc();
+        return policies.stream()
+                .map(p -> new PolicyResponse(
+                        p.getId(),
+                        p.getCode(),
+                        p.getName(),
+                        p.getDescription(),
+                        p.getPolicyType(),
+                        p.getBaseXp(),
+                        p.getMultiplier(),
+                        fromJsonString(p.getConditions(), new TypeReference<Map<String, Object>>() {}),
+                        p.getIsActive(),
+                        p.getPriority(),
+                        p.getCreatedAt(),
+                        p.getUpdatedAt()
+                ))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PolicyResponse getPolicy(UUID policyId) {
+        XpPolicy policy = xpPolicyRepository.findById(policyId)
+                .orElseThrow(() -> new PolicyNotFoundException("Policy not found"));
+        return new PolicyResponse(
+                policy.getId(),
+                policy.getCode(),
+                policy.getName(),
+                policy.getDescription(),
+                policy.getPolicyType(),
+                policy.getBaseXp(),
+                policy.getMultiplier(),
+                fromJsonString(policy.getConditions(), new TypeReference<Map<String, Object>>() {}),
+                policy.getIsActive(),
+                policy.getPriority(),
+                policy.getCreatedAt(),
+                policy.getUpdatedAt()
+        );
+    }
+
+    @Override
+    @Transactional
+    public PolicyResponse createPolicy(PolicyRequest request) {
+        if (!SecurityUtils.isAdmin()) {
+            throw new XpException("Admin access required", "FORBIDDEN", 403);
+        }
+        
+        XpPolicy policy = new XpPolicy();
+        policy.setCode(request.code());
+        policy.setName(request.name());
+        policy.setDescription(request.description());
+        policy.setPolicyType(request.policyType());
+        policy.setBaseXp(request.baseXp());
+        policy.setMultiplier(request.multiplier());
+        policy.setConditions(toJsonString(request.conditions()));
+        policy.setIsActive(true);
+        policy.setPriority(request.priority() != null ? request.priority() : 0);
+        
+        XpPolicy saved = xpPolicyRepository.save(policy);
+        eventPublisher.publishEvent(new com.thesystem.modules.xp.event.PolicyChangedEvent(
+                saved.getId(), saved.getCode(), "created", Instant.now()));
+        
+        return getPolicy(saved.getId());
+    }
+
+    @Override
+    @Transactional
+    public PolicyResponse updatePolicy(UUID policyId, PolicyRequest request) {
+        if (!SecurityUtils.isAdmin()) {
+            throw new XpException("Admin access required", "FORBIDDEN", 403);
+        }
+        
+        XpPolicy policy = xpPolicyRepository.findById(policyId)
+                .orElseThrow(() -> new PolicyNotFoundException("Policy not found"));
+        
+        policy.setName(request.name());
+        policy.setDescription(request.description());
+        policy.setBaseXp(request.baseXp());
+        policy.setMultiplier(request.multiplier());
+        policy.setConditions(toJsonString(request.conditions()));
+        policy.setIsActive(request.isActive());
+        policy.setPriority(request.priority() != null ? request.priority() : 0);
+        
+        XpPolicy saved = xpPolicyRepository.save(policy);
+        eventPublisher.publishEvent(new com.thesystem.modules.xp.event.PolicyChangedEvent(
+                saved.getId(), saved.getCode(), "updated", Instant.now()));
+        
+        return getPolicy(saved.getId());
+    }
+
+    @Override
+    @Transactional
+    public void deletePolicy(UUID policyId) {
+        if (!SecurityUtils.isAdmin()) {
+            throw new XpException("Admin access required", "FORBIDDEN", 403);
+        }
+        
+        XpPolicy policy = xpPolicyRepository.findById(policyId)
+                .orElseThrow(() -> new PolicyNotFoundException("Policy not found"));
+        
+        policy.setDeletedAt(Instant.now());
+        xpPolicyRepository.save(policy);
+        
+        eventPublisher.publishEvent(new com.thesystem.modules.xp.event.PolicyChangedEvent(
+                policyId, policy.getCode(), "deleted", Instant.now()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PolicyEvaluationResponse evaluatePolicies(UUID userId) {
+        List<XpPolicy> activePolicies = xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true);
+        
+        double totalMultiplier = 1.0;
+        int baseXp = 0;
+        List<String> appliedPolicies = new ArrayList<>();
+        
+        for (XpPolicy policy : activePolicies) {
+            if (matchesPolicy(policy, userId)) {
+                baseXp += policy.getBaseXp();
+                totalMultiplier *= policy.getMultiplier();
+                appliedPolicies.add(policy.getCode());
+            }
+        }
+        
+        totalMultiplier = Math.min(totalMultiplier, 10.0);
+        int finalXp = (int) Math.round(baseXp * totalMultiplier);
+        
+        return new PolicyEvaluationResponse(
+                userId,
+                baseXp,
+                totalMultiplier,
+                finalXp,
+                appliedPolicies
+        );
+    }
+
+    @Override
+    @Transactional
+    public RewardResponse calculateReward(RewardCalculationRequest request) {
+        UUID userId = SecurityUtils.getCurrentUserId();
+        
+        PolicyEvaluationResponse evaluation = evaluatePolicies(userId);
+        int finalXp = evaluation.finalXp();
+        
+        return new RewardResponse(
+                null,
+                userId,
+                request.rewardType(),
+                request.sourceType(),
+                request.sourceId(),
+                finalXp,
+                null,
+                evaluation.totalMultiplier(),
+                evaluation.baseXp(),
+                Instant.now()
+        );
+    }
+
+    @Override
+    @Transactional
+    public RewardResponse grantReward(UUID userId, UUID rewardId) {
+        throw new InvalidRewardException("Reward granting not yet implemented");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RewardHistoryResponse> getRewardHistory(UUID userId) {
+        List<RewardHistory> rewards = rewardHistoryRepository.findByUserIdAndDeletedAtIsNullOrderByAwardedAtDesc(userId);
+        return rewards.stream()
+                .map(r -> new RewardHistoryResponse(
+                        r.getId(),
+                        r.getUserId(),
+                        r.getRewardType(),
+                        r.getSourceType(),
+                        r.getSourceId(),
+                        r.getXpAmount(),
+                        r.getPolicyId(),
+                        r.getMultiplierApplied(),
+                        r.getBaseAmount(),
+                        r.getAwardedAt(),
+                        fromJsonString(r.getMetadata(), new TypeReference<Map<String, Object>>() {})
+                ))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StatisticsResponse getStatistics() {
+        UUID userId = SecurityUtils.getCurrentUserId();
+        
+        XpAccount account = xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)
+                .orElse(new XpAccount());
+        
+        Instant now = Instant.now();
+        Instant dayStart = now.minus(java.time.Duration.ofDays(1));
+        Instant weekStart = now.minus(java.time.Duration.ofDays(7));
+        Instant monthStart = now.minus(java.time.Duration.ofDays(30));
+        
+        Integer dailyXp = xpTransactionRepository.sumPositiveAmountByUserId(userId);
+        Integer weeklyXp = xpTransactionRepository.sumPositiveAmountByUserId(userId);
+        Integer monthlyXp = xpTransactionRepository.sumPositiveAmountByUserId(userId);
+        
+        return new StatisticsResponse(
+                dailyXp != null ? dailyXp : 0,
+                weeklyXp != null ? weeklyXp : 0,
+                monthlyXp != null ? monthlyXp : 0,
+                account.getLifetimeXp(),
+                account.getCurrentLevel(),
+                (int) Math.round(account.getLevelProgress()),
+                0,
+                0,
+                0,
+                Map.of(),
+                Map.of(),
+                Map.of()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LeaderboardResponse getLeaderboard(Pageable pageable) {
+        List<XpAccount> accounts = xpAccountRepository.findByDeletedAtIsNullOrderByLifetimeXpDesc();
+        
+        List<LeaderboardEntry> entries = accounts.stream()
+                .limit(pageable.getPageSize())
+                .map(a -> new LeaderboardEntry(
+                        a.getUserId(),
+                        "User " + a.getUserId().toString().substring(0, 8),
+                        a.getLifetimeXp(),
+                        a.getCurrentLevel(),
+                        0
+                ))
+                .toList();
+        
+        for (int i = 0; i < entries.size(); i++) {
+            entries.set(i, new LeaderboardEntry(
+                    entries.get(i).userId(),
+                    entries.get(i).username(),
+                    entries.get(i).xp(),
+                    entries.get(i).level(),
+                    i + 1
+            ));
+        }
+        
+        return new LeaderboardResponse(entries, pageable.getPageNumber(), entries.size());
+    }
+    
+    private long calculateXpForLevel(int level) {
+        return Math.round(100 * Math.pow(level, 1.5));
+    }
+    
+    private int evaluateAchievementProgress(AchievementDefinition definition, UUID userId) {
+        switch (definition.getRequirementType()) {
+            case COUNTER -> {
+                return Math.min(100, (int) (Math.random() * 100));
+            }
+            case STREAK -> {
+                return 0;
+            }
+            case MILESTONE -> {
+                return 0;
+            }
+            case COLLECTION -> {
+                return 0;
+            }
+            case SPEED -> {
+                return 0;
+            }
+            case CUSTOM -> {
+                return 0;
+            }
+            default -> {
+                return 0;
+            }
+        }
+    }
+    
+    private boolean matchesPolicy(XpPolicy policy, UUID userId) {
+        return true;
+    }
+    
+    private String toJsonString(Object obj) {
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            return "{}";
+        }
+    }
+    
+    private <T> T fromJsonString(String json, TypeReference<T> type) {
+        if (json == null || json.isBlank()) {
+            return type.getType().equals(new TypeReference<Map<String, Object>>() {}.getType())
+                    ? (T) Map.of()
+                    : null;
+        }
+        try {
+            return objectMapper.readValue(json, type);
+        } catch (Exception e) {
+            return type.getType().equals(new TypeReference<Map<String, Object>>() {}.getType())
+                    ? (T) Map.of()
+                    : null;
+        }
+    }
+    
+    private String getLevelTitle(int level) {
+        if (level <= 1) return "Novice";
+        if (level <= 3) return "Beginner";
+        if (level <= 5) return "Intermediate";
+        if (level <= 7) return "Advanced";
+        if (level <= 10) return "Expert";
+        return "Master";
+    }
+}
