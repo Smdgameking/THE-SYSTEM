@@ -7,25 +7,21 @@ import com.thesystem.modules.auth.dto.RegisterRequest;
 import com.thesystem.modules.auth.dto.TokenResponse;
 import com.thesystem.modules.auth.service.AuthService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.UUID;
-
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(value = AuthController.class, excludeAutoConfiguration = {
-        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-})
 class AuthControllerIntegrationTest {
 
     @Autowired
@@ -34,15 +30,22 @@ class AuthControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private AuthService authService;
+    @TestConfiguration
+    static class TestConfig {
+        static AuthService authService = Mockito.mock(AuthService.class);
+
+        @Bean
+        AuthService authService() {
+            return authService;
+        }
+    }
 
     @Test
     void shouldRegisterUser() throws Exception {
         RegisterRequest request = new RegisterRequest("test@example.com", "password123");
         TokenResponse tokenResponse = new TokenResponse("accessToken", "refreshToken", "Bearer", 900L);
 
-        when(authService.register(any(RegisterRequest.class))).thenReturn(tokenResponse);
+        Mockito.when(TestConfig.authService.register(any(RegisterRequest.class))).thenReturn(tokenResponse);
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -59,7 +62,7 @@ class AuthControllerIntegrationTest {
         LoginRequest request = new LoginRequest("test@example.com", "password123");
         TokenResponse tokenResponse = new TokenResponse("accessToken", "refreshToken", "Bearer", 900L);
 
-        when(authService.login(any(LoginRequest.class))).thenReturn(tokenResponse);
+        Mockito.when(TestConfig.authService.login(any(LoginRequest.class))).thenReturn(tokenResponse);
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -74,7 +77,7 @@ class AuthControllerIntegrationTest {
         RefreshTokenRequest request = new RefreshTokenRequest("refreshToken");
         TokenResponse tokenResponse = new TokenResponse("newAccessToken", "newRefreshToken", "Bearer", 900L);
 
-        when(authService.refreshToken(any(RefreshTokenRequest.class))).thenReturn(tokenResponse);
+        Mockito.when(TestConfig.authService.refreshToken(any(RefreshTokenRequest.class))).thenReturn(tokenResponse);
 
         mockMvc.perform(post("/api/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
