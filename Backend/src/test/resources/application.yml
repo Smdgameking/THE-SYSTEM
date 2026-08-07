@@ -20,3 +20,9 @@ spring:
 
 server:
   port: 0
+
+thesystem:
+  jwt:
+    secret: test-secret-change-me-in-production-use-a-long-random-string-at-least-256-bits
+    access-token-expiration-ms: 900000
+    refresh-token-expiration-ms: 604800000
