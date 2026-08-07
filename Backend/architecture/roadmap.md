@@ -67,9 +67,32 @@
 - [x] Goal module unit and integration tests
 - [x] docs/goal/README.md
 
-## Phase 6: Core Modules (v0.7.0 - v0.9.0)
+## Phase 6: Task Engine Architecture (v0.7.0) - COMPLETED
 
-## Phase 5: Supporting Modules (v0.9.0 - v1.0.0)
+- [x] Task Engine architecture design document
+- [x] Database schema design (tasks, dependencies, time entries, recurring configs)
+- [x] Task lifecycle state machine (DRAFT → PENDING → IN_PROGRESS → COMPLETED/FAILED → ARCHIVED)
+- [x] Task Execution Types (BOOLEAN, CHECKLIST, TIMER, COUNT, PROGRESS, HABIT, APPROVAL, CUSTOM)
+- [x] Execution Provider pattern with strategy objects
+- [x] Execution State architecture (JSONB storage, validation, serialization)
+- [x] Task dependency system with cycle prevention
+- [x] Subtask hierarchy design
+- [x] Recurring task architecture
+- [x] Time tracking architecture
+- [x] Goal integration design (events, structured execution state)
+- [x] XP integration design (structured execution state for rewards)
+- [x] Memory, Notification, AI integration points
+- [x] ADR-0007: Task Execution Provider Pattern
+- [x] Architecture validated against Backend Constitution
+
+## Phase 7: Core Modules Implementation (v0.8.0 - v0.9.0)
+
+- [ ] Task module implementation
+- [ ] Memory module (memories CRUD)
+- [ ] AI module (AI interactions)
+- [ ] XP module (gamification)
+
+## Phase 8: Supporting Modules (v0.9.0 - v1.0.0)
 
 - [ ] XP module (gamification)
 - [ ] Habit module (habit tracking)

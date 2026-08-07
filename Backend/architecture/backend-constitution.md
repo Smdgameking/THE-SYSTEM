@@ -164,6 +164,16 @@ Every release updates CHANGELOG.md. Never skip changelog updates.
 
 Modules should communicate through interfaces. Future communication should support domain events. Avoid tight coupling.
 
+## Idempotent Event Processing
+
+Every engine consuming domain events must be able to process the same event multiple times without producing duplicate business effects.
+
+Duplicate delivery must not create duplicate data.
+
+Consumers are responsible for idempotency. Producers are not responsible for guaranteeing exactly-once delivery.
+
+Idempotency must be enforced using stable business identifiers rather than transient runtime state.
+
 ## Testing
 
 Every module requires Unit Tests and Integration Tests. A module without tests is incomplete.
