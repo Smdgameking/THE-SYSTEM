@@ -106,6 +106,18 @@ class XpServiceImplTest {
         accountId = UUID.randomUUID();
         transactionId = UUID.randomUUID();
 
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper realMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            org.mockito.Mockito.lenient().when(objectMapper.readValue(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+                    .thenAnswer(invocation -> {
+                        String json = invocation.getArgument(0);
+                        com.fasterxml.jackson.core.type.TypeReference<?> typeRef = invocation.getArgument(1);
+                        return realMapper.readValue(json, typeRef);
+                    });
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to setup ObjectMapper stub", e);
+        }
+
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(userId.toString(), null, null)
         );
@@ -578,6 +590,375 @@ class XpServiceImplTest {
         assertThat(response).isNotNull();
         assertThat(response.baseXp()).isEqualTo(50);
         assertThat(response.multiplier()).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldMatchPolicyWithNoConditions() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "NO_CONDITIONS", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions(null);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(50);
+        assertThat(response.multiplier()).isEqualTo(1.5);
+    }
+
+    @Test
+    void shouldMatchPolicyWithEmptyConditions() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "EMPTY_CONDITIONS", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(50);
+        assertThat(response.multiplier()).isEqualTo(1.5);
+    }
+
+    @Test
+    void shouldMatchPolicyWhenMinUserLevelMet() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "MIN_LEVEL", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{\"min_user_level\": 3}");
+
+        XpAccount account = new XpAccount();
+        account.setId(accountId);
+        account.setUserId(userId);
+        account.setCurrentLevel(5);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(50);
+    }
+
+    @Test
+    void shouldNotMatchPolicyWhenMinUserLevelNotMet() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "MIN_LEVEL", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{\"min_user_level\": 5}");
+
+        XpAccount account = new XpAccount();
+        account.setId(accountId);
+        account.setUserId(userId);
+        account.setCurrentLevel(3);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(0);
+        assertThat(response.multiplier()).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldMatchPolicyWhenMaxUserLevelMet() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "MAX_LEVEL", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{\"max_user_level\": 10}");
+
+        XpAccount account = new XpAccount();
+        account.setId(accountId);
+        account.setUserId(userId);
+        account.setCurrentLevel(5);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(50);
+    }
+
+    @Test
+    void shouldNotMatchPolicyWhenMaxUserLevelExceeded() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "MAX_LEVEL", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{\"max_user_level\": 3}");
+
+        XpAccount account = new XpAccount();
+        account.setId(accountId);
+        account.setUserId(userId);
+        account.setCurrentLevel(5);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(0);
+        assertThat(response.multiplier()).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldMatchPolicyWhenUserIsAllowed() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "ALLOWED", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{\"allowed_user_ids\": [\"" + userId + "\"]}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(50);
+    }
+
+    @Test
+    void shouldNotMatchPolicyWhenUserIsNotAllowed() {
+        UUID otherUserId = UUID.randomUUID();
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "ALLOWED", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{\"allowed_user_ids\": [\"" + otherUserId + "\"]}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(0);
+        assertThat(response.multiplier()).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldMatchPolicyWhenUserIsNotExcluded() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "EXCLUDED", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{\"excluded_user_ids\": [\"" + UUID.randomUUID() + "\"]}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(50);
+    }
+
+    @Test
+    void shouldNotMatchPolicyWhenUserIsExcluded() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "EXCLUDED", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{\"excluded_user_ids\": [\"" + userId + "\"]}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(0);
+        assertThat(response.multiplier()).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldNotMatchPolicyWithMalformedConditions() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "MALFORMED", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("not valid json");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(0);
+        assertThat(response.multiplier()).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldNotMatchPolicyWithInvalidConditionValueType() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "INVALID_TYPE", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{\"min_user_level\": \"five\"}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(0);
+        assertThat(response.multiplier()).isEqualTo(1.0);
+    }
+
+    // ========================
+    // calculatePolicyMultiplier tests
+    // ========================
+
+    @Test
+    void shouldReturnBaseMultiplierWithNoPolicies() {
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of());
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of());
+
+        assertThat(multiplier).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldApplyPriorityMultiplierForHighPriority() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"priority_multipliers\":{\"LOW\":1.0,\"NORMAL\":1.0,\"HIGH\":1.5,\"CRITICAL\":2.0}}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "HIGH"));
+
+        assertThat(multiplier).isEqualTo(1.5);
+    }
+
+    @Test
+    void shouldApplyPriorityMultiplierForNormalPriority() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"priority_multipliers\":{\"LOW\":1.0,\"NORMAL\":1.0,\"HIGH\":1.5,\"CRITICAL\":2.0}}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "NORMAL"));
+
+        assertThat(multiplier).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldNotApplyPriorityMultiplierForUnknownPriority() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"priority_multipliers\":{\"LOW\":1.0,\"NORMAL\":1.0,\"HIGH\":1.5,\"CRITICAL\":2.0}}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "UNKNOWN"));
+
+        assertThat(multiplier).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldApplyDifficultyMultiplierForHardTask() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"difficulty_multipliers\":{\"EASY\":1.0,\"NORMAL\":1.25,\"HARD\":1.5,\"EXTREME\":2.0}}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskDifficulty", "HARD"));
+
+        assertThat(multiplier).isEqualTo(1.5);
+    }
+
+    @Test
+    void shouldNotApplyDifficultyMultiplierWhenTaskDifficultyMissing() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"difficulty_multipliers\":{\"EASY\":1.0,\"NORMAL\":1.25,\"HARD\":1.5,\"EXTREME\":2.0}}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "NORMAL"));
+
+        assertThat(multiplier).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldApplyStreakMultiplierForSeventhDayStreak() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("streak", 7));
+
+        assertThat(multiplier).isEqualTo(1.25);
+    }
+
+    @Test
+    void shouldNotApplyStreakMultiplierWhenStreakBelowFirstMilestone() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("streak", 1));
+
+        assertThat(multiplier).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldCombinePriorityAndDifficultyMultipliers() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"priority_multipliers\":{\"HIGH\":1.5},\"difficulty_multipliers\":{\"HARD\":1.5}}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "HIGH", "taskDifficulty", "HARD"));
+
+        assertThat(multiplier).isEqualTo(2.25);
+    }
+
+    @Test
+    void shouldCapMultiplierAtTen() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 5.0);
+        policy.setConditions("{\"priority_multipliers\":{\"HIGH\":2.0}}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "HIGH"));
+
+        assertThat(multiplier).isEqualTo(10.0);
+    }
+
+    @Test
+    void shouldReturnBaseMultiplierWhenPolicyHasNoConditions() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 2.5);
+        policy.setConditions(null);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of());
+
+        assertThat(multiplier).isEqualTo(2.5);
+    }
+
+    @Test
+    void shouldReturnBaseMultiplierWhenPolicyConditionsAreMalformed() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 2.5);
+        policy.setConditions("not valid json");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of());
+
+        assertThat(multiplier).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldApplyGoalDifficultyMultiplier() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "GOAL_COMPLETION", PolicyType.GOAL_COMPLETION, 100, 1.0);
+        policy.setConditions("{\"difficulty_multipliers\":{\"EASY\":1.0,\"NORMAL\":1.25,\"HARD\":1.5,\"EXTREME\":2.0}}");
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+
+        double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("goalDifficulty", "HARD"));
+
+        assertThat(multiplier).isEqualTo(1.5);
+    }
+
+    @Test
+    void shouldCombineMatchingAndNonMatchingPolicies() {
+        XpPolicy matchingPolicy = createXpPolicy(UUID.randomUUID(), "MATCHING", PolicyType.TASK_COMPLETION, 50, 1.5);
+        matchingPolicy.setConditions("{\"min_user_level\": 1}");
+
+        XpPolicy nonMatchingPolicy = createXpPolicy(UUID.randomUUID(), "NON_MATCHING", PolicyType.TASK_COMPLETION, 30, 2.0);
+        nonMatchingPolicy.setConditions("{\"min_user_level\": 100}");
+
+        XpAccount account = new XpAccount();
+        account.setId(accountId);
+        account.setUserId(userId);
+        account.setCurrentLevel(5);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(matchingPolicy, nonMatchingPolicy));
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(50);
+        assertThat(response.multiplier()).isEqualTo(1.5);
     }
 
     // ========================

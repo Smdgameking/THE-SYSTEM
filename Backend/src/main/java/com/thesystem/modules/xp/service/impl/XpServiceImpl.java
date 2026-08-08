@@ -810,7 +810,184 @@ public class XpServiceImpl implements XpService {
         return userAchievement != null ? userAchievement.getCurrentProgress() : 0;
     }
 
+    public double calculatePolicyMultiplier(UUID userId, Map<String, Object> context) {
+        if (context == null) {
+            context = Map.of();
+        }
+
+        List<XpPolicy> activePolicies = xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true);
+        double totalMultiplier = 1.0;
+
+        for (XpPolicy policy : activePolicies) {
+            if (matchesPolicy(policy, userId)) {
+                totalMultiplier *= calculateMultiplierForPolicy(policy, context);
+            }
+        }
+
+        return Math.min(totalMultiplier, 10.0);
+    }
+
+    private double calculateMultiplierForPolicy(XpPolicy policy, Map<String, Object> context) {
+        String conditions = policy.getConditions();
+        if (conditions == null || conditions.isBlank()) {
+            return policy.getMultiplier();
+        }
+
+        Map<String, Object> conditionsMap;
+        try {
+            conditionsMap = objectMapper.readValue(conditions, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            return policy.getMultiplier();
+        }
+
+        double multiplier = policy.getMultiplier();
+
+        if (conditionsMap.containsKey("priority_multipliers") && context.containsKey("taskPriority")) {
+            Object taskPriority = context.get("taskPriority");
+            if (taskPriority instanceof String) {
+                Object priorityObj = conditionsMap.get("priority_multipliers");
+                if (priorityObj instanceof Map) {
+                    Map<?, ?> priorityMap = (Map<?, ?>) priorityObj;
+                    Object multObj = priorityMap.get(taskPriority);
+                    if (multObj instanceof Number) {
+                        multiplier *= ((Number) multObj).doubleValue();
+                    }
+                }
+            }
+        }
+
+        if (conditionsMap.containsKey("difficulty_multipliers")) {
+            String difficultyKey = null;
+            if (context.containsKey("taskDifficulty") && context.get("taskDifficulty") instanceof String) {
+                difficultyKey = (String) context.get("taskDifficulty");
+            } else if (context.containsKey("goalDifficulty") && context.get("goalDifficulty") instanceof String) {
+                difficultyKey = (String) context.get("goalDifficulty");
+            }
+
+            if (difficultyKey != null) {
+                Object difficultyObj = conditionsMap.get("difficulty_multipliers");
+                if (difficultyObj instanceof Map) {
+                    Map<?, ?> difficultyMap = (Map<?, ?>) difficultyObj;
+                    Object multObj = difficultyMap.get(difficultyKey);
+                    if (multObj instanceof Number) {
+                        multiplier *= ((Number) multObj).doubleValue();
+                    }
+                }
+            }
+        }
+
+        if (conditionsMap.containsKey("streak_bonus") && context.containsKey("streak")) {
+            Object streakObj = context.get("streak");
+            if (streakObj instanceof Integer) {
+                int streak = (Integer) streakObj;
+                Object streakConfigObj = conditionsMap.get("streak_bonus");
+                if (streakConfigObj instanceof Map) {
+                    Map<?, ?> streakConfig = (Map<?, ?>) streakConfigObj;
+                    Object enabledObj = streakConfig.get("enabled");
+                    if (Boolean.TRUE.equals(enabledObj)) {
+                        Object milestonesObj = streakConfig.get("milestones");
+                        Object multipliersObj = streakConfig.get("multipliers");
+
+                        if (milestonesObj instanceof List && multipliersObj instanceof List) {
+                            List<?> milestonesList = (List<?>) milestonesObj;
+                            List<?> multipliersList = (List<?>) multipliersObj;
+
+                            int[] milestones = new int[milestonesList.size()];
+                            for (int i = 0; i < milestonesList.size(); i++) {
+                                if (milestonesList.get(i) instanceof Number) {
+                                    milestones[i] = ((Number) milestonesList.get(i)).intValue();
+                                }
+                            }
+
+                            double[] multipliers = new double[multipliersList.size()];
+                            for (int i = 0; i < multipliersList.size(); i++) {
+                                if (multipliersList.get(i) instanceof Number) {
+                                    multipliers[i] = ((Number) multipliersList.get(i)).doubleValue();
+                                }
+                            }
+
+                            for (int i = milestones.length - 1; i >= 0; i--) {
+                                if (streak >= milestones[i]) {
+                                    multiplier *= multipliers[i];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return multiplier;
+    }
+
     private boolean matchesPolicy(XpPolicy policy, UUID userId) {
+        if (policy.getIsActive() == null || !policy.getIsActive()) {
+            return false;
+        }
+
+        String conditions = policy.getConditions();
+        if (conditions == null || conditions.isBlank()) {
+            return true;
+        }
+
+        Map<String, Object> conditionsMap;
+        try {
+            conditionsMap = objectMapper.readValue(conditions, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            return false;
+        }
+
+        if (conditionsMap.containsKey("min_user_level")) {
+            Object value = conditionsMap.get("min_user_level");
+            if (!(value instanceof Number)) {
+                return false;
+            }
+            int minLevel = ((Number) value).intValue();
+            XpAccount account = xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId).orElse(null);
+            if (account == null || account.getCurrentLevel() < minLevel) {
+                return false;
+            }
+        }
+
+        if (conditionsMap.containsKey("max_user_level")) {
+            Object value = conditionsMap.get("max_user_level");
+            if (!(value instanceof Number)) {
+                return false;
+            }
+            int maxLevel = ((Number) value).intValue();
+            XpAccount account = xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId).orElse(null);
+            if (account == null || account.getCurrentLevel() > maxLevel) {
+                return false;
+            }
+        }
+
+        if (conditionsMap.containsKey("allowed_user_ids")) {
+            Object value = conditionsMap.get("allowed_user_ids");
+            if (!(value instanceof List<?>)) {
+                return false;
+            }
+            List<?> allowedIds = (List<?>) value;
+            boolean allowed = allowedIds.stream()
+                    .anyMatch(id -> userId.toString().equals(id.toString()));
+            if (!allowed) {
+                return false;
+            }
+        }
+
+        if (conditionsMap.containsKey("excluded_user_ids")) {
+            Object value = conditionsMap.get("excluded_user_ids");
+            if (!(value instanceof List<?>)) {
+                return false;
+            }
+            List<?> excludedIds = (List<?>) value;
+            boolean excluded = excludedIds.stream()
+                    .anyMatch(id -> userId.toString().equals(id.toString()));
+            if (excluded) {
+                return false;
+            }
+        }
+
         return true;
     }
 

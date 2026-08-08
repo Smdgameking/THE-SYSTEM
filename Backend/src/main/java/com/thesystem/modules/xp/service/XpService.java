@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -63,6 +64,15 @@ public interface XpService {
     TransactionResponse createTransaction(TransactionCreateRequest request);
 
     TransactionResponse createTransaction(UUID userId, TransactionCreateRequest request);
+
+    /**
+     * Calculates the effective policy multiplier for a user given context.
+     *
+     * @param userId  the unique identifier of the user
+     * @param context the context map containing attributes like taskPriority, taskDifficulty, executionType
+     * @return the effective multiplier (capped at 10.0)
+     */
+    double calculatePolicyMultiplier(UUID userId, Map<String, Object> context);
 
     /**
      * Retrieves a specific transaction by its ID.
