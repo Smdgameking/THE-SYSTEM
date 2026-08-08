@@ -62,6 +62,8 @@ public interface XpService {
      */
     TransactionResponse createTransaction(TransactionCreateRequest request);
 
+    TransactionResponse createTransaction(UUID userId, TransactionCreateRequest request);
+
     /**
      * Retrieves a specific transaction by its ID.
      *

@@ -134,7 +134,16 @@ public class XpServiceImpl implements XpService {
     @Transactional
     public TransactionResponse createTransaction(TransactionCreateRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId();
+        return createTransactionInternal(userId, request);
+    }
 
+    @Override
+    @Transactional
+    public TransactionResponse createTransaction(UUID userId, TransactionCreateRequest request) {
+        return createTransactionInternal(userId, request);
+    }
+
+    private TransactionResponse createTransactionInternal(UUID userId, TransactionCreateRequest request) {
         String sourceEngine = request.sourceEngine();
         UUID sourceId = request.sourceId();
         String sourceType = request.sourceType();
