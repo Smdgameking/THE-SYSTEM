@@ -54,6 +54,7 @@ import com.thesystem.modules.xp.repository.XpAccountRepository;
 import com.thesystem.modules.xp.repository.XpPolicyRepository;
 import com.thesystem.modules.xp.repository.XpTransactionRepository;
 import com.thesystem.modules.xp.service.XpService;
+import com.thesystem.modules.user.service.UserTimezoneResolver;
 import com.thesystem.security.util.SecurityUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -81,6 +82,7 @@ public class XpServiceImpl implements XpService {
     private final XpMapper xpMapper;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserTimezoneResolver userTimezoneResolver;
 
     public XpServiceImpl(
             XpAccountRepository xpAccountRepository,
@@ -91,7 +93,8 @@ public class XpServiceImpl implements XpService {
             RewardHistoryRepository rewardHistoryRepository,
             XpMapper xpMapper,
             ObjectMapper objectMapper,
-            ApplicationEventPublisher eventPublisher) {
+            ApplicationEventPublisher eventPublisher,
+            UserTimezoneResolver userTimezoneResolver) {
         this.xpAccountRepository = xpAccountRepository;
         this.xpTransactionRepository = xpTransactionRepository;
         this.achievementDefinitionRepository = achievementDefinitionRepository;
@@ -101,6 +104,7 @@ public class XpServiceImpl implements XpService {
         this.xpMapper = xpMapper;
         this.objectMapper = objectMapper;
         this.eventPublisher = eventPublisher;
+        this.userTimezoneResolver = userTimezoneResolver;
     }
 
     @Override
@@ -134,16 +138,23 @@ public class XpServiceImpl implements XpService {
     @Transactional
     public TransactionResponse createTransaction(TransactionCreateRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId();
-        return createTransactionInternal(userId, request);
+        return createTransactionInternal(userId, request, null, null, null);
     }
 
     @Override
     @Transactional
     public TransactionResponse createTransaction(UUID userId, TransactionCreateRequest request) {
-        return createTransactionInternal(userId, request);
+        return createTransactionInternal(userId, request, null, null, null);
     }
 
-    private TransactionResponse createTransactionInternal(UUID userId, TransactionCreateRequest request) {
+    @Override
+    @Transactional
+    public TransactionResponse createTransaction(UUID userId, TransactionCreateRequest request, UUID policyId, Double multiplierApplied, Integer baseAmount) {
+        return createTransactionInternal(userId, request, policyId, multiplierApplied, baseAmount);
+    }
+
+    private TransactionResponse createTransactionInternal(UUID userId, TransactionCreateRequest request,
+                                                          UUID policyId, Double multiplierApplied, Integer baseAmount) {
         String sourceEngine = request.sourceEngine();
         UUID sourceId = request.sourceId();
         String sourceType = request.sourceType();
@@ -178,9 +189,9 @@ public class XpServiceImpl implements XpService {
         transaction.setSourceEngine(sourceEngine);
         transaction.setSourceId(sourceId);
         transaction.setSourceType(sourceType);
-        transaction.setPolicyId(null);
-        transaction.setMultiplierApplied(null);
-        transaction.setBaseAmount(null);
+        transaction.setPolicyId(policyId);
+        transaction.setMultiplierApplied(multiplierApplied);
+        transaction.setBaseAmount(baseAmount);
         transaction.setReason(request.reason());
         transaction.setMetadata(request.metadata() != null ? toJsonString(request.metadata()) : null);
 
@@ -326,7 +337,7 @@ public class XpServiceImpl implements XpService {
             throw new LevelCalculationException("Level must be >= 1");
         }
         long xpRequired = calculateXpForLevel(level);
-        long xpForNextLevel = level >= 100 ? xpRequired : calculateXpForLevel(level + 1);
+        long xpForNextLevel = calculateXpForLevel(level + 1);
 
         return new LevelInfo(
                 level,
@@ -339,7 +350,9 @@ public class XpServiceImpl implements XpService {
     @Transactional(readOnly = true)
     public List<AchievementResponse> getAllAchievements() {
         List<AchievementDefinition> definitions = achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc();
+        boolean isAdmin = SecurityUtils.isAdmin();
         return definitions.stream()
+                .filter(def -> isAdmin || !def.getIsHidden())
                 .map(def -> new AchievementResponse(
                         def.getId(),
                         def.getCode(),
@@ -409,6 +422,32 @@ public class XpServiceImpl implements XpService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public UserAchievementResponse getUserAchievement(UUID userId, UUID userAchievementId) {
+        UserAchievement userAchievement = userAchievementRepository
+                .findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, userAchievementId)
+                .orElseThrow(() -> new AchievementNotFoundException("User achievement not found"));
+
+        AchievementDefinition definition = achievementDefinitionRepository.findById(userAchievement.getAchievementId())
+                .orElse(null);
+
+        return new UserAchievementResponse(
+                userAchievement.getId(),
+                userAchievement.getUserId(),
+                userAchievement.getAchievementId(),
+                definition != null ? definition.getCode() : "",
+                definition != null ? definition.getName() : "",
+                definition != null ? definition.getCategory() : AchievementCategory.TASK,
+                userAchievement.getCurrentProgress(),
+                userAchievement.getTargetProgress(),
+                userAchievement.getIsUnlocked(),
+                userAchievement.getUnlockedAt(),
+                fromJsonString(userAchievement.getProgressMetadata(), new TypeReference<Map<String, Object>>() {}),
+                userAchievement.getCreatedAt()
+        );
+    }
+
+    @Override
     @Transactional
     public List<AchievementResponse> checkAchievements(UUID userId) {
         List<AchievementResponse> unlocked = new ArrayList<>();
@@ -433,6 +472,8 @@ public class XpServiceImpl implements XpService {
                 int newProgress = evaluateAchievementProgress(definition, userId);
                 if (newProgress > userAchievement.getCurrentProgress()) {
                     userAchievement.setCurrentProgress(newProgress);
+                    eventPublisher.publishEvent(new AchievementProgressUpdatedEvent(
+                            userId, definition.getId(), newProgress, userAchievement.getTargetProgress(), Instant.now()));
                 }
 
                 if (newProgress >= userAchievement.getTargetProgress() && !userAchievement.getIsUnlocked()) {
@@ -608,15 +649,19 @@ public class XpServiceImpl implements XpService {
     @Override
     @Transactional(readOnly = true)
     public PolicyEvaluationResponse evaluatePolicies(UUID userId) {
-        List<XpPolicy> activePolicies = xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true);
+        List<XpPolicy> activePolicies = xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true);
 
         double totalMultiplier = 1.0;
         int baseXp = 0;
         List<String> appliedPolicies = new ArrayList<>();
+        boolean primaryBaseXpSet = false;
 
         for (XpPolicy policy : activePolicies) {
             if (matchesPolicy(policy, userId)) {
-                baseXp += policy.getBaseXp();
+                if (!primaryBaseXpSet) {
+                    baseXp += policy.getBaseXp();
+                    primaryBaseXpSet = true;
+                }
                 totalMultiplier *= policy.getMultiplier();
                 appliedPolicies.add(policy.getCode());
             }
@@ -637,11 +682,56 @@ public class XpServiceImpl implements XpService {
     }
 
     @Override
+    public XpCalculationResult calculateXpForEvent(UUID userId, Map<String, Object> context, XpService.XpSourceType sourceType) {
+        List<XpPolicy> activePolicies = xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true);
+
+        XpPolicy primaryPolicy = null;
+        double totalMultiplier = 1.0;
+        PolicyType basePolicyType = sourceType.getBasePolicyType();
+
+        for (XpPolicy policy : activePolicies) {
+            if (matchesPolicy(policy, userId)) {
+                if (primaryPolicy == null && (basePolicyType == null || policy.getPolicyType() == basePolicyType)) {
+                    primaryPolicy = policy;
+                }
+                totalMultiplier *= calculateMultiplierForPolicy(policy, context);
+            }
+        }
+
+        int baseXp;
+        if (sourceType == XpService.XpSourceType.GOAL && context.containsKey("goalEstimatedXp")) {
+            Object estimatedXpObj = context.get("goalEstimatedXp");
+            if (estimatedXpObj instanceof Number estimatedXpNumber) {
+                baseXp = estimatedXpNumber.intValue();
+            } else {
+                baseXp = 0;
+            }
+            if (baseXp <= 0 && primaryPolicy != null && primaryPolicy.getPolicyType() == PolicyType.GOAL_COMPLETION) {
+                baseXp = primaryPolicy.getBaseXp();
+            }
+        } else if (primaryPolicy != null) {
+            baseXp = primaryPolicy.getBaseXp();
+        } else {
+            baseXp = 0;
+        }
+
+        totalMultiplier = Math.min(totalMultiplier, 10.0);
+        int finalXp = (int) Math.round(baseXp * totalMultiplier);
+
+        return new XpCalculationResult(
+                primaryPolicy != null ? primaryPolicy.getId() : null,
+                baseXp,
+                totalMultiplier,
+                finalXp
+        );
+    }
+
+    @Override
     @Transactional
     public RewardResponse calculateReward(RewardCalculationRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId();
 
-        PolicyEvaluationResponse evaluation = evaluatePolicies(userId);
+        XpCalculationResult calculation = calculateXpForEvent(userId, Map.of(), XpSourceType.REWARD);
 
         return new RewardResponse(
                 null,
@@ -649,10 +739,10 @@ public class XpServiceImpl implements XpService {
                 request.rewardType(),
                 request.sourceType(),
                 request.sourceId(),
-                evaluation.calculatedXp(),
+                calculation.finalXp(),
                 null,
-                evaluation.multiplier(),
-                evaluation.baseXp(),
+                calculation.multiplier(),
+                calculation.baseXp(),
                 Instant.now(),
                 Map.of()
         );
@@ -661,37 +751,31 @@ public class XpServiceImpl implements XpService {
     @Override
     @Transactional
     public RewardResponse grantReward(UUID userId, UUID rewardId) {
-        XpAccount account = xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)
-                .orElseGet(() -> createDefaultAccount(userId));
+        XpCalculationResult calculation = calculateXpForEvent(userId, Map.of(), XpSourceType.REWARD);
 
-        int baseAmount = 10;
-        int balanceBefore = account.getCurrentXp();
-        int balanceAfter = balanceBefore + baseAmount;
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                TransactionType.BONUS,
+                calculation.finalXp(),
+                "xp-engine",
+                rewardId,
+                "REWARD",
+                "Reward granted",
+                Map.of()
+        );
 
-        XpTransaction transaction = new XpTransaction();
-        transaction.setUserId(userId);
-        transaction.setTransactionType(TransactionType.BONUS);
-        transaction.setAmount(baseAmount);
-        transaction.setBalanceAfter(balanceAfter);
-        transaction.setSourceEngine("xp-engine");
-        transaction.setSourceId(rewardId);
-        transaction.setSourceType("REWARD");
-        transaction.setReason("Reward granted");
-        xpTransactionRepository.save(transaction);
+        TransactionResponse transactionResponse = createTransactionInternal(userId, request,
+                calculation.primaryPolicyId(), calculation.multiplier(), calculation.baseXp());
 
         RewardHistory rewardHistory = new RewardHistory();
         rewardHistory.setUserId(userId);
         rewardHistory.setRewardType(com.thesystem.modules.xp.enums.RewardType.ADMIN);
         rewardHistory.setSourceType("REWARD");
         rewardHistory.setSourceId(rewardId);
-        rewardHistory.setXpAmount(baseAmount);
-        rewardHistory.setBaseAmount(baseAmount);
+        rewardHistory.setXpAmount(calculation.finalXp());
+        rewardHistory.setPolicyId(calculation.primaryPolicyId());
+        rewardHistory.setMultiplierApplied(calculation.multiplier());
+        rewardHistory.setBaseAmount(calculation.baseXp());
         rewardHistoryRepository.save(rewardHistory);
-
-        account.setCurrentXp(balanceAfter);
-        account.setTotalXpEarned(account.getTotalXpEarned() + baseAmount);
-        account.setLifetimeXp(account.getTotalXpEarned() - account.getTotalXpSpent());
-        xpAccountRepository.save(account);
 
         return new RewardResponse(
                 rewardHistory.getId(),
@@ -699,10 +783,10 @@ public class XpServiceImpl implements XpService {
                 "MANUAL",
                 "REWARD",
                 rewardId,
-                baseAmount,
-                null,
-                1.0,
-                baseAmount,
+                calculation.finalXp(),
+                calculation.primaryPolicyId(),
+                calculation.multiplier(),
+                calculation.baseXp(),
                 Instant.now(),
                 Map.of()
         );
@@ -739,7 +823,7 @@ public class XpServiceImpl implements XpService {
                 .orElse(new XpAccount());
 
         Instant now = Instant.now();
-        java.time.ZoneId zoneId = java.time.ZoneId.systemDefault();
+        java.time.ZoneId zoneId = userTimezoneResolver.resolveUserZoneId(userId);
         java.time.LocalDate today = java.time.LocalDate.now(zoneId);
         java.time.LocalDate weekStart = today.with(java.time.DayOfWeek.MONDAY);
         java.time.LocalDate monthStart = today.withDayOfMonth(1);
@@ -752,6 +836,12 @@ public class XpServiceImpl implements XpService {
         Integer weeklyXp = xpTransactionRepository.sumPositiveAmountByUserIdAndCreatedAtAfter(userId, weekStartInstant);
         Integer monthlyXp = xpTransactionRepository.sumPositiveAmountByUserIdAndCreatedAtAfter(userId, monthStartInstant);
 
+        long tasksCompleted = xpTransactionRepository.findByUserIdAndTransactionTypeAndDeletedAtIsNull(userId, TransactionType.TASK_COMPLETION)
+                .stream().map(XpTransaction::getSourceId).distinct().count();
+        long goalsCompleted = xpTransactionRepository.findByUserIdAndTransactionTypeAndDeletedAtIsNull(userId, TransactionType.GOAL_COMPLETION)
+                .stream().map(XpTransaction::getSourceId).distinct().count();
+        long achievementsUnlocked = userAchievementRepository.countByUserIdAndIsUnlockedAndDeletedAtIsNull(userId, true);
+
         return new StatisticsResponse(
                 dailyXp != null ? dailyXp : 0,
                 weeklyXp != null ? weeklyXp : 0,
@@ -759,9 +849,9 @@ public class XpServiceImpl implements XpService {
                 account.getLifetimeXp(),
                 account.getCurrentLevel(),
                 account.getLevelProgress(),
-                0,
-                0,
-                0,
+                (int) tasksCompleted,
+                (int) goalsCompleted,
+                (int) achievementsUnlocked,
                 Map.of(),
                 Map.of(),
                 Map.of(),
@@ -772,9 +862,11 @@ public class XpServiceImpl implements XpService {
     @Override
     @Transactional(readOnly = true)
     public LeaderboardResponse getLeaderboard(Pageable pageable) {
-        List<XpAccount> accounts = xpAccountRepository.findByDeletedAtIsNullOrderByLifetimeXpDesc();
+        List<XpAccount> allAccounts = xpAccountRepository.findByDeletedAtIsNullOrderByLifetimeXpDesc();
+        long totalElements = allAccounts.size();
 
-        List<LeaderboardEntry> entries = accounts.stream()
+        List<LeaderboardEntry> entries = allAccounts.stream()
+                .skip(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .map(a -> new LeaderboardEntry(
                         a.getUserId(),
@@ -785,6 +877,7 @@ public class XpServiceImpl implements XpService {
                 ))
                 .collect(Collectors.toList());
 
+        int rank = (int) pageable.getOffset() + 1;
         for (int i = 0; i < entries.size(); i++) {
             LeaderboardEntry entry = entries.get(i);
             entries.set(i, new LeaderboardEntry(
@@ -792,11 +885,14 @@ public class XpServiceImpl implements XpService {
                     entry.username(),
                     entry.currentXp(),
                     entry.currentLevel(),
-                    i + 1
+                    rank + i
             ));
         }
 
-        return new LeaderboardResponse(entries, 1, entries.size());
+        int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
+        if (totalPages == 0) totalPages = 1;
+
+        return new LeaderboardResponse(entries, totalPages, totalElements);
     }
 
     private long calculateXpForLevel(int level) {
@@ -815,7 +911,7 @@ public class XpServiceImpl implements XpService {
             context = Map.of();
         }
 
-        List<XpPolicy> activePolicies = xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true);
+        List<XpPolicy> activePolicies = xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true);
         double totalMultiplier = 1.0;
 
         for (XpPolicy policy : activePolicies) {

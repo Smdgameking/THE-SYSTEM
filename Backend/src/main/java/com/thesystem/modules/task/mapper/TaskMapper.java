@@ -27,6 +27,7 @@ public interface TaskMapper {
     @Mapping(target = "completionEvidence", source = "completionEvidence", qualifiedByName = "stringToMap")
     @Mapping(target = "executionState", source = "executionState", qualifiedByName = "stringToMap")
     @Mapping(target = "customMetadata", source = "customMetadata", qualifiedByName = "stringToMap")
+    @Mapping(target = "difficulty", source = "difficulty")
     TaskResponse toTaskResponse(Task task);
 
     @Mapping(target = "id", source = "id")

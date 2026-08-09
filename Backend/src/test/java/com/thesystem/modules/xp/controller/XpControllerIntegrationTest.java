@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -353,5 +354,21 @@ class XpControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/xp/policies/" + policyId))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void shouldGetUserAchievementReadOnly() throws Exception {
+        UUID userAchievementId = UUID.randomUUID();
+        UserAchievementResponse response = new UserAchievementResponse(
+                userAchievementId, UUID.randomUUID(), UUID.randomUUID(), "FIRST_TASK", "First Task",
+                AchievementCategory.TASK, 1, 1, true, Instant.now(), Map.of(), Instant.now()
+        );
+
+        Mockito.when(TestConfig.xpService.getUserAchievement(any(UUID.class), eq(userAchievementId))).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/xp/achievements/user/" + userAchievementId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.achievementCode").value("FIRST_TASK"));
     }
 }

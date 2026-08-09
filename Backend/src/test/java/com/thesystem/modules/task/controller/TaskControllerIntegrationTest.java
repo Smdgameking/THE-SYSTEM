@@ -73,14 +73,14 @@ class TaskControllerIntegrationTest {
         UUID taskId = UUID.randomUUID();
         CreateTaskRequest request = new CreateTaskRequest(
                 "Test Task", "Description", null, null,
-                TaskStatus.DRAFT, TaskPriority.NORMAL, "Category",
+                TaskStatus.DRAFT, TaskPriority.NORMAL, null, "Category",
                 TaskExecutionType.BOOLEAN, 60, Instant.now(), Instant.now().plusSeconds(3600), null,
                 List.of("tag1"), List.of(), "Notes", Map.of(), Map.of(), Map.of(),
                 TaskVisibility.PRIVATE
         );
         TaskResponse response = new TaskResponse(
                 taskId, UUID.randomUUID(), null, null, "Test Task", "Description",
-                TaskStatus.DRAFT, TaskPriority.NORMAL, "Category",
+                TaskStatus.DRAFT, TaskPriority.NORMAL, null, "Category",
                 TaskExecutionType.BOOLEAN, 60, null,
                 Instant.now(), Instant.now().plusSeconds(3600), null, null,
                 false, null, List.of("tag1"), List.of(), "Notes",
@@ -103,7 +103,7 @@ class TaskControllerIntegrationTest {
         UUID taskId = UUID.randomUUID();
         TaskResponse response = new TaskResponse(
                 taskId, UUID.randomUUID(), null, null, "Test Task", "Description",
-                TaskStatus.DRAFT, TaskPriority.NORMAL, "Category",
+                TaskStatus.DRAFT, TaskPriority.NORMAL, null, "Category",
                 TaskExecutionType.BOOLEAN, 60, null,
                 Instant.now(), Instant.now().plusSeconds(3600), null, null,
                 false, null, List.of(), List.of(), "Notes",
@@ -124,7 +124,7 @@ class TaskControllerIntegrationTest {
         UUID taskId = UUID.randomUUID();
         TaskResponse response = new TaskResponse(
                 taskId, UUID.randomUUID(), null, null, "Test Task", "Description",
-                TaskStatus.DRAFT, TaskPriority.NORMAL, "Category",
+                TaskStatus.DRAFT, TaskPriority.NORMAL, null, "Category",
                 TaskExecutionType.BOOLEAN, 60, null,
                 Instant.now(), Instant.now().plusSeconds(3600), null, null,
                 false, null, List.of(), List.of(), "Notes",
@@ -145,7 +145,7 @@ class TaskControllerIntegrationTest {
         UUID taskId = UUID.randomUUID();
         TaskResponse response = new TaskResponse(
                 taskId, UUID.randomUUID(), null, null, "Test Task", "Description",
-                TaskStatus.COMPLETED, TaskPriority.NORMAL, "Category",
+                TaskStatus.COMPLETED, TaskPriority.NORMAL, null, "Category",
                 TaskExecutionType.BOOLEAN, 60, null,
                 Instant.now(), Instant.now().plusSeconds(3600), Instant.now(), null,
                 false, null, List.of(), List.of(), "Notes",

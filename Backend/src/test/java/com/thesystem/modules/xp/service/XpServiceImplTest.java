@@ -1,15 +1,19 @@
 package com.thesystem.modules.xp.service;
 
 import com.thesystem.modules.xp.dto.achievement.AchievementResponse;
+import com.thesystem.modules.xp.dto.achievement.UserAchievementResponse;
 import com.thesystem.modules.xp.dto.level.ProgressResponse;
 import com.thesystem.modules.xp.dto.policy.PolicyEvaluationResponse;
 import com.thesystem.modules.xp.dto.statistics.LeaderboardEntry;
 import com.thesystem.modules.xp.dto.statistics.LeaderboardResponse;
 import com.thesystem.modules.xp.dto.statistics.StatisticsResponse;
+import com.thesystem.modules.xp.dto.reward.RewardHistoryResponse;
+import com.thesystem.modules.xp.dto.reward.RewardResponse;
 import com.thesystem.modules.xp.dto.transaction.TransactionCreateRequest;
 import com.thesystem.modules.xp.dto.transaction.TransactionResponse;
 import com.thesystem.modules.xp.dto.xpaccount.XpAccountResponse;
 import com.thesystem.modules.xp.entity.AchievementDefinition;
+import com.thesystem.modules.xp.entity.RewardHistory;
 import com.thesystem.modules.xp.entity.UserAchievement;
 import com.thesystem.modules.xp.entity.XpAccount;
 import com.thesystem.modules.xp.entity.XpPolicy;
@@ -22,6 +26,7 @@ import com.thesystem.modules.xp.events.AchievementUnlockedEvent;
 import com.thesystem.modules.xp.events.LevelUpEvent;
 import com.thesystem.modules.xp.events.XpAwardedEvent;
 import com.thesystem.modules.xp.events.XpRemovedEvent;
+import com.thesystem.modules.xp.exception.AchievementNotFoundException;
 import com.thesystem.modules.xp.exception.DuplicateTransactionException;
 import com.thesystem.modules.xp.exception.InvalidTransactionException;
 import com.thesystem.modules.xp.exception.LevelCalculationException;
@@ -47,6 +52,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +63,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -89,6 +97,9 @@ class XpServiceImplTest {
     @Mock
     private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
+    @Mock
+    private com.thesystem.modules.user.service.UserTimezoneResolver userTimezoneResolver;
+
     private XpServiceImpl xpService;
     private UUID userId;
     private UUID accountId;
@@ -100,7 +111,7 @@ class XpServiceImplTest {
                 xpAccountRepository, xpTransactionRepository,
                 achievementDefinitionRepository, userAchievementRepository,
                 xpPolicyRepository, rewardHistoryRepository,
-                xpMapper, objectMapper, eventPublisher
+                xpMapper, objectMapper, eventPublisher, userTimezoneResolver
         );
         userId = UUID.randomUUID();
         accountId = UUID.randomUUID();
@@ -538,7 +549,7 @@ class XpServiceImplTest {
 
     @Test
     void shouldReturnBaseEvaluationWithNoPolicies() {
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of());
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of());
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -551,7 +562,7 @@ class XpServiceImplTest {
     void shouldApplySingleActivePolicy() {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_BONUS", PolicyType.TASK_COMPLETION, 50, 1.5);
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -564,16 +575,18 @@ class XpServiceImplTest {
     @Test
     void shouldCombineMultiplePoliciesAndCapMultiplier() {
         XpPolicy policy1 = createXpPolicy(UUID.randomUUID(), "TASK_BONUS", PolicyType.TASK_COMPLETION, 50, 2.0);
+        policy1.setPriority(2);
         XpPolicy policy2 = createXpPolicy(UUID.randomUUID(), "STREAK_BONUS", PolicyType.STREAK_MULTIPLIER, 30, 5.0);
+        policy2.setPriority(1);
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy1, policy2));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy1, policy2));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
         assertThat(response).isNotNull();
-        assertThat(response.baseXp()).isEqualTo(80);
+        assertThat(response.baseXp()).isEqualTo(50);
         assertThat(response.multiplier()).isEqualTo(10.0);
-        assertThat(response.calculatedXp()).isEqualTo(800);
+        assertThat(response.calculatedXp()).isEqualTo(500);
     }
 
     @Test
@@ -583,7 +596,7 @@ class XpServiceImplTest {
         XpPolicy inactivePolicy = createXpPolicy(UUID.randomUUID(), "INACTIVE", PolicyType.TASK_COMPLETION, 50, 2.0);
         inactivePolicy.setIsActive(false);
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(activePolicy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(activePolicy));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -597,7 +610,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "NO_CONDITIONS", PolicyType.TASK_COMPLETION, 50, 1.5);
         policy.setConditions(null);
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -611,7 +624,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "EMPTY_CONDITIONS", PolicyType.TASK_COMPLETION, 50, 1.5);
         policy.setConditions("{}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -630,7 +643,7 @@ class XpServiceImplTest {
         account.setUserId(userId);
         account.setCurrentLevel(5);
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
         when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
@@ -649,7 +662,7 @@ class XpServiceImplTest {
         account.setUserId(userId);
         account.setCurrentLevel(3);
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
         when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
@@ -669,7 +682,7 @@ class XpServiceImplTest {
         account.setUserId(userId);
         account.setCurrentLevel(5);
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
         when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
@@ -688,7 +701,7 @@ class XpServiceImplTest {
         account.setUserId(userId);
         account.setCurrentLevel(5);
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
         when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
@@ -703,7 +716,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "ALLOWED", PolicyType.TASK_COMPLETION, 50, 1.5);
         policy.setConditions("{\"allowed_user_ids\": [\"" + userId + "\"]}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -717,7 +730,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "ALLOWED", PolicyType.TASK_COMPLETION, 50, 1.5);
         policy.setConditions("{\"allowed_user_ids\": [\"" + otherUserId + "\"]}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -731,7 +744,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "EXCLUDED", PolicyType.TASK_COMPLETION, 50, 1.5);
         policy.setConditions("{\"excluded_user_ids\": [\"" + UUID.randomUUID() + "\"]}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -744,7 +757,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "EXCLUDED", PolicyType.TASK_COMPLETION, 50, 1.5);
         policy.setConditions("{\"excluded_user_ids\": [\"" + userId + "\"]}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -758,7 +771,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "MALFORMED", PolicyType.TASK_COMPLETION, 50, 1.5);
         policy.setConditions("not valid json");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -772,7 +785,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "INVALID_TYPE", PolicyType.TASK_COMPLETION, 50, 1.5);
         policy.setConditions("{\"min_user_level\": \"five\"}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
 
@@ -787,7 +800,7 @@ class XpServiceImplTest {
 
     @Test
     void shouldReturnBaseMultiplierWithNoPolicies() {
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of());
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of());
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of());
 
@@ -799,7 +812,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
         policy.setConditions("{\"priority_multipliers\":{\"LOW\":1.0,\"NORMAL\":1.0,\"HIGH\":1.5,\"CRITICAL\":2.0}}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "HIGH"));
 
@@ -811,7 +824,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
         policy.setConditions("{\"priority_multipliers\":{\"LOW\":1.0,\"NORMAL\":1.0,\"HIGH\":1.5,\"CRITICAL\":2.0}}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "NORMAL"));
 
@@ -823,7 +836,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
         policy.setConditions("{\"priority_multipliers\":{\"LOW\":1.0,\"NORMAL\":1.0,\"HIGH\":1.5,\"CRITICAL\":2.0}}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "UNKNOWN"));
 
@@ -835,7 +848,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
         policy.setConditions("{\"difficulty_multipliers\":{\"EASY\":1.0,\"NORMAL\":1.25,\"HARD\":1.5,\"EXTREME\":2.0}}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskDifficulty", "HARD"));
 
@@ -847,7 +860,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
         policy.setConditions("{\"difficulty_multipliers\":{\"EASY\":1.0,\"NORMAL\":1.25,\"HARD\":1.5,\"EXTREME\":2.0}}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "NORMAL"));
 
@@ -859,7 +872,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
         policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("streak", 7));
 
@@ -871,7 +884,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
         policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("streak", 1));
 
@@ -883,7 +896,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
         policy.setConditions("{\"priority_multipliers\":{\"HIGH\":1.5},\"difficulty_multipliers\":{\"HARD\":1.5}}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "HIGH", "taskDifficulty", "HARD"));
 
@@ -895,7 +908,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 5.0);
         policy.setConditions("{\"priority_multipliers\":{\"HIGH\":2.0}}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("taskPriority", "HIGH"));
 
@@ -907,7 +920,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 2.5);
         policy.setConditions(null);
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of());
 
@@ -919,7 +932,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 2.5);
         policy.setConditions("not valid json");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of());
 
@@ -931,7 +944,7 @@ class XpServiceImplTest {
         XpPolicy policy = createXpPolicy(UUID.randomUUID(), "GOAL_COMPLETION", PolicyType.GOAL_COMPLETION, 100, 1.0);
         policy.setConditions("{\"difficulty_multipliers\":{\"EASY\":1.0,\"NORMAL\":1.25,\"HARD\":1.5,\"EXTREME\":2.0}}");
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(policy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
 
         double multiplier = xpService.calculatePolicyMultiplier(userId, Map.of("goalDifficulty", "HARD"));
 
@@ -951,7 +964,7 @@ class XpServiceImplTest {
         account.setUserId(userId);
         account.setCurrentLevel(5);
 
-        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNull(true)).thenReturn(List.of(matchingPolicy, nonMatchingPolicy));
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(matchingPolicy, nonMatchingPolicy));
         when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
 
         PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
@@ -959,6 +972,56 @@ class XpServiceImplTest {
         assertThat(response).isNotNull();
         assertThat(response.baseXp()).isEqualTo(50);
         assertThat(response.multiplier()).isEqualTo(1.5);
+    }
+
+    @Test
+    void shouldUsePrimaryPolicyBaseXpWhenMultiplePoliciesMatch() {
+        XpPolicy primaryPolicy = createXpPolicy(UUID.randomUUID(), "PRIMARY", PolicyType.TASK_COMPLETION, 50, 1.0);
+        primaryPolicy.setPriority(10);
+        XpPolicy secondaryPolicy = createXpPolicy(UUID.randomUUID(), "SECONDARY", PolicyType.TASK_COMPLETION, 30, 2.0);
+        secondaryPolicy.setPriority(5);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(primaryPolicy, secondaryPolicy));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(50);
+        assertThat(response.multiplier()).isEqualTo(2.0);
+        assertThat(response.calculatedXp()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldIgnoreBaseXpFromMultiplierOnlyPolicy() {
+        XpPolicy basePolicy = createXpPolicy(UUID.randomUUID(), "BASE", PolicyType.TASK_COMPLETION, 50, 1.0);
+        basePolicy.setPriority(10);
+        XpPolicy multiplierOnlyPolicy = createXpPolicy(UUID.randomUUID(), "MULTIPLIER_ONLY", PolicyType.STREAK_MULTIPLIER, 0, 2.0);
+        multiplierOnlyPolicy.setPriority(5);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(basePolicy, multiplierOnlyPolicy));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(50);
+        assertThat(response.multiplier()).isEqualTo(2.0);
+        assertThat(response.calculatedXp()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldUseHighestPriorityPolicyWhenSameBaseXp() {
+        XpPolicy highPriority = createXpPolicy(UUID.randomUUID(), "HIGH", PolicyType.TASK_COMPLETION, 100, 1.0);
+        highPriority.setPriority(10);
+        XpPolicy lowPriority = createXpPolicy(UUID.randomUUID(), "LOW", PolicyType.TASK_COMPLETION, 50, 1.0);
+        lowPriority.setPriority(1);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(highPriority, lowPriority));
+
+        PolicyEvaluationResponse response = xpService.evaluatePolicies(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.baseXp()).isEqualTo(100);
+        assertThat(response.multiplier()).isEqualTo(1.0);
     }
 
     // ========================
@@ -974,6 +1037,7 @@ class XpServiceImplTest {
         account.setCurrentLevel(3);
         account.setLevelProgress(50.0);
 
+        when(userTimezoneResolver.resolveUserZoneId(userId)).thenReturn(ZoneId.of("UTC"));
         when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
         when(xpTransactionRepository.sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), any(Instant.class))).thenReturn(100);
 
@@ -988,6 +1052,7 @@ class XpServiceImplTest {
 
     @Test
     void shouldReturnDefaultStatisticsWhenAccountNotFound() {
+        when(userTimezoneResolver.resolveUserZoneId(userId)).thenReturn(ZoneId.of("UTC"));
         when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
         when(xpTransactionRepository.sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), any(Instant.class))).thenReturn(null);
 
@@ -998,6 +1063,76 @@ class XpServiceImplTest {
         assertThat(stats.currentLevel()).isEqualTo(1);
         assertThat(stats.levelProgress()).isEqualTo(0);
         assertThat(stats.dailyXp()).isEqualTo(0);
+    }
+
+    // ========================
+    // Statistics timezone tests
+    // ========================
+
+    @Test
+    void shouldUseUserTimezoneForDailyBoundary() {
+        XpAccount account = new XpAccount();
+        account.setId(accountId);
+        account.setUserId(userId);
+        account.setLifetimeXp(500);
+        account.setCurrentLevel(3);
+        account.setLevelProgress(50.0);
+
+        when(userTimezoneResolver.resolveUserZoneId(userId)).thenReturn(ZoneId.of("Asia/Kolkata"));
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
+
+        StatisticsResponse stats = xpService.getStatistics();
+
+        assertThat(stats).isNotNull();
+        verify(xpTransactionRepository).sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), argThat(instant -> {
+            ZoneId zoneId = ZoneId.of("Asia/Kolkata");
+            LocalDate today = LocalDate.now(zoneId);
+            return instant.equals(today.atStartOfDay(zoneId).toInstant());
+        }));
+    }
+
+    @Test
+    void shouldUseUtcWhenUserTimezoneIsNull() {
+        XpAccount account = new XpAccount();
+        account.setId(accountId);
+        account.setUserId(userId);
+        account.setLifetimeXp(500);
+        account.setCurrentLevel(3);
+        account.setLevelProgress(50.0);
+
+        when(userTimezoneResolver.resolveUserZoneId(userId)).thenReturn(ZoneId.of("UTC"));
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
+
+        StatisticsResponse stats = xpService.getStatistics();
+
+        assertThat(stats).isNotNull();
+        verify(xpTransactionRepository).sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), argThat(instant -> {
+            ZoneId zoneId = ZoneId.of("UTC");
+            LocalDate today = LocalDate.now(zoneId);
+            return instant.equals(today.atStartOfDay(zoneId).toInstant());
+        }));
+    }
+
+    @Test
+    void shouldUseUtcWhenUserTimezoneIsInvalid() {
+        XpAccount account = new XpAccount();
+        account.setId(accountId);
+        account.setUserId(userId);
+        account.setLifetimeXp(500);
+        account.setCurrentLevel(3);
+        account.setLevelProgress(50.0);
+
+        when(userTimezoneResolver.resolveUserZoneId(userId)).thenReturn(ZoneId.of("UTC"));
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
+
+        StatisticsResponse stats = xpService.getStatistics();
+
+        assertThat(stats).isNotNull();
+        verify(xpTransactionRepository).sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), argThat(instant -> {
+            ZoneId zoneId = ZoneId.of("UTC");
+            LocalDate today = LocalDate.now(zoneId);
+            return instant.equals(today.atStartOfDay(zoneId).toInstant());
+        }));
     }
 
     // ========================
@@ -1060,6 +1195,342 @@ class XpServiceImplTest {
 
         assertThat(leaderboard.entries()).hasSize(1);
         assertThat(leaderboard.entries().get(0).username()).isEqualTo("User " + account.getUserId().toString().substring(0, 8));
+    }
+
+    // ========================
+    // calculateXpForEvent tests
+    // ========================
+
+    @Test
+    void shouldReturnBaseXpFromPrimaryPolicy() {
+        XpPolicy primaryPolicy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 25, 1.0);
+        primaryPolicy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(primaryPolicy));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.baseXp()).isEqualTo(25);
+        assertThat(result.finalXp()).isEqualTo(25);
+        assertThat(result.primaryPolicyId()).isEqualTo(primaryPolicy.getId());
+    }
+
+    @Test
+    void shouldApplyMultiplierFromPrimaryPolicy() {
+        XpPolicy primaryPolicy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 2.0);
+        primaryPolicy.setConditions("{\"priority_multipliers\":{\"HIGH\":2.0}}");
+        primaryPolicy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(primaryPolicy));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of("taskPriority", "HIGH"), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.baseXp()).isEqualTo(10);
+        assertThat(result.multiplier()).isEqualTo(4.0);
+        assertThat(result.finalXp()).isEqualTo(40);
+    }
+
+    @Test
+    void shouldCapMultiplierAtTenInEventCalculation() {
+        XpPolicy primaryPolicy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 5.0);
+        primaryPolicy.setConditions("{\"priority_multipliers\":{\"HIGH\":3.0}}");
+        primaryPolicy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(primaryPolicy));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of("taskPriority", "HIGH"), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.multiplier()).isEqualTo(10.0);
+        assertThat(result.finalXp()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldReturnZeroBaseXpWhenNoPoliciesMatch() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "MIN_LEVEL", PolicyType.TASK_COMPLETION, 50, 1.5);
+        policy.setConditions("{\"min_user_level\": 10}");
+
+        XpAccount account = new XpAccount();
+        account.setId(accountId);
+        account.setUserId(userId);
+        account.setCurrentLevel(1);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.baseXp()).isEqualTo(0);
+        assertThat(result.finalXp()).isEqualTo(0);
+        assertThat(result.primaryPolicyId()).isNull();
+    }
+
+    // ========================
+    // Source-aware policy selection tests
+    // ========================
+
+    @Test
+    void shouldSelectTaskCompletionPolicyForTaskSource() {
+        XpPolicy taskPolicy = createXpPolicy(UUID.randomUUID(), "TASK_XP", PolicyType.TASK_COMPLETION, 10, 1.0);
+        taskPolicy.setPriority(10);
+
+        XpPolicy bonusPolicy = createXpPolicy(UUID.randomUUID(), "BONUS_XP", PolicyType.BONUS, 50, 1.0);
+        bonusPolicy.setPriority(5);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(bonusPolicy, taskPolicy));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.primaryPolicyId()).isEqualTo(taskPolicy.getId());
+        assertThat(result.baseXp()).isEqualTo(10);
+    }
+
+    @Test
+    void shouldSelectBonusPolicyForRewardSource() {
+        XpPolicy taskPolicy = createXpPolicy(UUID.randomUUID(), "TASK_XP", PolicyType.TASK_COMPLETION, 10, 1.0);
+        taskPolicy.setPriority(10);
+
+        XpPolicy bonusPolicy = createXpPolicy(UUID.randomUUID(), "BONUS_XP", PolicyType.BONUS, 50, 1.0);
+        bonusPolicy.setPriority(5);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(bonusPolicy, taskPolicy));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.REWARD);
+
+        assertThat(result).isNotNull();
+        assertThat(result.primaryPolicyId()).isEqualTo(bonusPolicy.getId());
+        assertThat(result.baseXp()).isEqualTo(50);
+    }
+
+    @Test
+    void shouldIgnoreUnrelatedPolicyTypesForTaskSource() {
+        XpPolicy goalPolicy = createXpPolicy(UUID.randomUUID(), "GOAL_XP", PolicyType.GOAL_COMPLETION, 100, 1.0);
+        goalPolicy.setPriority(10);
+
+        XpPolicy bonusPolicy = createXpPolicy(UUID.randomUUID(), "BONUS_XP", PolicyType.BONUS, 50, 2.0);
+        bonusPolicy.setPriority(5);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(goalPolicy, bonusPolicy));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.primaryPolicyId()).isNull();
+        assertThat(result.baseXp()).isEqualTo(0);
+        assertThat(result.finalXp()).isEqualTo(0);
+    }
+
+    @Test
+    void shouldApplyMultipliersFromAllMatchingPoliciesRegardlessOfSource() {
+        XpPolicy taskPolicy = createXpPolicy(UUID.randomUUID(), "TASK_XP", PolicyType.TASK_COMPLETION, 10, 1.0);
+        taskPolicy.setConditions("{\"priority_multipliers\":{\"HIGH\":1.5}}");
+        taskPolicy.setPriority(10);
+
+        XpPolicy difficultyPolicy = createXpPolicy(UUID.randomUUID(), "DIFFICULTY_XP", PolicyType.DIFFICULTY_MULTIPLIER, 0, 2.0);
+        difficultyPolicy.setPriority(5);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(taskPolicy, difficultyPolicy));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of("taskPriority", "HIGH"), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.baseXp()).isEqualTo(10);
+        assertThat(result.multiplier()).isEqualTo(3.0);
+        assertThat(result.finalXp()).isEqualTo(30);
+    }
+
+    // ========================
+    // Goal estimatedXp tests
+    // ========================
+
+    @Test
+    void shouldUseGoalEstimatedXpWhenPositive() {
+        XpPolicy goalPolicy = createXpPolicy(UUID.randomUUID(), "GOAL_XP", PolicyType.GOAL_COMPLETION, 100, 1.0);
+        goalPolicy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(goalPolicy));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of("goalEstimatedXp", 250), XpService.XpSourceType.GOAL);
+
+        assertThat(result).isNotNull();
+        assertThat(result.baseXp()).isEqualTo(250);
+        assertThat(result.finalXp()).isEqualTo(250);
+    }
+
+    @Test
+    void shouldFallBackToGoalPolicyWhenEstimatedXpIsZero() {
+        XpPolicy goalPolicy = createXpPolicy(UUID.randomUUID(), "GOAL_XP", PolicyType.GOAL_COMPLETION, 100, 1.0);
+        goalPolicy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(goalPolicy));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of("goalEstimatedXp", 0), XpService.XpSourceType.GOAL);
+
+        assertThat(result).isNotNull();
+        assertThat(result.baseXp()).isEqualTo(100);
+        assertThat(result.finalXp()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldFallBackToGoalPolicyWhenEstimatedXpIsNegative() {
+        XpPolicy goalPolicy = createXpPolicy(UUID.randomUUID(), "GOAL_XP", PolicyType.GOAL_COMPLETION, 100, 1.0);
+        goalPolicy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(goalPolicy));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of("goalEstimatedXp", -10), XpService.XpSourceType.GOAL);
+
+        assertThat(result).isNotNull();
+        assertThat(result.baseXp()).isEqualTo(100);
+    }
+
+    // ========================
+    // Idempotency tests
+    // ========================
+
+    @Test
+    void shouldThrowOnSequentialDuplicateTransaction() {
+        XpTransaction existingTransaction = new XpTransaction();
+        existingTransaction.setId(transactionId);
+        existingTransaction.setUserId(userId);
+        existingTransaction.setSourceEngine("task-engine");
+        existingTransaction.setSourceId(UUID.randomUUID());
+        existingTransaction.setSourceType("TASK");
+
+        when(xpTransactionRepository.findBySourceEngineAndSourceIdAndSourceTypeAndDeletedAtIsNull(any(), any(), any()))
+                .thenReturn(Optional.of(existingTransaction));
+
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                TransactionType.TASK_COMPLETION, 10, "task-engine", UUID.randomUUID(), "TASK", "Completed task", null
+        );
+
+        assertThatThrownBy(() -> xpService.createTransaction(userId, request))
+                .isInstanceOf(DuplicateTransactionException.class);
+    }
+
+    // ========================
+    // Transaction audit fields tests
+    // ========================
+
+    @Test
+    void shouldPopulateAuditFieldsWhenCreatingTransaction() {
+        XpAccount account = new XpAccount();
+        account.setId(accountId);
+        account.setUserId(userId);
+        account.setCurrentXp(0);
+        account.setCurrentLevel(1);
+        account.setTotalXpEarned(0);
+        account.setTotalXpSpent(0);
+        account.setLifetimeXp(0);
+        account.setLevelProgress(0.0);
+
+        UUID policyId = UUID.randomUUID();
+
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(account));
+        when(xpTransactionRepository.findBySourceEngineAndSourceIdAndSourceTypeAndDeletedAtIsNull(any(), any(), any()))
+                .thenReturn(Optional.empty());
+        when(xpTransactionRepository.save(any(XpTransaction.class))).thenAnswer(invocation -> {
+            XpTransaction t = invocation.getArgument(0);
+            t.setId(transactionId);
+            return t;
+        });
+        when(xpMapper.toTransactionResponse(any(XpTransaction.class))).thenAnswer(invocation -> {
+            XpTransaction t = invocation.getArgument(0);
+            return new TransactionResponse(
+                    t.getId(), t.getUserId(), t.getTransactionType(), t.getAmount(),
+                    t.getBalanceAfter(), t.getSourceEngine(), t.getSourceId(),
+                    t.getSourceType(), t.getPolicyId(), t.getMultiplierApplied(),
+                    t.getBaseAmount(), t.getReason(), Map.of(), Instant.now()
+            );
+        });
+        when(xpAccountRepository.save(any(XpAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                TransactionType.TASK_COMPLETION, 100, "task", UUID.randomUUID(), "task", "Completed task", null
+        );
+
+        TransactionResponse response = xpService.createTransaction(userId, request, policyId, 1.5, 10);
+
+        assertThat(response).isNotNull();
+        assertThat(response.policyId()).isEqualTo(policyId);
+        assertThat(response.multiplierApplied()).isEqualTo(1.5);
+        assertThat(response.baseAmount()).isEqualTo(10);
+    }
+
+    // ========================
+    // Reward XP calculation tests
+    // ========================
+
+    @Test
+    void shouldCalculateRewardUsingPolicyEngine() {
+        XpPolicy rewardPolicy = createXpPolicy(UUID.randomUUID(), "REWARD_POLICY", PolicyType.BONUS, 50, 1.5);
+        rewardPolicy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(rewardPolicy));
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(new XpAccount()));
+        when(xpTransactionRepository.findBySourceEngineAndSourceIdAndSourceTypeAndDeletedAtIsNull(any(), any(), any()))
+                .thenReturn(Optional.empty());
+        when(xpTransactionRepository.save(any(XpTransaction.class))).thenAnswer(invocation -> {
+            XpTransaction t = invocation.getArgument(0);
+            t.setId(transactionId);
+            return t;
+        });
+        when(xpMapper.toTransactionResponse(any(XpTransaction.class))).thenAnswer(invocation -> {
+            XpTransaction t = invocation.getArgument(0);
+            return new TransactionResponse(
+                    t.getId(), t.getUserId(), t.getTransactionType(), t.getAmount(),
+                    t.getBalanceAfter(), t.getSourceEngine(), t.getSourceId(),
+                    t.getSourceType(), t.getPolicyId(), t.getMultiplierApplied(),
+                    t.getBaseAmount(), t.getReason(), Map.of(), Instant.now()
+            );
+        });
+        when(xpAccountRepository.save(any(XpAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(rewardHistoryRepository.save(any(RewardHistory.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        RewardResponse response = xpService.grantReward(userId, UUID.randomUUID());
+
+        assertThat(response).isNotNull();
+        assertThat(response.xpAmount()).isEqualTo(75);
+        assertThat(response.policyId()).isEqualTo(rewardPolicy.getId());
+        assertThat(response.multiplierApplied()).isEqualTo(1.5);
+        assertThat(response.baseAmount()).isEqualTo(50);
+    }
+
+    // ========================
+    // getUserAchievement read-only tests
+    // ========================
+
+    @Test
+    void shouldReturnUserAchievementWithoutMutation() {
+        UUID userAchievementId = UUID.randomUUID();
+        UserAchievement userAchievement = createUserAchievement(UUID.randomUUID(), userId, UUID.randomUUID(), true);
+        userAchievement.setId(userAchievementId);
+
+        when(userAchievementRepository.findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, userAchievementId))
+                .thenReturn(Optional.of(userAchievement));
+        when(achievementDefinitionRepository.findById(userAchievement.getAchievementId()))
+                .thenReturn(Optional.of(createAchievementDefinition(userAchievement.getAchievementId(), "TEST")));
+
+        UserAchievementResponse response = xpService.getUserAchievement(userId, userAchievementId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.isUnlocked()).isTrue();
+        verify(userAchievementRepository, never()).save(any(UserAchievement.class));
+        verify(eventPublisher, never()).publishEvent(any(AchievementUnlockedEvent.class));
+    }
+
+    @Test
+    void shouldThrowWhenUserAchievementNotFound() {
+        UUID missingId = UUID.randomUUID();
+        when(userAchievementRepository.findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, missingId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> xpService.getUserAchievement(userId, missingId))
+                .isInstanceOf(AchievementNotFoundException.class);
     }
 
     // ========================

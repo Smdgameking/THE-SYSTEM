@@ -4,6 +4,7 @@ import com.thesystem.modules.task.enums.TaskExecutionType;
 import com.thesystem.modules.task.enums.TaskPriority;
 import com.thesystem.modules.task.enums.TaskStatus;
 import com.thesystem.modules.task.enums.TaskVisibility;
+import com.thesystem.modules.task.enums.TaskDifficulty;
 import com.thesystem.shared.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,6 +50,10 @@ public class Task extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "execution_type")
     private TaskExecutionType executionType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "difficulty")
+    private TaskDifficulty difficulty;
 
     @Column(name = "category")
     private String category;
@@ -172,6 +177,14 @@ public class Task extends BaseEntity {
 
     public void setExecutionType(TaskExecutionType executionType) {
         this.executionType = executionType;
+    }
+
+    public TaskDifficulty getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(TaskDifficulty difficulty) {
+        this.difficulty = difficulty;
     }
 
     public String getCategory() {

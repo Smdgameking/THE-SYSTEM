@@ -18,6 +18,7 @@ import com.thesystem.modules.xp.dto.transaction.TransactionHistoryFilter;
 import com.thesystem.modules.xp.dto.transaction.TransactionResponse;
 import com.thesystem.modules.xp.dto.xpaccount.XpAccountCreateRequest;
 import com.thesystem.modules.xp.dto.xpaccount.XpAccountResponse;
+import com.thesystem.modules.xp.enums.PolicyType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -35,240 +36,111 @@ public interface XpService {
     // XP Account Operations
     // ========================
 
-    /**
-     * Retrieves the XP account for a given user.
-     *
-     * @param userId the unique identifier of the user
-     * @return the XP account details
-     */
     XpAccountResponse getAccount(UUID userId);
 
-    /**
-     * Creates a new XP account for the specified user.
-     *
-     * @param request the account creation request containing user details
-     * @return the created XP account details
-     */
     XpAccountResponse createAccount(XpAccountCreateRequest request);
 
     // ========================
     // XP Transaction Operations
     // ========================
 
-    /**
-     * Creates a new XP transaction for a user.
-     *
-     * @param request the transaction creation request
-     * @return the created transaction details
-     */
     TransactionResponse createTransaction(TransactionCreateRequest request);
 
     TransactionResponse createTransaction(UUID userId, TransactionCreateRequest request);
 
-    /**
-     * Calculates the effective policy multiplier for a user given context.
-     *
-     * @param userId  the unique identifier of the user
-     * @param context the context map containing attributes like taskPriority, taskDifficulty, executionType
-     * @return the effective multiplier (capped at 10.0)
-     */
+    TransactionResponse createTransaction(UUID userId, TransactionCreateRequest request, UUID policyId, Double multiplierApplied, Integer baseAmount);
+
     double calculatePolicyMultiplier(UUID userId, Map<String, Object> context);
 
-    /**
-     * Retrieves a specific transaction by its ID.
-     *
-     * @param transactionId the unique identifier of the transaction
-     * @param userId        the unique identifier of the requesting user
-     * @return the transaction details
-     */
+    record XpCalculationResult(UUID primaryPolicyId, int baseXp, double multiplier, int finalXp) {
+    }
+
+    XpCalculationResult calculateXpForEvent(UUID userId, Map<String, Object> context, XpSourceType sourceType);
+
     TransactionResponse getTransaction(UUID transactionId, UUID userId);
 
-    /**
-     * Lists transactions for a user with pagination.
-     *
-     * @param userId   the unique identifier of the user
-     * @param pageable pagination and sorting parameters
-     * @return a page of transaction details
-     */
     Page<TransactionResponse> listTransactions(UUID userId, Pageable pageable);
 
-    /**
-     * Retrieves the transaction history for a user based on filters.
-     *
-     * @param userId   the unique identifier of the user
-     * @param filters  the filters to apply to the history
-     * @return the filtered list of transactions
-     */
     List<TransactionResponse> getTransactionHistory(UUID userId, TransactionHistoryFilter filters);
 
     // ========================
     // Level System Operations
     // ========================
 
-    /**
-     * Calculates the level based on the given amount of XP.
-     *
-     * @param xp the amount of XP to evaluate
-     * @return the calculated level
-     */
     int calculateLevel(int xp);
 
-    /**
-     * Calculates the progress for a user towards the next level.
-     *
-     * @param userId the unique identifier of the user
-     * @return the progress details including current and next level thresholds
-     */
     ProgressResponse calculateProgress(UUID userId);
 
-    /**
-     * Retrieves detailed information about a specific level.
-     *
-     * @param level the level number to retrieve information for
-     * @return the level details including thresholds and rewards
-     */
     LevelInfo getLevelInfo(int level);
 
     // ========================
     // Achievement Operations
     // ========================
 
-    /**
-     * Retrieves all available achievements.
-     *
-     * @return a list of all achievement details
-     */
     List<AchievementResponse> getAllAchievements();
 
-    /**
-     * Retrieves a specific achievement by its ID.
-     *
-     * @param achievementId the unique identifier of the achievement
-     * @return the achievement details
-     */
     AchievementResponse getAchievement(UUID achievementId);
 
-    /**
-     * Retrieves all achievements unlocked by a specific user.
-     *
-     * @param userId the unique identifier of the user
-     * @return a list of the user's unlocked achievements
-     */
     List<UserAchievementResponse> getUserAchievements(UUID userId);
 
-    /**
-     * Evaluates and unlocks any achievements the user has earned.
-     *
-     * @param userId the unique identifier of the user
-     * @return a list of newly unlocked achievements
-     */
+    UserAchievementResponse getUserAchievement(UUID userId, UUID userAchievementId);
+
     List<AchievementResponse> checkAchievements(UUID userId);
 
-    /**
-     * Manually unlocks an achievement for a user.
-     *
-     * @param userId        the unique identifier of the user
-     * @param achievementId the unique identifier of the achievement to unlock
-     * @return the unlocked user achievement details
-     */
     UserAchievementResponse unlockAchievement(UUID userId, UUID achievementId);
 
     // ========================
     // Policy Operations
     // ========================
 
-    /**
-     * Retrieves all configured XP policies.
-     *
-     * @return a list of all policy details
-     */
     List<PolicyResponse> getAllPolicies();
 
-    /**
-     * Retrieves a specific policy by its ID.
-     *
-     * @param policyId the unique identifier of the policy
-     * @return the policy details
-     */
     PolicyResponse getPolicy(UUID policyId);
 
-    /**
-     * Creates a new XP policy.
-     *
-     * @param request the policy creation request
-     * @return the created policy details
-     */
     PolicyResponse createPolicy(PolicyRequest request);
 
-    /**
-     * Updates an existing XP policy.
-     *
-     * @param policyId the unique identifier of the policy to update
-     * @param request  the policy update request
-     * @return the updated policy details
-     */
     PolicyResponse updatePolicy(UUID policyId, PolicyRequest request);
 
-    /**
-     * Deletes an XP policy by its ID.
-     *
-     * @param policyId the unique identifier of the policy to delete
-     */
     void deletePolicy(UUID policyId);
 
-    /**
-     * Evaluates all active policies against a user's activity to determine applicable rewards.
-     *
-     * @param userId the unique identifier of the user
-     * @return the policy evaluation results
-     */
     PolicyEvaluationResponse evaluatePolicies(UUID userId);
 
     // ========================
     // Reward Operations
     // ========================
 
-    /**
-     * Calculates the reward for a user based on a specific action.
-     *
-     * @param request the reward calculation request containing user and action details
-     * @return the calculated reward details
-     */
     RewardResponse calculateReward(RewardCalculationRequest request);
 
-    /**
-     * Grants a reward to a user.
-     *
-     * @param userId  the unique identifier of the user
-     * @param rewardId the unique identifier of the reward to grant
-     * @return the granted reward details
-     */
     RewardResponse grantReward(UUID userId, UUID rewardId);
 
-    /**
-     * Retrieves the reward history for a user.
-     *
-     * @param userId the unique identifier of the user
-     * @return a list of the user's reward history
-     */
     List<RewardHistoryResponse> getRewardHistory(UUID userId);
 
     // ========================
     // Analytics Operations
     // ========================
 
-    /**
-     * Retrieves overall XP statistics.
-     *
-     * @return the aggregated statistics
-     */
     StatisticsResponse getStatistics();
 
-    /**
-     * Retrieves the XP leaderboard.
-     *
-     * @param pageable pagination and sorting parameters
-     * @return the leaderboard with ranked entries
-     */
     LeaderboardResponse getLeaderboard(Pageable pageable);
+
+    // ========================
+    // Source Type Mapping
+    // ========================
+
+    enum XpSourceType {
+        TASK(PolicyType.TASK_COMPLETION),
+        GOAL(PolicyType.GOAL_COMPLETION),
+        REWARD(PolicyType.BONUS),
+        MANUAL(null);
+
+        private final PolicyType basePolicyType;
+
+        XpSourceType(PolicyType basePolicyType) {
+            this.basePolicyType = basePolicyType;
+        }
+
+        public PolicyType getBasePolicyType() {
+            return basePolicyType;
+        }
+    }
 }

@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,6 +70,9 @@ class TaskServiceTest {
     @Mock
     private TaskExecutionProviderRegistry executionProviderRegistry;
 
+    @Mock
+    private com.thesystem.modules.user.service.UserTimezoneResolver userTimezoneResolver;
+
     private TaskServiceImpl taskService;
     private UUID userId;
     private UUID taskId;
@@ -79,7 +83,7 @@ class TaskServiceTest {
         taskService = new TaskServiceImpl(
                 taskRepository, taskDependencyRepository, taskTimeEntryRepository,
                 recurringTaskConfigRepository, taskMapper, new com.fasterxml.jackson.databind.ObjectMapper(),
-                eventPublisher, executionProviderRegistry
+                eventPublisher, executionProviderRegistry, userTimezoneResolver
         );
         userId = UUID.randomUUID();
         taskId = UUID.randomUUID();
@@ -97,7 +101,7 @@ class TaskServiceTest {
     private TaskResponse taskResponse(UUID id, String title, TaskStatus status) {
         return new TaskResponse(
                 id, userId, null, null, title, null, status,
-                TaskPriority.NORMAL, null, null, null, null,
+                TaskPriority.NORMAL, null, null, null, null, null,
                 null, null, null, null, false, null,
                 List.of(), List.of(), null, null, Map.of(), Map.of(), TaskVisibility.PRIVATE,
                 Instant.now(), Instant.now(), null, null, null
@@ -107,7 +111,7 @@ class TaskServiceTest {
     @Test
     void shouldCreateTaskSuccessfully() {
         CreateTaskRequest request = new CreateTaskRequest(
-                "New Task", "Description", null, null, null, TaskPriority.NORMAL,
+                "New Task", "Description", null, null, null, TaskPriority.NORMAL, null,
                 "Category", TaskExecutionType.BOOLEAN, 60, Instant.now(), Instant.now().plusSeconds(3600),
                 null, List.of(), List.of(), null, null, null, Map.of(), null
         );
@@ -164,7 +168,7 @@ class TaskServiceTest {
     @Test
     void shouldUpdateTaskSuccessfully() {
         UpdateTaskRequest request = new UpdateTaskRequest(
-                "Updated Title", null, null, null, null, TaskPriority.HIGH, null, null,
+                "Updated Title", null, null, null, null, TaskPriority.HIGH, null, null, null,
                 null, null, null, null, null, null, null, null, List.of(), List.of(), null,
                 null, null, null, null
         );
@@ -203,7 +207,7 @@ class TaskServiceTest {
 
         TaskResponse response = taskService.updateTask(userId, taskId, new UpdateTaskRequest(
                 null, null, null, null, TaskStatus.PENDING, null, null, null, null, null,
-                null, null, null, null, null, null, List.of(), List.of(), null,
+                null, null, null, null, null, null, null, List.of(), List.of(), null,
                 null, null, null, null
         ));
 
@@ -283,7 +287,7 @@ class TaskServiceTest {
     @Test
     void shouldCreateSubtaskSuccessfully() {
         CreateTaskRequest request = new CreateTaskRequest(
-                "Subtask", "Sub Description", null, taskId, null, TaskPriority.NORMAL,
+                "Subtask", "Sub Description", null, taskId, null, TaskPriority.NORMAL, null,
                 null, null, null, null, null, null, List.of(), List.of(), null, null, null, null, null
         );
         when(taskRepository.findByIdAndUserIdAndDeletedAtIsNull(taskId, userId)).thenReturn(Optional.of(task));

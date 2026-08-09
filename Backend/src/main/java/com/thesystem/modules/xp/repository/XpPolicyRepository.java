@@ -14,7 +14,7 @@ public interface XpPolicyRepository extends JpaRepository<XpPolicy, UUID> {
 
     List<XpPolicy> findByPolicyTypeAndIsActiveAndDeletedAtIsNull(PolicyType policyType, Boolean isActive);
 
-    List<XpPolicy> findByIsActiveAndDeletedAtIsNull(Boolean isActive);
+    List<XpPolicy> findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(Boolean isActive);
 
     List<XpPolicy> findByDeletedAtIsNullOrderByPriorityDesc();
 }

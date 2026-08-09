@@ -102,7 +102,7 @@ public class XpController {
     public ResponseEntity<ApiResponse<UserAchievementResponse>> getUserAchievement(
             @PathVariable @Parameter(description = "User Achievement ID") UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
-        UserAchievementResponse response = xpService.unlockAchievement(userId, id);
+        UserAchievementResponse response = xpService.getUserAchievement(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response, "User achievement retrieved successfully", UUID.randomUUID().toString()));
     }
 

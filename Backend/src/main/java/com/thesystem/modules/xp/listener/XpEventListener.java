@@ -19,7 +19,6 @@ import java.util.UUID;
 public class XpEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(XpEventListener.class);
-    private static final int TASK_COMPLETION_BASE_XP = 10;
 
     private final XpService xpService;
     private final TaskRepository taskRepository;
@@ -36,24 +35,31 @@ public class XpEventListener {
             UUID taskId = toUuid(event.taskId());
 
             String priority = "NORMAL";
+            String difficulty = null;
             if (taskId != null && userId != null) {
                 Task task = taskRepository.findByIdAndUserIdAndDeletedAtIsNull(taskId, userId).orElse(null);
-                if (task != null && task.getPriority() != null) {
-                    priority = task.getPriority().name();
+                if (task != null) {
+                    if (task.getPriority() != null) {
+                        priority = task.getPriority().name();
+                    }
+                    if (task.getDifficulty() != null) {
+                        difficulty = task.getDifficulty().name();
+                    }
                 }
             }
 
-            Map<String, Object> context = Map.of(
-                    "taskPriority", priority,
-                    "executionType", event.executionType() != null ? event.executionType() : "UNKNOWN"
-            );
+            java.util.Map<String, Object> context = new java.util.HashMap<>();
+            context.put("taskPriority", priority);
+            if (difficulty != null) {
+                context.put("taskDifficulty", difficulty);
+            }
+            context.put("executionType", event.executionType() != null ? event.executionType() : "UNKNOWN");
 
-            double multiplier = xpService.calculatePolicyMultiplier(userId, context);
-            int finalXp = (int) Math.round(TASK_COMPLETION_BASE_XP * multiplier);
+            XpService.XpCalculationResult calculation = xpService.calculateXpForEvent(userId, context, XpService.XpSourceType.TASK);
 
             TransactionCreateRequest request = new TransactionCreateRequest(
                     TransactionType.TASK_COMPLETION,
-                    finalXp,
+                    calculation.finalXp(),
                     "task-engine",
                     taskId,
                     "TASK",
@@ -61,7 +67,7 @@ public class XpEventListener {
                     context
             );
 
-            xpService.createTransaction(userId, request);
+            xpService.createTransaction(userId, request, calculation.primaryPolicyId(), calculation.multiplier(), calculation.baseXp());
         } catch (Exception e) {
             logger.error("Failed to award XP for task completion: {}", event, e);
         }
@@ -70,26 +76,28 @@ public class XpEventListener {
     @EventListener
     public void handleGoalCompleted(GoalCompletedEvent event) {
         try {
-            int baseXp = event.estimatedXp() > 0 ? event.estimatedXp() : 100;
+            UUID userId = event.userId();
+            UUID goalId = event.goalId();
 
-            Map<String, Object> context = Map.of(
-                    "goalDifficulty", "NORMAL"
-            );
+            java.util.Map<String, Object> context = new java.util.HashMap<>();
+            if (event.difficulty() != null) {
+                context.put("goalDifficulty", event.difficulty());
+            }
+            context.put("goalEstimatedXp", event.estimatedXp());
 
-            double multiplier = xpService.calculatePolicyMultiplier(event.userId(), context);
-            int finalXp = (int) Math.round(baseXp * multiplier);
+            XpService.XpCalculationResult calculation = xpService.calculateXpForEvent(userId, context, XpService.XpSourceType.GOAL);
 
             TransactionCreateRequest request = new TransactionCreateRequest(
                     TransactionType.GOAL_COMPLETION,
-                    finalXp,
+                    calculation.finalXp(),
                     "goal-engine",
-                    event.goalId(),
+                    goalId,
                     "GOAL",
                     "Goal completed",
                     context
             );
 
-            xpService.createTransaction(event.userId(), request);
+            xpService.createTransaction(userId, request, calculation.primaryPolicyId(), calculation.multiplier(), calculation.baseXp());
         } catch (Exception e) {
             logger.error("Failed to award XP for goal completion: {}", event, e);
         }

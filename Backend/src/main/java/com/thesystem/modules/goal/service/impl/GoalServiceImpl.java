@@ -217,7 +217,7 @@ public class GoalServiceImpl implements GoalService {
         goal.setCompletionPercentage(100.0);
         goal.setCurrentProgress(100);
         Goal saved = goalRepository.save(goal);
-        eventPublisher.publishEvent(new GoalCompletedEvent(saved.getId(), userId, saved.getEstimatedXp()));
+        eventPublisher.publishEvent(new GoalCompletedEvent(saved.getId(), userId, saved.getEstimatedXp(), saved.getDifficulty() != null ? saved.getDifficulty().name() : null));
         return goalMapper.toGoalResponse(saved);
     }
 

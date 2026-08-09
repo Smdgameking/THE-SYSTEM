@@ -18,6 +18,7 @@ import com.thesystem.modules.task.entity.TaskDependency;
 import com.thesystem.modules.task.entity.TaskTimeEntry;
 import com.thesystem.modules.task.enums.DependencyStatus;
 import com.thesystem.modules.task.enums.DependencyType;
+import com.thesystem.modules.task.enums.TaskDifficulty;
 import com.thesystem.modules.task.enums.TaskExecutionType;
 import com.thesystem.modules.task.enums.TaskPriority;
 import com.thesystem.modules.task.enums.TaskStatus;
@@ -32,6 +33,7 @@ import com.thesystem.modules.task.repository.TaskDependencyRepository;
 import com.thesystem.modules.task.repository.TaskRepository;
 import com.thesystem.modules.task.repository.TaskTimeEntryRepository;
 import com.thesystem.modules.task.service.TaskService;
+import com.thesystem.modules.user.service.UserTimezoneResolver;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +56,7 @@ public class TaskServiceImpl implements TaskService {
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
     private final TaskExecutionProviderRegistry executionProviderRegistry;
+    private final UserTimezoneResolver userTimezoneResolver;
 
     public TaskServiceImpl(
             TaskRepository taskRepository,
@@ -63,7 +66,8 @@ public class TaskServiceImpl implements TaskService {
             TaskMapper taskMapper,
             ObjectMapper objectMapper,
             ApplicationEventPublisher eventPublisher,
-            TaskExecutionProviderRegistry executionProviderRegistry
+            TaskExecutionProviderRegistry executionProviderRegistry,
+            UserTimezoneResolver userTimezoneResolver
     ) {
         this.taskRepository = taskRepository;
         this.taskDependencyRepository = taskDependencyRepository;
@@ -73,6 +77,7 @@ public class TaskServiceImpl implements TaskService {
         this.objectMapper = objectMapper;
         this.eventPublisher = eventPublisher;
         this.executionProviderRegistry = executionProviderRegistry;
+        this.userTimezoneResolver = userTimezoneResolver;
     }
 
     @Override
@@ -86,6 +91,7 @@ public class TaskServiceImpl implements TaskService {
         task.setParentTaskId(request.parentTaskId());
         task.setStatus(request.status() != null ? request.status() : TaskStatus.DRAFT);
         task.setPriority(request.priority() != null ? request.priority() : TaskPriority.NORMAL);
+        task.setDifficulty(request.difficulty() != null ? request.difficulty() : TaskDifficulty.NORMAL);
         task.setCategory(request.category());
         task.setExecutionType(request.executionType());
         task.setEstimatedDuration(request.estimatedDuration());
@@ -149,6 +155,7 @@ public class TaskServiceImpl implements TaskService {
         if (request.goalId() != null) task.setGoalId(request.goalId());
         if (request.parentTaskId() != null) task.setParentTaskId(request.parentTaskId());
         if (request.priority() != null) task.setPriority(request.priority());
+        if (request.difficulty() != null) task.setDifficulty(request.difficulty());
         if (request.category() != null) task.setCategory(request.category());
         if (request.executionType() != null) task.setExecutionType(request.executionType());
         if (request.estimatedDuration() != null) task.setEstimatedDuration(request.estimatedDuration());
@@ -192,7 +199,7 @@ public class TaskServiceImpl implements TaskService {
         task.setStatus(TaskStatus.COMPLETED);
         task.setCompletedDate(Instant.now());
         Task saved = taskRepository.save(task);
-        eventPublisher.publishEvent(new TaskCompletedEvent(toLong(saved.getId()), toLong(userId), toLong(saved.getGoalId()), saved.getTitle(), saved.getExecutionType() != null ? saved.getExecutionType().name() : null));
+        eventPublisher.publishEvent(new TaskCompletedEvent(toLong(saved.getId()), toLong(userId), toLong(saved.getGoalId()), saved.getTitle(), saved.getExecutionType() != null ? saved.getExecutionType().name() : null, saved.getDifficulty() != null ? saved.getDifficulty().name() : null));
         return taskMapper.toTaskResponse(saved);
     }
 
@@ -254,7 +261,7 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Parent task not found"));
         CreateTaskRequest subtaskRequest = new CreateTaskRequest(
                 request.title(), request.description(), request.goalId(), parentTaskId,
-                request.status(), request.priority(), request.category(), request.executionType(),
+                request.status(), request.priority(), request.difficulty(), request.category(), request.executionType(),
                 request.estimatedDuration(), request.startDate(), request.dueDate(), request.reminderDate(),
                 request.tags(), request.attachments(), request.notes(), request.completionEvidence(),
                 request.executionState(), request.customMetadata(), request.visibility()
@@ -427,12 +434,12 @@ public class TaskServiceImpl implements TaskService {
         List<TaskTimeEntry> allEntries = taskTimeEntryRepository.findByUserIdAndDeletedAtIsNull(userId);
         long focusTimeToday = allEntries.stream()
                 .filter(e -> e.getEndTime() != null)
-                .filter(e -> isToday(e.getEndTime()))
+                .filter(e -> isToday(e.getEndTime(), userId))
                 .mapToLong(e -> e.getDurationMinutes() != null ? e.getDurationMinutes() : 0)
                 .sum();
         long focusTimeWeek = allEntries.stream()
                 .filter(e -> e.getEndTime() != null)
-                .filter(e -> isThisWeek(e.getEndTime()))
+                .filter(e -> isThisWeek(e.getEndTime(), userId))
                 .mapToLong(e -> e.getDurationMinutes() != null ? e.getDurationMinutes() : 0)
                 .sum();
 
@@ -623,14 +630,16 @@ public class TaskServiceImpl implements TaskService {
         return uuid != null ? uuid.getMostSignificantBits() : null;
     }
 
-    private boolean isToday(Instant instant) {
-        LocalDate date = instant.atZone(ZoneId.systemDefault()).toLocalDate();
-        return date.equals(LocalDate.now());
+    private boolean isToday(Instant instant, UUID userId) {
+        ZoneId zoneId = userTimezoneResolver.resolveUserZoneId(userId);
+        LocalDate date = instant.atZone(zoneId).toLocalDate();
+        return date.equals(LocalDate.now(zoneId));
     }
 
-    private boolean isThisWeek(Instant instant) {
-        LocalDate date = instant.atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate now = LocalDate.now();
+    private boolean isThisWeek(Instant instant, UUID userId) {
+        ZoneId zoneId = userTimezoneResolver.resolveUserZoneId(userId);
+        LocalDate date = instant.atZone(zoneId).toLocalDate();
+        LocalDate now = LocalDate.now(zoneId);
         WeekFields weekFields = WeekFields.of(Locale.getDefault());
         return date.get(weekFields.weekOfYear()) == now.get(weekFields.weekOfYear()) &&
                date.get(weekFields.weekBasedYear()) == now.get(weekFields.weekBasedYear());

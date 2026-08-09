@@ -1112,6 +1112,107 @@ GET /api/v1/xp/leaderboard:
 
 ---
 
+## Streak Engine — Resolved Rules
+
+This section resolves all previously undefined streak rules and establishes the authoritative behavior for Streak Engine implementation.
+
+### 1. Streak Ownership
+
+* THE SYSTEM uses ONE unified, user-wide streak.
+* Tasks and goals both contribute to the same streak.
+* HABIT task `execution_state.streak` remains a separate per-task habit streak and must not be confused with the global user streak.
+
+### 2. Streak Freeze
+
+* No streak-freeze functionality in v1.
+* Do not create database fields, APIs, or policies for streak freezes yet.
+
+### 3. Manual Restoration
+
+* Users cannot manually restore their streak.
+* Administrators may restore a streak in a future/admin workflow.
+* Any future restoration must be auditable.
+* Do not implement the admin restoration workflow yet.
+
+### 4. Timezone Changes
+
+* `UserProfile.timezone` is the source of truth for determining activity dates.
+* Historical streak activity is NOT rewritten when a user changes timezone.
+* Existing historical records retain their originally calculated `activity_date`.
+* Future completion events use the user's new timezone.
+* If timezone is null or invalid, use UTC as the fallback.
+
+### 5. Minimum Daily Requirement
+
+* A calendar day is considered active when the user completes at least ONE qualifying activity.
+* A qualifying activity is:
+  * Task transitioning to COMPLETED
+  * Goal transitioning to COMPLETED
+* Multiple completions on the same day do not increase the streak by multiple days.
+* Failed, cancelled, deleted, progress-only, or manual XP activity does not qualify.
+
+### 6. Streak Break Behavior
+
+* A day with no qualifying activity is an inactive day.
+* An inactive day breaks the consecutive streak.
+* Failed or cancelled tasks do not directly reset the streak; they simply do not contribute activity.
+* If another qualifying task or goal is completed that day, the day remains active.
+
+### 7. Recurring / HABIT Task Behavior
+
+* Skipping a recurring/HABIT task does not have special global-streak behavior.
+* If the user completes another qualifying task or goal that day, the global streak continues.
+* If there is no qualifying activity that day, the global streak breaks.
+* Per-task HABIT streak behavior remains owned by the Task Engine.
+
+### 8. Streak History Source
+
+* Streak history is event-driven.
+* The Streak Engine maintains dedicated streak activity/history data.
+* Do NOT derive the authoritative streak state by scanning `xp_transactions`.
+* XP transactions and streak history are separate concerns.
+
+### 9. Day Boundary
+
+* Streaks use strict calendar days.
+* The day boundary is 00:00:00 in the user's configured timezone.
+* Do not introduce a grace period in v1.
+* Convert the completion event's `occurredAt` timestamp into the user's timezone before determining `activity_date`.
+
+### 10. Maximum Streak
+
+* There is NO maximum streak length.
+* `current_streak` and `longest_streak` can grow indefinitely within the database integer limits.
+* XP multiplier remains independently capped at the existing 10.0x policy cap.
+
+### Core Streak Semantics
+
+* First qualifying completion ever → current streak becomes 1.
+* Consecutive qualifying calendar days increment the streak by exactly 1 per active day.
+* A gap of one or more inactive calendar days breaks the current streak.
+* `longest_streak` records the historical maximum.
+* A new activity after a broken streak starts a new streak at 1.
+* Multiple task/goal completions on the same calendar day increase activity counts but do not increase the streak by more than one day.
+* Out-of-order events must use their original `occurredAt` timestamp rather than processing time. The exact recalculation behavior for out-of-order events is part of the future implementation contract.
+
+### Architectural Distinction
+
+**GLOBAL USER STREAK**
+
+* Owned by XP / Streak Engine.
+* One streak per user.
+* Task and goal completions contribute.
+
+**HABIT TASK STREAK**
+
+* Owned by Task Engine.
+* Per task.
+* Stored in task `execution_state`.
+* Used for habit/task-specific behavior.
+* Must not be treated as the user's global streak.
+
+---
+
 ## Appendix A: Glossary
 
 | Term | Definition |

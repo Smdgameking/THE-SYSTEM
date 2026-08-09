@@ -7,6 +7,7 @@ import com.thesystem.modules.task.enums.TaskPriority;
 import com.thesystem.modules.task.enums.TaskStatus;
 import com.thesystem.modules.task.enums.TaskVisibility;
 import com.thesystem.modules.task.enums.TaskTimeEntryType;
+import com.thesystem.modules.task.enums.TaskDifficulty;
 
 import java.time.Instant;
 import java.util.List;
@@ -22,6 +23,7 @@ public record TaskResponse(
         String description,
         TaskStatus status,
         TaskPriority priority,
+        TaskDifficulty difficulty,
         String category,
         TaskExecutionType executionType,
         Integer estimatedDuration,

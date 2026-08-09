@@ -40,55 +40,63 @@ class XpEventListenerTest {
     void shouldAwardXpForTaskCompletionWithPolicyMultiplier() {
         Long taskId = 123L;
         Long userId = 456L;
-        TaskCompletedEvent event = new TaskCompletedEvent(taskId, userId, null, "Test Task", "MANUAL");
+        TaskCompletedEvent event = new TaskCompletedEvent(taskId, userId, null, "Test Task", "MANUAL", null);
 
-        when(xpService.calculatePolicyMultiplier(any(UUID.class), any())).thenReturn(1.5);
+        XpService.XpCalculationResult calculation = new XpService.XpCalculationResult(
+                UUID.randomUUID(), 10, 1.5, 15);
+        when(xpService.calculateXpForEvent(any(UUID.class), any(), eq(XpService.XpSourceType.TASK))).thenReturn(calculation);
         when(taskRepository.findByIdAndUserIdAndDeletedAtIsNull(any(UUID.class), any(UUID.class))).thenReturn(java.util.Optional.empty());
 
         listener.handleTaskCompleted(event);
 
-        verify(xpService).calculatePolicyMultiplier(any(UUID.class), any());
-        verify(xpService).createTransaction(any(UUID.class), any(TransactionCreateRequest.class));
+        verify(xpService).calculateXpForEvent(any(UUID.class), any(), eq(XpService.XpSourceType.TASK));
+        verify(xpService).createTransaction(any(UUID.class), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
     }
 
     @Test
     void shouldApplyBaseXpWhenNoPoliciesMatch() {
         Long taskId = 123L;
         Long userId = 456L;
-        TaskCompletedEvent event = new TaskCompletedEvent(taskId, userId, null, "Test Task", "MANUAL");
+        TaskCompletedEvent event = new TaskCompletedEvent(taskId, userId, null, "Test Task", "MANUAL", null);
 
-        when(xpService.calculatePolicyMultiplier(any(UUID.class), any())).thenReturn(1.0);
+        XpService.XpCalculationResult calculation = new XpService.XpCalculationResult(
+                UUID.randomUUID(), 10, 1.0, 10);
+        when(xpService.calculateXpForEvent(any(UUID.class), any(), eq(XpService.XpSourceType.TASK))).thenReturn(calculation);
         when(taskRepository.findByIdAndUserIdAndDeletedAtIsNull(any(UUID.class), any(UUID.class))).thenReturn(java.util.Optional.empty());
 
         listener.handleTaskCompleted(event);
 
-        verify(xpService).createTransaction(any(UUID.class), any(TransactionCreateRequest.class));
+        verify(xpService).createTransaction(any(UUID.class), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
     }
 
     @Test
     void shouldAwardXpForGoalCompletion() {
         UUID goalId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        GoalCompletedEvent event = new GoalCompletedEvent(goalId, userId, 100);
+        GoalCompletedEvent event = new GoalCompletedEvent(goalId, userId, 100, "HARD");
 
-        when(xpService.calculatePolicyMultiplier(eq(userId), any())).thenReturn(1.0);
+        XpService.XpCalculationResult calculation = new XpService.XpCalculationResult(
+                UUID.randomUUID(), 100, 1.0, 100);
+        when(xpService.calculateXpForEvent(eq(userId), any(), eq(XpService.XpSourceType.GOAL))).thenReturn(calculation);
 
         listener.handleGoalCompleted(event);
 
-        verify(xpService).calculatePolicyMultiplier(eq(userId), any());
-        verify(xpService).createTransaction(eq(userId), any(TransactionCreateRequest.class));
+        verify(xpService).calculateXpForEvent(eq(userId), any(), eq(XpService.XpSourceType.GOAL));
+        verify(xpService).createTransaction(eq(userId), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
     }
 
     @Test
     void shouldUseDefaultXpWhenGoalEstimatedXpIsZero() {
         UUID goalId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        GoalCompletedEvent event = new GoalCompletedEvent(goalId, userId, 0);
+        GoalCompletedEvent event = new GoalCompletedEvent(goalId, userId, 0, "NORMAL");
 
-        when(xpService.calculatePolicyMultiplier(eq(userId), any())).thenReturn(1.0);
+        XpService.XpCalculationResult calculation = new XpService.XpCalculationResult(
+                UUID.randomUUID(), 100, 1.0, 100);
+        when(xpService.calculateXpForEvent(eq(userId), any(), eq(XpService.XpSourceType.GOAL))).thenReturn(calculation);
 
         listener.handleGoalCompleted(event);
 
-        verify(xpService).createTransaction(eq(userId), any(TransactionCreateRequest.class));
+        verify(xpService).createTransaction(eq(userId), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
     }
 }
