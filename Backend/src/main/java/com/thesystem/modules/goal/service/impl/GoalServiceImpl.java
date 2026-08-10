@@ -213,11 +213,12 @@ public class GoalServiceImpl implements GoalService {
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Goal not found"));
         validateTransition(goal.getStatus(), GoalStatus.COMPLETED);
         goal.setStatus(GoalStatus.COMPLETED);
-        goal.setCompletedDate(Instant.now());
+        Instant completedAt = Instant.now();
+        goal.setCompletedDate(completedAt);
         goal.setCompletionPercentage(100.0);
         goal.setCurrentProgress(100);
         Goal saved = goalRepository.save(goal);
-        eventPublisher.publishEvent(new GoalCompletedEvent(saved.getId(), userId, saved.getEstimatedXp(), saved.getDifficulty() != null ? saved.getDifficulty().name() : null));
+        eventPublisher.publishEvent(new GoalCompletedEvent(saved.getId(), userId, saved.getEstimatedXp(), saved.getDifficulty() != null ? saved.getDifficulty().name() : null, completedAt));
         return goalMapper.toGoalResponse(saved);
     }
 

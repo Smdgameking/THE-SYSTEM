@@ -50,6 +50,7 @@ import com.thesystem.modules.xp.mapper.XpMapper;
 import com.thesystem.modules.xp.repository.AchievementDefinitionRepository;
 import com.thesystem.modules.xp.repository.RewardHistoryRepository;
 import com.thesystem.modules.xp.repository.UserAchievementRepository;
+import com.thesystem.modules.xp.repository.UserStreakRepository;
 import com.thesystem.modules.xp.repository.XpAccountRepository;
 import com.thesystem.modules.xp.repository.XpPolicyRepository;
 import com.thesystem.modules.xp.repository.XpTransactionRepository;
@@ -79,6 +80,7 @@ public class XpServiceImpl implements XpService {
     private final UserAchievementRepository userAchievementRepository;
     private final XpPolicyRepository xpPolicyRepository;
     private final RewardHistoryRepository rewardHistoryRepository;
+    private final UserStreakRepository userStreakRepository;
     private final XpMapper xpMapper;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
@@ -91,6 +93,7 @@ public class XpServiceImpl implements XpService {
             UserAchievementRepository userAchievementRepository,
             XpPolicyRepository xpPolicyRepository,
             RewardHistoryRepository rewardHistoryRepository,
+            UserStreakRepository userStreakRepository,
             XpMapper xpMapper,
             ObjectMapper objectMapper,
             ApplicationEventPublisher eventPublisher,
@@ -101,6 +104,7 @@ public class XpServiceImpl implements XpService {
         this.userAchievementRepository = userAchievementRepository;
         this.xpPolicyRepository = xpPolicyRepository;
         this.rewardHistoryRepository = rewardHistoryRepository;
+        this.userStreakRepository = userStreakRepository;
         this.xpMapper = xpMapper;
         this.objectMapper = objectMapper;
         this.eventPublisher = eventPublisher;
@@ -182,6 +186,7 @@ public class XpServiceImpl implements XpService {
         }
 
         XpTransaction transaction = new XpTransaction();
+        transaction.setId(UUID.randomUUID());
         transaction.setUserId(userId);
         transaction.setTransactionType(request.transactionType());
         transaction.setAmount(amount);
@@ -683,6 +688,23 @@ public class XpServiceImpl implements XpService {
 
     @Override
     public XpCalculationResult calculateXpForEvent(UUID userId, Map<String, Object> context, XpService.XpSourceType sourceType) {
+        Map<String, Object> mutableContext = new java.util.HashMap<>();
+        if (context != null) {
+            mutableContext.putAll(context);
+        }
+
+        int streakValue = 0;
+        if (userStreakRepository != null) {
+            var streakOptional = userStreakRepository.findByUserIdAndDeletedAtIsNull(userId);
+            if (streakOptional != null) {
+                var streak = streakOptional.orElse(null);
+                if (streak != null && streak.getCurrentStreak() != null) {
+                    streakValue = streak.getCurrentStreak();
+                }
+            }
+        }
+        mutableContext.put("streak", streakValue);
+
         List<XpPolicy> activePolicies = xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true);
 
         XpPolicy primaryPolicy = null;
@@ -694,13 +716,13 @@ public class XpServiceImpl implements XpService {
                 if (primaryPolicy == null && (basePolicyType == null || policy.getPolicyType() == basePolicyType)) {
                     primaryPolicy = policy;
                 }
-                totalMultiplier *= calculateMultiplierForPolicy(policy, context);
+                totalMultiplier *= calculateMultiplierForPolicy(policy, mutableContext);
             }
         }
 
         int baseXp;
-        if (sourceType == XpService.XpSourceType.GOAL && context.containsKey("goalEstimatedXp")) {
-            Object estimatedXpObj = context.get("goalEstimatedXp");
+        if (sourceType == XpService.XpSourceType.GOAL && mutableContext.containsKey("goalEstimatedXp")) {
+            Object estimatedXpObj = mutableContext.get("goalEstimatedXp");
             if (estimatedXpObj instanceof Number estimatedXpNumber) {
                 baseXp = estimatedXpNumber.intValue();
             } else {

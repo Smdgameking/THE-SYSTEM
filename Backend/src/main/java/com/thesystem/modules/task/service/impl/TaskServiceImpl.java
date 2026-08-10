@@ -197,9 +197,10 @@ public class TaskServiceImpl implements TaskService {
         validateTransition(task.getStatus(), TaskStatus.COMPLETED);
         validateSubtasksCompleted(taskId, userId);
         task.setStatus(TaskStatus.COMPLETED);
-        task.setCompletedDate(Instant.now());
+        Instant completedAt = Instant.now();
+        task.setCompletedDate(completedAt);
         Task saved = taskRepository.save(task);
-        eventPublisher.publishEvent(new TaskCompletedEvent(toLong(saved.getId()), toLong(userId), toLong(saved.getGoalId()), saved.getTitle(), saved.getExecutionType() != null ? saved.getExecutionType().name() : null, saved.getDifficulty() != null ? saved.getDifficulty().name() : null));
+        eventPublisher.publishEvent(new TaskCompletedEvent(saved.getId(), userId, saved.getGoalId(), saved.getTitle(), saved.getExecutionType() != null ? saved.getExecutionType().name() : null, saved.getDifficulty() != null ? saved.getDifficulty().name() : null, completedAt));
         return taskMapper.toTaskResponse(saved);
     }
 

@@ -31,6 +31,7 @@ import com.thesystem.modules.goal.events.GoalProgressUpdatedEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
@@ -163,7 +164,8 @@ class GoalServiceUnitTest {
         goal.setId(goalId);
         goal.setStatus(GoalStatus.ACTIVE);
         when(goalRepository.findByIdAndUserIdAndDeletedAtIsNull(goalId, userId)).thenReturn(Optional.of(goal));
-        when(goalRepository.save(any(Goal.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        ArgumentCaptor<Goal> goalCaptor = ArgumentCaptor.forClass(Goal.class);
+        when(goalRepository.save(goalCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0));
         when(goalMapper.toGoalResponse(any(Goal.class))).thenReturn(new GoalResponse(
                 goalId, userId, "Test Goal", "Description", "Category",
                 GoalPriority.NORMAL, GoalDifficulty.EASY, GoalStatus.COMPLETED, GoalVisibility.PRIVATE,
@@ -175,7 +177,17 @@ class GoalServiceUnitTest {
 
         assertThat(response).isNotNull();
         assertThat(response.status()).isEqualTo(GoalStatus.COMPLETED);
-        verify(eventPublisher).publishEvent(any(GoalCompletedEvent.class));
+
+        Goal savedGoal = goalCaptor.getValue();
+        assertThat(savedGoal.getStatus()).isEqualTo(GoalStatus.COMPLETED);
+        assertThat(savedGoal.getCompletedDate()).isNotNull();
+
+        ArgumentCaptor<GoalCompletedEvent> eventCaptor = ArgumentCaptor.forClass(GoalCompletedEvent.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        GoalCompletedEvent publishedEvent = eventCaptor.getValue();
+        assertThat(publishedEvent.goalId()).isEqualTo(goalId);
+        assertThat(publishedEvent.userId()).isEqualTo(userId);
+        assertThat(publishedEvent.occurredAt()).isEqualTo(savedGoal.getCompletedDate());
     }
 
     @Test

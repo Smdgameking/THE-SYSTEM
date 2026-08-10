@@ -38,8 +38,8 @@ class XpEventListenerTest {
 
     @Test
     void shouldAwardXpForTaskCompletionWithPolicyMultiplier() {
-        Long taskId = 123L;
-        Long userId = 456L;
+        UUID taskId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         TaskCompletedEvent event = new TaskCompletedEvent(taskId, userId, null, "Test Task", "MANUAL", null);
 
         XpService.XpCalculationResult calculation = new XpService.XpCalculationResult(
@@ -55,8 +55,8 @@ class XpEventListenerTest {
 
     @Test
     void shouldApplyBaseXpWhenNoPoliciesMatch() {
-        Long taskId = 123L;
-        Long userId = 456L;
+        UUID taskId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         TaskCompletedEvent event = new TaskCompletedEvent(taskId, userId, null, "Test Task", "MANUAL", null);
 
         XpService.XpCalculationResult calculation = new XpService.XpCalculationResult(

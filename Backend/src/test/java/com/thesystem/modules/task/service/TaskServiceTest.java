@@ -218,18 +218,24 @@ class TaskServiceTest {
     void shouldTransitionFromInProgressToCompleted() {
         task.setStatus(TaskStatus.IN_PROGRESS);
         when(taskRepository.findByIdAndUserIdAndDeletedAtIsNull(taskId, userId)).thenReturn(Optional.of(task));
-        when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> {
-            Task t = invocation.getArgument(0);
-            t.setStatus(TaskStatus.COMPLETED);
-            t.setCompletedDate(Instant.now());
-            return t;
-        });
+        ArgumentCaptor<Task> taskCaptor = ArgumentCaptor.forClass(Task.class);
+        when(taskRepository.save(taskCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0));
         when(taskMapper.toTaskResponse(any(Task.class))).thenReturn(taskResponse(taskId, "Test Task", TaskStatus.COMPLETED));
 
         TaskResponse response = taskService.completeTask(userId, taskId);
 
         assertThat(response.status()).isEqualTo(TaskStatus.COMPLETED);
-        verify(eventPublisher).publishEvent(any(TaskCompletedEvent.class));
+
+        Task savedTask = taskCaptor.getValue();
+        assertThat(savedTask.getStatus()).isEqualTo(TaskStatus.COMPLETED);
+        assertThat(savedTask.getCompletedDate()).isNotNull();
+
+        ArgumentCaptor<TaskCompletedEvent> eventCaptor = ArgumentCaptor.forClass(TaskCompletedEvent.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        TaskCompletedEvent publishedEvent = eventCaptor.getValue();
+        assertThat(publishedEvent.taskId()).isEqualTo(taskId);
+        assertThat(publishedEvent.userId()).isEqualTo(userId);
+        assertThat(publishedEvent.occurredAt()).isEqualTo(savedTask.getCompletedDate());
     }
 
     @Test

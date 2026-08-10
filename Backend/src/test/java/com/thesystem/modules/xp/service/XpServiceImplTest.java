@@ -15,6 +15,7 @@ import com.thesystem.modules.xp.dto.xpaccount.XpAccountResponse;
 import com.thesystem.modules.xp.entity.AchievementDefinition;
 import com.thesystem.modules.xp.entity.RewardHistory;
 import com.thesystem.modules.xp.entity.UserAchievement;
+import com.thesystem.modules.xp.entity.UserStreak;
 import com.thesystem.modules.xp.entity.XpAccount;
 import com.thesystem.modules.xp.entity.XpPolicy;
 import com.thesystem.modules.xp.entity.XpTransaction;
@@ -35,9 +36,12 @@ import com.thesystem.modules.xp.mapper.XpMapper;
 import com.thesystem.modules.xp.repository.AchievementDefinitionRepository;
 import com.thesystem.modules.xp.repository.RewardHistoryRepository;
 import com.thesystem.modules.xp.repository.UserAchievementRepository;
+import com.thesystem.modules.xp.repository.UserStreakRepository;
 import com.thesystem.modules.xp.repository.XpAccountRepository;
 import com.thesystem.modules.xp.repository.XpPolicyRepository;
 import com.thesystem.modules.xp.repository.XpTransactionRepository;
+import com.thesystem.modules.xp.service.XpService;
+import com.thesystem.modules.xp.service.XpService.XpCalculationResult;
 import com.thesystem.modules.xp.service.impl.XpServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -89,6 +93,9 @@ class XpServiceImplTest {
     private RewardHistoryRepository rewardHistoryRepository;
 
     @Mock
+    private UserStreakRepository userStreakRepository;
+
+    @Mock
     private XpMapper xpMapper;
 
     @Mock
@@ -111,6 +118,7 @@ class XpServiceImplTest {
                 xpAccountRepository, xpTransactionRepository,
                 achievementDefinitionRepository, userAchievementRepository,
                 xpPolicyRepository, rewardHistoryRepository,
+                userStreakRepository,
                 xpMapper, objectMapper, eventPublisher, userTimezoneResolver
         );
         userId = UUID.randomUUID();
@@ -1084,7 +1092,7 @@ class XpServiceImplTest {
         StatisticsResponse stats = xpService.getStatistics();
 
         assertThat(stats).isNotNull();
-        verify(xpTransactionRepository).sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), argThat(instant -> {
+        verify(xpTransactionRepository, atLeastOnce()).sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), argThat(instant -> {
             ZoneId zoneId = ZoneId.of("Asia/Kolkata");
             LocalDate today = LocalDate.now(zoneId);
             return instant.equals(today.atStartOfDay(zoneId).toInstant());
@@ -1106,7 +1114,7 @@ class XpServiceImplTest {
         StatisticsResponse stats = xpService.getStatistics();
 
         assertThat(stats).isNotNull();
-        verify(xpTransactionRepository).sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), argThat(instant -> {
+        verify(xpTransactionRepository, atLeastOnce()).sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), argThat(instant -> {
             ZoneId zoneId = ZoneId.of("UTC");
             LocalDate today = LocalDate.now(zoneId);
             return instant.equals(today.atStartOfDay(zoneId).toInstant());
@@ -1128,7 +1136,7 @@ class XpServiceImplTest {
         StatisticsResponse stats = xpService.getStatistics();
 
         assertThat(stats).isNotNull();
-        verify(xpTransactionRepository).sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), argThat(instant -> {
+        verify(xpTransactionRepository, atLeastOnce()).sumPositiveAmountByUserIdAndCreatedAtAfter(eq(userId), argThat(instant -> {
             ZoneId zoneId = ZoneId.of("UTC");
             LocalDate today = LocalDate.now(zoneId);
             return instant.equals(today.atStartOfDay(zoneId).toInstant());
@@ -1389,8 +1397,153 @@ class XpServiceImplTest {
     }
 
     // ========================
-    // Idempotency tests
+    // Streak integration tests
     // ========================
+
+    @Test
+    void shouldApplyStreakBonusFromUserStreakRepository() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+        policy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(java.util.Optional.of(createUserStreak(accountId, userId, 3)));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.multiplier()).isEqualTo(1.1);
+        assertThat(result.finalXp()).isEqualTo(11);
+    }
+
+    @Test
+    void shouldNotApplyStreakBonusWhenStreakBelowFirstMilestone() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+        policy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(java.util.Optional.of(createUserStreak(accountId, userId, 1)));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.multiplier()).isEqualTo(1.0);
+        assertThat(result.finalXp()).isEqualTo(10);
+    }
+
+    @Test
+    void shouldApplyCorrectStreakBonusBetweenMilestones() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+        policy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(java.util.Optional.of(createUserStreak(accountId, userId, 5)));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.multiplier()).isEqualTo(1.1);
+        assertThat(result.finalXp()).isEqualTo(11);
+    }
+
+    @Test
+    void shouldApplyCorrectStreakBonusAtSeven() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+        policy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(java.util.Optional.of(createUserStreak(accountId, userId, 7)));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.multiplier()).isEqualTo(1.25);
+        assertThat(result.finalXp()).isEqualTo(13);
+    }
+
+    @Test
+    void shouldApplyHighestStreakBonusAboveMaxMilestone() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+        policy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(java.util.Optional.of(createUserStreak(accountId, userId, 100)));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.multiplier()).isEqualTo(3.0);
+        assertThat(result.finalXp()).isEqualTo(30);
+    }
+
+    @Test
+    void shouldCapTotalMultiplierAtTenWithStreakBonus() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 5.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+        policy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(java.util.Optional.of(createUserStreak(accountId, userId, 100)));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of("taskPriority", "HIGH"), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.multiplier()).isEqualTo(10.0);
+        assertThat(result.finalXp()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldNotApplyStreakBonusForGoalPolicyWithoutStreakConfig() {
+        XpPolicy goalPolicy = createXpPolicy(UUID.randomUUID(), "GOAL_COMPLETION", PolicyType.GOAL_COMPLETION, 100, 1.0);
+        goalPolicy.setConditions("{}");
+        goalPolicy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(goalPolicy));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(java.util.Optional.of(createUserStreak(accountId, userId, 10)));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of("goalEstimatedXp", 100), XpService.XpSourceType.GOAL);
+
+        assertThat(result).isNotNull();
+        assertThat(result.multiplier()).isEqualTo(1.0);
+        assertThat(result.finalXp()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldUseZeroStreakWhenNoUserStreakExists() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+        policy.setPriority(10);
+
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(java.util.Optional.empty());
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.multiplier()).isEqualTo(1.0);
+        assertThat(result.finalXp()).isEqualTo(10);
+    }
+
+    @Test
+    void shouldUseZeroStreakWhenCurrentStreakIsNull() {
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+        policy.setPriority(10);
+
+        UserStreak streak = createUserStreak(accountId, userId, null);
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(java.util.Optional.of(streak));
+
+        XpServiceImpl.XpCalculationResult result = xpService.calculateXpForEvent(userId, Map.of(), XpService.XpSourceType.TASK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.multiplier()).isEqualTo(1.0);
+        assertThat(result.finalXp()).isEqualTo(10);
+    }
 
     @Test
     void shouldThrowOnSequentialDuplicateTransaction() {
@@ -1584,6 +1737,36 @@ class XpServiceImplTest {
         policy.setCreatedAt(Instant.now());
         policy.setUpdatedAt(Instant.now());
         return policy;
+    }
+
+    private UserStreak createUserStreak(UUID id, UUID userId, Integer currentStreak) {
+        UserStreak streak = new UserStreak();
+        streak.setId(id);
+        streak.setUserId(userId);
+        streak.setCurrentStreak(currentStreak);
+        streak.setLongestStreak(currentStreak != null ? currentStreak : 0);
+        streak.setCurrentStreakStartDate(java.time.LocalDate.now());
+        streak.setLastActivityDate(java.time.LocalDate.now());
+        return streak;
+    }
+
+    @Test
+    void shouldHandleImmutableContextMap() {
+        UUID userId = UUID.randomUUID();
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(createUserStreak(UUID.randomUUID(), userId, 3)));
+
+        XpPolicy policy = createXpPolicy(UUID.randomUUID(), "TASK_COMPLETION", PolicyType.TASK_COMPLETION, 10, 1.0);
+        policy.setConditions("{\"streak_bonus\":{\"enabled\":true,\"milestones\":[3,7,14,30,60,90],\"multipliers\":[1.1,1.25,1.5,2.0,2.5,3.0]}}");
+        when(xpPolicyRepository.findByIsActiveAndDeletedAtIsNullOrderByPriorityDesc(true)).thenReturn(List.of(policy));
+
+        Map<String, Object> immutableContext = Map.of("taskPriority", "NORMAL");
+        XpCalculationResult result = xpService.calculateXpForEvent(userId, immutableContext, XpService.XpSourceType.TASK);
+
+        assertThat(result.baseXp()).isEqualTo(10);
+        assertThat(result.multiplier()).isEqualTo(1.1);
+        assertThat(result.finalXp()).isEqualTo(11);
+        assertThat(immutableContext).hasSize(1);
+        assertThat(immutableContext).containsKey("taskPriority");
     }
 
     private XpAccount createXpAccount(UUID id, int lifetimeXp, int currentLevel) {

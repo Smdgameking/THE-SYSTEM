@@ -9,6 +9,7 @@ import com.thesystem.modules.xp.enums.TransactionType;
 import com.thesystem.modules.xp.service.XpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Component
+@Order(2)
 public class XpEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(XpEventListener.class);
@@ -31,8 +33,8 @@ public class XpEventListener {
     @EventListener
     public void handleTaskCompleted(TaskCompletedEvent event) {
         try {
-            UUID userId = toUuid(event.userId());
-            UUID taskId = toUuid(event.taskId());
+            UUID userId = event.userId();
+            UUID taskId = event.taskId();
 
             String priority = "NORMAL";
             String difficulty = null;
@@ -103,10 +105,4 @@ public class XpEventListener {
         }
     }
 
-    private UUID toUuid(Long value) {
-        if (value == null) {
-            return null;
-        }
-        return UUID.nameUUIDFromBytes(String.valueOf(value).getBytes(java.nio.charset.StandardCharsets.UTF_8));
-    }
 }

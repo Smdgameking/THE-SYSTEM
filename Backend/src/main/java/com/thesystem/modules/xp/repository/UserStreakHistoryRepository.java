@@ -16,7 +16,7 @@ public interface UserStreakHistoryRepository extends JpaRepository<UserStreakHis
     boolean existsBySourceEngineAndSourceIdAndSourceTypeAndDeletedAtIsNull(
             String sourceEngine, UUID sourceId, String sourceType);
 
-    List<UserStreakHistory> findByUserIdAndDeletedAtIsNullOrderByOccurredAtAsc(UUID userId);
+    List<UserStreakHistory> findByUserIdAndDeletedAtIsNullOrderByActivityDateAscOccurredAtAsc(UUID userId);
 
     List<UserStreakHistory> findByUserIdAndActivityDateAndDeletedAtIsNull(UUID userId, LocalDate activityDate);
 

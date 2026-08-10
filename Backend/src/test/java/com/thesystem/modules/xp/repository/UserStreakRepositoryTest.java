@@ -4,6 +4,7 @@ import com.thesystem.modules.xp.entity.UserStreak;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -11,6 +12,10 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@TestPropertySource(properties = {
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect"
+})
 class UserStreakRepositoryTest {
 
     @Autowired
@@ -20,6 +25,7 @@ class UserStreakRepositoryTest {
     void shouldSaveAndFindByUserId() {
         UUID userId = UUID.randomUUID();
         UserStreak streak = new UserStreak();
+        streak.setId(UUID.randomUUID());
         streak.setUserId(userId);
         streak.setCurrentStreak(5);
         streak.setLongestStreak(10);
@@ -36,6 +42,7 @@ class UserStreakRepositoryTest {
     void shouldExcludeSoftDeletedStreakFromActiveLookup() {
         UUID userId = UUID.randomUUID();
         UserStreak streak = new UserStreak();
+        streak.setId(UUID.randomUUID());
         streak.setUserId(userId);
         streak.setCurrentStreak(5);
         streak.setDeletedAt(java.time.Instant.now());
@@ -50,6 +57,7 @@ class UserStreakRepositoryTest {
     void shouldCheckExistenceByUserId() {
         UUID userId = UUID.randomUUID();
         UserStreak streak = new UserStreak();
+        streak.setId(UUID.randomUUID());
         streak.setUserId(userId);
 
         userStreakRepository.save(streak);
