@@ -551,6 +551,122 @@ class XpServiceImplTest {
         verify(userAchievementRepository).save(any(UserAchievement.class));
     }
 
+    @Test
+    void shouldReturnCurrentStreakCappedAtMilestone() {
+        AchievementDefinition definition = createStreakAchievementDefinition(UUID.randomUUID(), "STREAK_3", "current_streak", 3);
+        UserAchievement userAchievement = createUserAchievement(UUID.randomUUID(), userId, definition.getId(), false);
+        userAchievement.setTargetProgress(3);
+
+        when(achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc()).thenReturn(List.of(definition));
+        when(achievementDefinitionRepository.findById(definition.getId())).thenReturn(Optional.of(definition));
+        when(userAchievementRepository.findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId()))
+                .thenReturn(Optional.of(userAchievement));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(createUserStreak(UUID.randomUUID(), userId, 3)));
+        when(userAchievementRepository.save(any(UserAchievement.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<AchievementResponse> unlocked = xpService.checkAchievements(userId);
+
+        assertThat(unlocked).hasSize(1);
+        assertThat(unlocked.get(0).code()).isEqualTo("STREAK_3");
+        verify(userAchievementRepository).save(argThat(ua -> ua.getCurrentProgress() == 3 && ua.getIsUnlocked()));
+    }
+
+    @Test
+    void shouldReturnLongestStreakCappedAtMilestone() {
+        AchievementDefinition definition = createStreakAchievementDefinition(UUID.randomUUID(), "STREAK_7", "longest_streak", 7);
+        UserAchievement userAchievement = createUserAchievement(UUID.randomUUID(), userId, definition.getId(), false);
+        userAchievement.setTargetProgress(7);
+
+        when(achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc()).thenReturn(List.of(definition));
+        when(achievementDefinitionRepository.findById(definition.getId())).thenReturn(Optional.of(definition));
+        when(userAchievementRepository.findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId()))
+                .thenReturn(Optional.of(userAchievement));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(createUserStreak(UUID.randomUUID(), userId, 7)));
+        when(userAchievementRepository.save(any(UserAchievement.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<AchievementResponse> unlocked = xpService.checkAchievements(userId);
+
+        assertThat(unlocked).hasSize(1);
+        assertThat(unlocked.get(0).code()).isEqualTo("STREAK_7");
+        verify(userAchievementRepository).save(argThat(ua -> ua.getCurrentProgress() == 7 && ua.getIsUnlocked()));
+    }
+
+    @Test
+    void shouldReturnStreakValueBelowMilestone() {
+        AchievementDefinition definition = createStreakAchievementDefinition(UUID.randomUUID(), "STREAK_5", "current_streak", 10);
+        UserAchievement userAchievement = createUserAchievement(UUID.randomUUID(), userId, definition.getId(), false);
+
+        when(achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc()).thenReturn(List.of(definition));
+        when(userAchievementRepository.findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId()))
+                .thenReturn(Optional.of(userAchievement));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(createUserStreak(UUID.randomUUID(), userId, 5)));
+
+        List<AchievementResponse> unlocked = xpService.checkAchievements(userId);
+
+        assertThat(unlocked).isEmpty();
+        assertThat(userAchievement.getCurrentProgress()).isEqualTo(5);
+        verify(userAchievementRepository, never()).save(any(UserAchievement.class));
+    }
+
+    @Test
+    void shouldReturnZeroWhenNoUserStreakExists() {
+        AchievementDefinition definition = createStreakAchievementDefinition(UUID.randomUUID(), "STREAK_3", "current_streak", 3);
+        UserAchievement userAchievement = createUserAchievement(UUID.randomUUID(), userId, definition.getId(), false);
+
+        when(achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc()).thenReturn(List.of(definition));
+        when(userAchievementRepository.findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId()))
+                .thenReturn(Optional.of(userAchievement));
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
+
+        List<AchievementResponse> unlocked = xpService.checkAchievements(userId);
+
+        assertThat(unlocked).isEmpty();
+        assertThat(userAchievement.getCurrentProgress()).isEqualTo(0);
+        verify(userAchievementRepository, never()).save(any(UserAchievement.class));
+    }
+
+    @Test
+    void shouldReturnZeroForInvalidRequirementValue() {
+        AchievementDefinition definition = new AchievementDefinition();
+        definition.setId(UUID.randomUUID());
+        definition.setCode("BAD_STREAK");
+        definition.setName("Bad Streak");
+        definition.setDescription("Bad");
+        definition.setCategory(AchievementCategory.STREAK);
+        definition.setRequirementType(RequirementType.STREAK);
+        definition.setRequirementValue("not valid json");
+        definition.setXpReward(50);
+        definition.setIsHidden(false);
+        definition.setIsRepeatable(false);
+        definition.setSortOrder(1);
+        definition.setCreatedAt(Instant.now());
+
+        when(achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc()).thenReturn(List.of(definition));
+        when(userAchievementRepository.findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId()))
+                .thenReturn(Optional.empty());
+        when(userAchievementRepository.save(any(UserAchievement.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<AchievementResponse> unlocked = xpService.checkAchievements(userId);
+
+        assertThat(unlocked).isEmpty();
+        verify(userAchievementRepository).save(argThat(ua -> ua.getCurrentProgress() == 0));
+    }
+
+    @Test
+    void shouldPreserveNonStreakAchievementEvaluation() {
+        AchievementDefinition definition = createAchievementDefinition(UUID.randomUUID(), "FIRST_TASK");
+        UserAchievement userAchievement = createUserAchievement(UUID.randomUUID(), userId, definition.getId(), false);
+        userAchievement.setCurrentProgress(50);
+
+        when(achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc()).thenReturn(List.of(definition));
+        when(userAchievementRepository.findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId()))
+                .thenReturn(Optional.of(userAchievement));
+
+        List<AchievementResponse> unlocked = xpService.checkAchievements(userId);
+
+        assertThat(unlocked).isEmpty();
+    }
+
     // ========================
     // evaluatePolicies tests
     // ========================
@@ -1700,6 +1816,24 @@ class XpServiceImplTest {
         definition.setIconUrl("/icons/test.png");
         definition.setRequirementType(RequirementType.COUNTER);
         definition.setRequirementValue("{\"count\": 1}");
+        definition.setXpReward(50);
+        definition.setIsHidden(false);
+        definition.setIsRepeatable(false);
+        definition.setSortOrder(1);
+        definition.setCreatedAt(Instant.now());
+        return definition;
+    }
+
+    private AchievementDefinition createStreakAchievementDefinition(UUID id, String code, String metric, int milestone) {
+        AchievementDefinition definition = new AchievementDefinition();
+        definition.setId(id);
+        definition.setCode(code);
+        definition.setName("Test Streak Achievement");
+        definition.setDescription("Test streak description");
+        definition.setCategory(AchievementCategory.STREAK);
+        definition.setIconUrl("/icons/test.png");
+        definition.setRequirementType(RequirementType.STREAK);
+        definition.setRequirementValue("{\"metric\":\"" + metric + "\",\"milestone\":" + milestone + "}");
         definition.setXpReward(50);
         definition.setIsHidden(false);
         definition.setIsRepeatable(false);

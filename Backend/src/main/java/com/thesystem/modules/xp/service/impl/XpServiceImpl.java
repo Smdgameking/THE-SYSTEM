@@ -23,11 +23,13 @@ import com.thesystem.modules.xp.dto.xpaccount.XpAccountResponse;
 import com.thesystem.modules.xp.entity.AchievementDefinition;
 import com.thesystem.modules.xp.entity.RewardHistory;
 import com.thesystem.modules.xp.entity.UserAchievement;
+import com.thesystem.modules.xp.entity.UserStreak;
 import com.thesystem.modules.xp.entity.XpAccount;
 import com.thesystem.modules.xp.entity.XpPolicy;
 import com.thesystem.modules.xp.entity.XpTransaction;
 import com.thesystem.modules.xp.enums.AchievementCategory;
 import com.thesystem.modules.xp.enums.PolicyType;
+import com.thesystem.modules.xp.enums.RequirementType;
 import com.thesystem.modules.xp.enums.TransactionType;
 import com.thesystem.modules.xp.events.AchievementProgressUpdatedEvent;
 import com.thesystem.modules.xp.events.AchievementUnlockedEvent;
@@ -922,10 +924,62 @@ public class XpServiceImpl implements XpService {
     }
 
     private int evaluateAchievementProgress(AchievementDefinition definition, UUID userId) {
+        if (definition.getRequirementType() == RequirementType.STREAK) {
+            return evaluateStreakProgress(definition, userId);
+        }
+
         UserAchievement userAchievement = userAchievementRepository
                 .findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId())
                 .orElse(null);
         return userAchievement != null ? userAchievement.getCurrentProgress() : 0;
+    }
+
+    private int evaluateStreakProgress(AchievementDefinition definition, UUID userId) {
+        String requirementValue = definition.getRequirementValue();
+        if (requirementValue == null || requirementValue.isBlank()) {
+            return 0;
+        }
+
+        Map<String, Object> requirementMap;
+        try {
+            requirementMap = objectMapper.readValue(requirementValue, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            return 0;
+        }
+
+        Object metricObj = requirementMap.get("metric");
+        Object milestoneObj = requirementMap.get("milestone");
+
+        if (!(metricObj instanceof String metric) || milestoneObj == null) {
+            return 0;
+        }
+
+        int milestone;
+        try {
+            milestone = Integer.parseInt(milestoneObj.toString());
+        } catch (Exception e) {
+            return 0;
+        }
+
+        if (milestone <= 0) {
+            return 0;
+        }
+
+        UserStreak userStreak = userStreakRepository.findByUserIdAndDeletedAtIsNull(userId).orElse(null);
+        if (userStreak == null) {
+            return 0;
+        }
+
+        int streakValue;
+        if ("current_streak".equals(metric)) {
+            streakValue = userStreak.getCurrentStreak() != null ? userStreak.getCurrentStreak() : 0;
+        } else if ("longest_streak".equals(metric)) {
+            streakValue = userStreak.getLongestStreak() != null ? userStreak.getLongestStreak() : 0;
+        } else {
+            return 0;
+        }
+
+        return Math.min(streakValue, milestone);
     }
 
     public double calculatePolicyMultiplier(UUID userId, Map<String, Object> context) {

@@ -1,0 +1,45 @@
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/thesystem}
+    username: ${DATABASE_USERNAME:thesystem}
+    password: ${DATABASE_PASSWORD:mknic123}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+server:
+  port: 9000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    com.thesystem: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.flywaydb: DEBUG
+
+thesystem:
+  jwt:
+    secret: ${THE_SYSTEM_JWT_SECRET:}
+    access-token-expiration-ms: 900000
+    refresh-token-expiration-ms: 604800000
