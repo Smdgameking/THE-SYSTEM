@@ -15,8 +15,11 @@ public final class SecurityUtils {
         if (authentication == null || authentication.getPrincipal() == null) {
             return null;
         }
-        String userId = authentication.getPrincipal().toString();
-        return UUID.fromString(userId);
+        try {
+            return UUID.fromString(authentication.getPrincipal().toString());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public static boolean isAdmin() {

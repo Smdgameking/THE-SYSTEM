@@ -15,6 +15,7 @@ import com.thesystem.modules.xp.dto.reward.RewardResponse;
 import com.thesystem.modules.xp.dto.statistics.LeaderboardEntry;
 import com.thesystem.modules.xp.dto.statistics.LeaderboardResponse;
 import com.thesystem.modules.xp.dto.statistics.StatisticsResponse;
+import com.thesystem.modules.xp.dto.streak.UserStreakResponse;
 import com.thesystem.modules.xp.dto.transaction.TransactionCreateRequest;
 import com.thesystem.modules.xp.dto.transaction.TransactionHistoryFilter;
 import com.thesystem.modules.xp.dto.transaction.TransactionResponse;
@@ -46,6 +47,7 @@ import com.thesystem.modules.xp.exception.InvalidTransactionException;
 import com.thesystem.modules.xp.exception.LevelCalculationException;
 import com.thesystem.modules.xp.exception.PolicyNotFoundException;
 import com.thesystem.modules.xp.exception.TransactionNotFoundException;
+import com.thesystem.modules.xp.exception.UserStreakNotFoundException;
 import com.thesystem.modules.xp.exception.XpAccountNotFoundException;
 import com.thesystem.modules.xp.exception.XpException;
 import com.thesystem.modules.xp.mapper.XpMapper;
@@ -465,12 +467,15 @@ public class XpServiceImpl implements XpService {
                     .findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId())
                     .orElse(null);
 
+            int targetProgress = extractTargetProgress(definition);
+
             if (userAchievement == null) {
                 userAchievement = new UserAchievement();
+                userAchievement.setId(UUID.randomUUID());
                 userAchievement.setUserId(userId);
                 userAchievement.setAchievementId(definition.getId());
                 userAchievement.setCurrentProgress(0);
-                userAchievement.setTargetProgress(100);
+                userAchievement.setTargetProgress(targetProgress);
                 userAchievement.setIsUnlocked(false);
                 userAchievementRepository.save(userAchievement);
             }
@@ -488,6 +493,19 @@ public class XpServiceImpl implements XpService {
                     userAchievement.setUnlockedAt(Instant.now());
                     userAchievementRepository.save(userAchievement);
 
+                    if (definition.getXpReward() != null && definition.getXpReward() > 0) {
+                        TransactionCreateRequest rewardRequest = new TransactionCreateRequest(
+                                TransactionType.ACHIEVEMENT,
+                                definition.getXpReward(),
+                                "achievement-engine",
+                                userAchievement.getId(),
+                                "ACHIEVEMENT",
+                                "Achievement unlocked: " + definition.getCode(),
+                                null
+                        );
+                        createTransaction(userId, rewardRequest, null, 1.0, definition.getXpReward());
+                    }
+
                     eventPublisher.publishEvent(new AchievementUnlockedEvent(
                             userId, definition.getId(), definition.getCode(), definition.getXpReward(), Instant.now()));
 
@@ -497,6 +515,26 @@ public class XpServiceImpl implements XpService {
         }
 
         return unlocked;
+    }
+
+    private int extractTargetProgress(AchievementDefinition definition) {
+        if (definition.getRequirementValue() == null || definition.getRequirementValue().isBlank()) {
+            return 100;
+        }
+        try {
+            Map<String, Object> map = objectMapper.readValue(definition.getRequirementValue(), new TypeReference<Map<String, Object>>() {});
+            Object milestone = map.get("milestone");
+            if (milestone instanceof Number number) {
+                return number.intValue();
+            }
+            Object count = map.get("count");
+            if (count instanceof Number number) {
+                return number.intValue();
+            }
+        } catch (Exception e) {
+            // fallback to default
+        }
+        return 100;
     }
 
     @Override
@@ -523,6 +561,19 @@ public class XpServiceImpl implements XpService {
             userAchievement.setCurrentProgress(userAchievement.getTargetProgress());
             userAchievementRepository.save(userAchievement);
 
+            if (definition.getXpReward() != null && definition.getXpReward() > 0) {
+                TransactionCreateRequest rewardRequest = new TransactionCreateRequest(
+                        TransactionType.ACHIEVEMENT,
+                        definition.getXpReward(),
+                        "achievement-engine",
+                        userAchievement.getId(),
+                        "ACHIEVEMENT",
+                        "Achievement unlocked: " + definition.getCode(),
+                        null
+                );
+                createTransaction(userId, rewardRequest, null, 1.0, definition.getXpReward());
+            }
+
             eventPublisher.publishEvent(new AchievementUnlockedEvent(
                     userId, achievementId, definition.getCode(), definition.getXpReward(), Instant.now()));
         }
@@ -540,6 +591,20 @@ public class XpServiceImpl implements XpService {
                 userAchievement.getUnlockedAt(),
                 fromJsonString(userAchievement.getProgressMetadata(), new TypeReference<Map<String, Object>>() {}),
                 userAchievement.getCreatedAt()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserStreakResponse getUserStreak(UUID userId) {
+        UserStreak userStreak = userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new UserStreakNotFoundException("User streak not found"));
+
+        return new UserStreakResponse(
+                userStreak.getCurrentStreak(),
+                userStreak.getLongestStreak(),
+                userStreak.getCurrentStreakStartDate(),
+                userStreak.getLastActivityDate()
         );
     }
 

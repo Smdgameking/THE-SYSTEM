@@ -31,6 +31,7 @@ import com.thesystem.modules.xp.exception.AchievementNotFoundException;
 import com.thesystem.modules.xp.exception.DuplicateTransactionException;
 import com.thesystem.modules.xp.exception.InvalidTransactionException;
 import com.thesystem.modules.xp.exception.LevelCalculationException;
+import com.thesystem.modules.xp.exception.UserStreakNotFoundException;
 import com.thesystem.modules.xp.exception.XpAccountNotFoundException;
 import com.thesystem.modules.xp.mapper.XpMapper;
 import com.thesystem.modules.xp.repository.AchievementDefinitionRepository;
@@ -525,6 +526,8 @@ class XpServiceImplTest {
         userAchievement.setCurrentProgress(100);
         userAchievement.setTargetProgress(0);
 
+        mockCreateTransaction();
+
         when(achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc()).thenReturn(List.of(definition));
         when(userAchievementRepository.findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId()))
                 .thenReturn(Optional.of(userAchievement));
@@ -557,6 +560,8 @@ class XpServiceImplTest {
         UserAchievement userAchievement = createUserAchievement(UUID.randomUUID(), userId, definition.getId(), false);
         userAchievement.setTargetProgress(3);
 
+        mockCreateTransaction();
+
         when(achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc()).thenReturn(List.of(definition));
         when(achievementDefinitionRepository.findById(definition.getId())).thenReturn(Optional.of(definition));
         when(userAchievementRepository.findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, definition.getId()))
@@ -576,6 +581,8 @@ class XpServiceImplTest {
         AchievementDefinition definition = createStreakAchievementDefinition(UUID.randomUUID(), "STREAK_7", "longest_streak", 7);
         UserAchievement userAchievement = createUserAchievement(UUID.randomUUID(), userId, definition.getId(), false);
         userAchievement.setTargetProgress(7);
+
+        mockCreateTransaction();
 
         when(achievementDefinitionRepository.findByDeletedAtIsNullOrderBySortOrderAsc()).thenReturn(List.of(definition));
         when(achievementDefinitionRepository.findById(definition.getId())).thenReturn(Optional.of(definition));
@@ -1884,6 +1891,18 @@ class XpServiceImplTest {
         return streak;
     }
 
+    private void mockCreateTransaction() {
+        XpAccount mockAccount = mock(XpAccount.class);
+        when(mockAccount.getCurrentXp()).thenReturn(0);
+        when(mockAccount.getTotalXpEarned()).thenReturn(0);
+        when(mockAccount.getTotalXpSpent()).thenReturn(0);
+        when(mockAccount.getLifetimeXp()).thenReturn(0);
+        when(xpAccountRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(mockAccount));
+        when(xpTransactionRepository.findBySourceEngineAndSourceIdAndSourceTypeAndDeletedAtIsNull(any(), any(), any()))
+                .thenReturn(Optional.empty());
+        when(xpTransactionRepository.save(any(XpTransaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
     @Test
     void shouldHandleImmutableContextMap() {
         UUID userId = UUID.randomUUID();
@@ -1901,6 +1920,45 @@ class XpServiceImplTest {
         assertThat(result.finalXp()).isEqualTo(11);
         assertThat(immutableContext).hasSize(1);
         assertThat(immutableContext).containsKey("taskPriority");
+    }
+
+    // ========================
+    // getUserStreak tests
+    // ========================
+
+    @Test
+    void shouldReturnUserStreakResponseWhenStreakExists() {
+        UUID streakId = UUID.randomUUID();
+        LocalDate startDate = LocalDate.of(2026, 8, 1);
+        LocalDate lastActivity = LocalDate.of(2026, 8, 3);
+        UserStreak streak = new UserStreak();
+        streak.setId(streakId);
+        streak.setUserId(userId);
+        streak.setCurrentStreak(3);
+        streak.setLongestStreak(3);
+        streak.setCurrentStreakStartDate(startDate);
+        streak.setLastActivityDate(lastActivity);
+
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(streak));
+
+        com.thesystem.modules.xp.dto.streak.UserStreakResponse response = xpService.getUserStreak(userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.currentStreak()).isEqualTo(3);
+        assertThat(response.longestStreak()).isEqualTo(3);
+        assertThat(response.currentStreakStartDate()).isEqualTo(startDate);
+        assertThat(response.lastActivityDate()).isEqualTo(lastActivity);
+        verify(userStreakRepository).findByUserIdAndDeletedAtIsNull(userId);
+    }
+
+    @Test
+    void shouldThrowUserStreakNotFoundExceptionWhenNoActiveStreak() {
+        when(userStreakRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> xpService.getUserStreak(userId))
+                .isInstanceOf(UserStreakNotFoundException.class)
+                .hasMessageContaining("User streak not found");
+        verify(userStreakRepository).findByUserIdAndDeletedAtIsNull(userId);
     }
 
     private XpAccount createXpAccount(UUID id, int lifetimeXp, int currentLevel) {

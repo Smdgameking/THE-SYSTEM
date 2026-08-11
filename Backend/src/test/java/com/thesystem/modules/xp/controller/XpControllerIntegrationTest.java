@@ -8,6 +8,7 @@ import com.thesystem.modules.xp.dto.policy.PolicyResponse;
 import com.thesystem.modules.xp.dto.statistics.LeaderboardEntry;
 import com.thesystem.modules.xp.dto.statistics.LeaderboardResponse;
 import com.thesystem.modules.xp.dto.statistics.StatisticsResponse;
+import com.thesystem.modules.xp.dto.streak.UserStreakResponse;
 import com.thesystem.modules.xp.dto.transaction.TransactionResponse;
 import com.thesystem.modules.xp.dto.xpaccount.XpAccountResponse;
 import com.thesystem.modules.xp.enums.AchievementCategory;
@@ -30,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -370,5 +372,34 @@ class XpControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.achievementCode").value("FIRST_TASK"));
+    }
+
+    @Test
+    void shouldGetUserStreak() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UserStreakResponse response = new UserStreakResponse(
+                3, 3, LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 3)
+        );
+
+        Mockito.when(TestConfig.xpService.getUserStreak(any(UUID.class))).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/xp/streak"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.currentStreak").value(3))
+                .andExpect(jsonPath("$.data.longestStreak").value(3))
+                .andExpect(jsonPath("$.data.currentStreakStartDate").value("2026-08-01"))
+                .andExpect(jsonPath("$.data.lastActivityDate").value("2026-08-03"));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenUserStreakDoesNotExist() throws Exception {
+        Mockito.when(TestConfig.xpService.getUserStreak(any(UUID.class)))
+                .thenThrow(new com.thesystem.modules.xp.exception.UserStreakNotFoundException("User streak not found"));
+
+        mockMvc.perform(get("/api/v1/xp/streak"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("USER_STREAK_NOT_FOUND"));
     }
 }

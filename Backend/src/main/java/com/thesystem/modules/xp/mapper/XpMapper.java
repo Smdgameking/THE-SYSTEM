@@ -32,11 +32,23 @@ public interface XpMapper {
     @Mapping(target = "requirementValue", source = "requirementValue", qualifiedByName = "stringToMap")
     AchievementResponse toAchievementResponse(AchievementDefinition definition);
 
-    @Mapping(target = "achievementCode", expression = "java(getAchievementCode(userAchievement))")
-    @Mapping(target = "achievementName", expression = "java(getAchievementName(userAchievement))")
-    @Mapping(target = "category", expression = "java(getAchievementCategory(userAchievement))")
-    @Mapping(target = "progressMetadata", source = "progressMetadata", qualifiedByName = "stringToMap")
-    UserAchievementResponse toUserAchievementResponse(UserAchievement userAchievement);
+    @Mapping(target = "achievementCode", source = "definition.code")
+    @Mapping(target = "achievementName", source = "definition.name")
+    @Mapping(target = "category", source = "definition.category")
+    @Mapping(target = "progressMetadata", source = "userAchievement.progressMetadata", qualifiedByName = "stringToMap")
+    @Mapping(target = "id", source = "userAchievement.id")
+    @Mapping(target = "userId", source = "userAchievement.userId")
+    @Mapping(target = "achievementId", source = "userAchievement.achievementId")
+    @Mapping(target = "currentProgress", source = "userAchievement.currentProgress")
+    @Mapping(target = "targetProgress", source = "userAchievement.targetProgress")
+    @Mapping(target = "isUnlocked", source = "userAchievement.isUnlocked")
+    @Mapping(target = "unlockedAt", source = "userAchievement.unlockedAt")
+    @Mapping(target = "createdAt", source = "userAchievement.createdAt")
+    UserAchievementResponse toUserAchievementResponse(UserAchievement userAchievement, AchievementDefinition definition);
+
+    default UserAchievementResponse toUserAchievementResponse(UserAchievement userAchievement) {
+        return toUserAchievementResponse(userAchievement, null);
+    }
 
     @Mapping(target = "conditions", source = "conditions", qualifiedByName = "stringToMap")
     PolicyResponse toPolicyResponse(XpPolicy policy);
@@ -45,18 +57,6 @@ public interface XpMapper {
     RewardHistoryResponse toRewardHistoryResponse(RewardHistory rewardHistory);
 
     XpAccountResponse toXpAccountResponse(XpAccount account);
-
-    default String getAchievementCode(UserAchievement userAchievement) {
-        return "";
-    }
-
-    default String getAchievementName(UserAchievement userAchievement) {
-        return "";
-    }
-
-    default com.thesystem.modules.xp.enums.AchievementCategory getAchievementCategory(UserAchievement userAchievement) {
-        return com.thesystem.modules.xp.enums.AchievementCategory.TASK;
-    }
 
     @Named("stringToMap")
     default Map<String, Object> stringToMap(String value) {

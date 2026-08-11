@@ -5,8 +5,10 @@ import com.thesystem.modules.task.events.TaskCompletedEvent;
 import com.thesystem.modules.user.service.UserTimezoneResolver;
 import com.thesystem.modules.xp.entity.UserStreak;
 import com.thesystem.modules.xp.entity.UserStreakHistory;
+import com.thesystem.modules.xp.events.StreakMilestoneReachedEvent;
 import com.thesystem.modules.xp.repository.UserStreakHistoryRepository;
 import com.thesystem.modules.xp.repository.UserStreakRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ public class StreakEngine {
     private static final String SOURCE_TYPE_TASK = "TASK_COMPLETION";
     private static final String SOURCE_ENGINE_GOAL = "goal-engine";
     private static final String SOURCE_TYPE_GOAL = "GOAL_COMPLETION";
+    private static final int[] STREAK_MILESTONES = {3, 7, 14, 30, 60, 90};
     private static final String POSTGRES_UNIQUE_VIOLATION = "23505";
 
     /*
@@ -37,14 +40,17 @@ public class StreakEngine {
     private final UserTimezoneResolver userTimezoneResolver;
     private final UserStreakRepository userStreakRepository;
     private final UserStreakHistoryRepository userStreakHistoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public StreakEngine(
             UserTimezoneResolver userTimezoneResolver,
             UserStreakRepository userStreakRepository,
-            UserStreakHistoryRepository userStreakHistoryRepository) {
+            UserStreakHistoryRepository userStreakHistoryRepository,
+            ApplicationEventPublisher eventPublisher) {
         this.userTimezoneResolver = userTimezoneResolver;
         this.userStreakRepository = userStreakRepository;
         this.userStreakHistoryRepository = userStreakHistoryRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -161,11 +167,25 @@ public class StreakEngine {
                     return newStreak;
                 });
 
+        int previousStreak = streak.getCurrentStreak() != null ? streak.getCurrentStreak() : 0;
+
         streak.setCurrentStreak(currentStreak);
         streak.setLongestStreak(longestStreak);
         streak.setCurrentStreakStartDate(currentStreakStartDate);
         streak.setLastActivityDate(lastActivityDate);
 
         userStreakRepository.save(streak);
+
+        publishMilestoneEvents(userId, previousStreak, currentStreak);
+    }
+
+    private void publishMilestoneEvents(UUID userId, int previousStreak, int currentStreak) {
+        for (int milestone : STREAK_MILESTONES) {
+            if (previousStreak < milestone && currentStreak >= milestone) {
+                eventPublisher.publishEvent(
+                        new StreakMilestoneReachedEvent(userId, currentStreak, milestone, "current_streak")
+                );
+            }
+        }
     }
 }

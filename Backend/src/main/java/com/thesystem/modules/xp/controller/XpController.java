@@ -7,6 +7,7 @@ import com.thesystem.modules.xp.dto.policy.PolicyRequest;
 import com.thesystem.modules.xp.dto.policy.PolicyResponse;
 import com.thesystem.modules.xp.dto.statistics.LeaderboardResponse;
 import com.thesystem.modules.xp.dto.statistics.StatisticsResponse;
+import com.thesystem.modules.xp.dto.streak.UserStreakResponse;
 import com.thesystem.modules.xp.dto.transaction.TransactionResponse;
 import com.thesystem.modules.xp.dto.xpaccount.XpAccountResponse;
 import com.thesystem.modules.xp.exception.XpException;
@@ -72,6 +73,14 @@ public class XpController {
     public ResponseEntity<ApiResponse<LeaderboardResponse>> getLeaderboard(Pageable pageable) {
         LeaderboardResponse response = xpService.getLeaderboard(pageable);
         return ResponseEntity.ok(ApiResponse.ok(response, "Leaderboard retrieved successfully", UUID.randomUUID().toString()));
+    }
+
+    @GetMapping("/streak")
+    @Operation(summary = "Get current user streak")
+    public ResponseEntity<ApiResponse<UserStreakResponse>> getStreak() {
+        UUID userId = SecurityUtils.getCurrentUserId();
+        UserStreakResponse response = xpService.getUserStreak(userId);
+        return ResponseEntity.ok(ApiResponse.ok(response, "User streak retrieved successfully", UUID.randomUUID().toString()));
     }
 
     @GetMapping("/achievements")

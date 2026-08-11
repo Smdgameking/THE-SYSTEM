@@ -70,6 +70,7 @@ public class XpEventListener {
             );
 
             xpService.createTransaction(userId, request, calculation.primaryPolicyId(), calculation.multiplier(), calculation.baseXp());
+            xpService.checkAchievements(userId);
         } catch (Exception e) {
             logger.error("Failed to award XP for task completion: {}", event, e);
         }
@@ -100,6 +101,7 @@ public class XpEventListener {
             );
 
             xpService.createTransaction(userId, request, calculation.primaryPolicyId(), calculation.multiplier(), calculation.baseXp());
+            xpService.checkAchievements(userId);
         } catch (Exception e) {
             logger.error("Failed to award XP for goal completion: {}", event, e);
         }

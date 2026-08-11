@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -51,6 +53,7 @@ class XpEventListenerTest {
 
         verify(xpService).calculateXpForEvent(any(UUID.class), any(), eq(XpService.XpSourceType.TASK));
         verify(xpService).createTransaction(any(UUID.class), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
+        verify(xpService).checkAchievements(eq(userId));
     }
 
     @Test
@@ -67,6 +70,7 @@ class XpEventListenerTest {
         listener.handleTaskCompleted(event);
 
         verify(xpService).createTransaction(any(UUID.class), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
+        verify(xpService).checkAchievements(eq(userId));
     }
 
     @Test
@@ -83,6 +87,7 @@ class XpEventListenerTest {
 
         verify(xpService).calculateXpForEvent(eq(userId), any(), eq(XpService.XpSourceType.GOAL));
         verify(xpService).createTransaction(eq(userId), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
+        verify(xpService).checkAchievements(eq(userId));
     }
 
     @Test
@@ -98,5 +103,88 @@ class XpEventListenerTest {
         listener.handleGoalCompleted(event);
 
         verify(xpService).createTransaction(eq(userId), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
+        verify(xpService).checkAchievements(eq(userId));
+    }
+
+    @Test
+    void shouldNotCallCheckAchievementsWhenTaskCreateTransactionFails() {
+        UUID taskId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        TaskCompletedEvent event = new TaskCompletedEvent(taskId, userId, null, "Test Task", "MANUAL", null);
+
+        XpService.XpCalculationResult calculation = new XpService.XpCalculationResult(
+                UUID.randomUUID(), 10, 1.0, 10);
+        when(xpService.calculateXpForEvent(any(UUID.class), any(), eq(XpService.XpSourceType.TASK))).thenReturn(calculation);
+        when(taskRepository.findByIdAndUserIdAndDeletedAtIsNull(any(UUID.class), any(UUID.class))).thenReturn(java.util.Optional.empty());
+        when(xpService.createTransaction(any(UUID.class), any(TransactionCreateRequest.class), any(UUID.class), any(), any()))
+                .thenThrow(new RuntimeException("Transaction failed"));
+
+        listener.handleTaskCompleted(event);
+
+        verify(xpService).createTransaction(any(UUID.class), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
+        verify(xpService, never()).checkAchievements(any(UUID.class));
+    }
+
+    @Test
+    void shouldNotCallCheckAchievementsWhenGoalCreateTransactionFails() {
+        UUID goalId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        GoalCompletedEvent event = new GoalCompletedEvent(goalId, userId, 100, "HARD");
+
+        XpService.XpCalculationResult calculation = new XpService.XpCalculationResult(
+                UUID.randomUUID(), 100, 1.0, 100);
+        when(xpService.calculateXpForEvent(eq(userId), any(), eq(XpService.XpSourceType.GOAL))).thenReturn(calculation);
+        when(xpService.createTransaction(eq(userId), any(TransactionCreateRequest.class), any(UUID.class), any(), any()))
+                .thenThrow(new RuntimeException("Transaction failed"));
+
+        listener.handleGoalCompleted(event);
+
+        verify(xpService).createTransaction(eq(userId), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
+        verify(xpService, never()).checkAchievements(any(UUID.class));
+    }
+
+    @Test
+    void shouldNotBreakTaskCompletionWhenCheckAchievementsFails() {
+        UUID taskId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        TaskCompletedEvent event = new TaskCompletedEvent(taskId, userId, null, "Test Task", "MANUAL", null);
+
+        XpService.XpCalculationResult calculation = new XpService.XpCalculationResult(
+                UUID.randomUUID(), 10, 1.0, 10);
+        when(xpService.calculateXpForEvent(any(UUID.class), any(), eq(XpService.XpSourceType.TASK))).thenReturn(calculation);
+        when(taskRepository.findByIdAndUserIdAndDeletedAtIsNull(any(UUID.class), any(UUID.class))).thenReturn(java.util.Optional.empty());
+        when(xpService.createTransaction(any(UUID.class), any(TransactionCreateRequest.class), any(UUID.class), any(), any()))
+                .thenReturn(new com.thesystem.modules.xp.dto.transaction.TransactionResponse(
+                        UUID.randomUUID(), userId, TransactionType.TASK_COMPLETION, 10, 10,
+                        "task-engine", taskId, "TASK", null, 1.0, 10, "Task completed", Map.of(), java.time.Instant.now()
+                ));
+        when(xpService.checkAchievements(any(UUID.class))).thenThrow(new RuntimeException("Achievement check failed"));
+
+        listener.handleTaskCompleted(event);
+
+        verify(xpService).createTransaction(any(UUID.class), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
+        verify(xpService).checkAchievements(eq(userId));
+    }
+
+    @Test
+    void shouldNotBreakGoalCompletionWhenCheckAchievementsFails() {
+        UUID goalId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        GoalCompletedEvent event = new GoalCompletedEvent(goalId, userId, 100, "HARD");
+
+        XpService.XpCalculationResult calculation = new XpService.XpCalculationResult(
+                UUID.randomUUID(), 100, 1.0, 100);
+        when(xpService.calculateXpForEvent(eq(userId), any(), eq(XpService.XpSourceType.GOAL))).thenReturn(calculation);
+        when(xpService.createTransaction(eq(userId), any(TransactionCreateRequest.class), any(UUID.class), any(), any()))
+                .thenReturn(new com.thesystem.modules.xp.dto.transaction.TransactionResponse(
+                        UUID.randomUUID(), userId, TransactionType.GOAL_COMPLETION, 100, 100,
+                        "goal-engine", goalId, "GOAL", null, 1.0, 100, "Goal completed", Map.of(), java.time.Instant.now()
+                ));
+        when(xpService.checkAchievements(any(UUID.class))).thenThrow(new RuntimeException("Achievement check failed"));
+
+        listener.handleGoalCompleted(event);
+
+        verify(xpService).createTransaction(eq(userId), any(TransactionCreateRequest.class), any(UUID.class), any(), any());
+        verify(xpService).checkAchievements(eq(userId));
     }
 }

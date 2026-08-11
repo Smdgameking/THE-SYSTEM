@@ -13,6 +13,7 @@ import com.thesystem.modules.xp.dto.reward.RewardResponse;
 import com.thesystem.modules.xp.dto.statistics.LeaderboardEntry;
 import com.thesystem.modules.xp.dto.statistics.LeaderboardResponse;
 import com.thesystem.modules.xp.dto.statistics.StatisticsResponse;
+import com.thesystem.modules.xp.dto.streak.UserStreakResponse;
 import com.thesystem.modules.xp.dto.transaction.TransactionCreateRequest;
 import com.thesystem.modules.xp.dto.transaction.TransactionHistoryFilter;
 import com.thesystem.modules.xp.dto.transaction.TransactionResponse;
@@ -88,6 +89,12 @@ public interface XpService {
     List<AchievementResponse> checkAchievements(UUID userId);
 
     UserAchievementResponse unlockAchievement(UUID userId, UUID achievementId);
+
+    // ========================
+    // Streak Operations
+    // ========================
+
+    UserStreakResponse getUserStreak(UUID userId);
 
     // ========================
     // Policy Operations

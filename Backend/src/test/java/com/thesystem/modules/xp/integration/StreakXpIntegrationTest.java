@@ -74,6 +74,12 @@ class StreakXpIntegrationTest {
     private XpPolicyRepository xpPolicyRepository;
 
     @Autowired
+    private com.thesystem.modules.xp.repository.AchievementDefinitionRepository achievementDefinitionRepository;
+
+    @Autowired
+    private com.thesystem.modules.xp.repository.UserAchievementRepository userAchievementRepository;
+
+    @Autowired
     private XpTransactionRepository xpTransactionRepository;
 
     @Autowired
@@ -343,5 +349,64 @@ class StreakXpIntegrationTest {
         goal.setCurrentProgress(0);
         goal.setCompletionPercentage(0.0);
         return goalRepository.save(goal);
+    }
+
+    @Test
+    void shouldUnlockStreakAchievementAndRecordXpRewardWhenMilestoneCrossed() {
+        LocalDate today = LocalDate.now(ZoneId.of("UTC"));
+        LocalDate yesterday = today.minusDays(1);
+        LocalDate dayBefore = today.minusDays(2);
+
+        createStreakHistory(dayBefore);
+        createStreakHistory(yesterday);
+
+        UserStreak streak = new UserStreak();
+        streak.setId(userId);
+        streak.setUserId(userId);
+        streak.setCurrentStreak(2);
+        streak.setLongestStreak(2);
+        streak.setCurrentStreakStartDate(dayBefore);
+        streak.setLastActivityDate(yesterday);
+        userStreakRepository.save(streak);
+
+        com.thesystem.modules.xp.entity.AchievementDefinition streak3 = new com.thesystem.modules.xp.entity.AchievementDefinition();
+        streak3.setId(UUID.randomUUID());
+        streak3.setCode("STREAK_3_DAY");
+        streak3.setName("3-Day Streak");
+        streak3.setDescription("Maintain a 3-day streak");
+        streak3.setCategory(com.thesystem.modules.xp.enums.AchievementCategory.STREAK);
+        streak3.setRequirementType(com.thesystem.modules.xp.enums.RequirementType.STREAK);
+        streak3.setRequirementValue("{\"metric\":\"current_streak\",\"milestone\":3}");
+        streak3.setXpReward(50);
+        streak3.setIsHidden(false);
+        streak3.setIsRepeatable(false);
+        streak3.setSortOrder(1);
+        achievementDefinitionRepository.save(streak3);
+
+        Task task = createTask(taskId, userId);
+        taskService.completeTask(userId, taskId);
+
+        UserStreak updatedStreak = userStreakRepository.findByUserIdAndDeletedAtIsNull(userId).orElseThrow();
+        assertThat(updatedStreak.getCurrentStreak()).isEqualTo(3);
+        assertThat(updatedStreak.getLastActivityDate()).isEqualTo(today);
+
+        List<XpTransaction> transactions = xpTransactionRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId);
+        assertThat(transactions).hasSize(2);
+
+        XpTransaction taskTx = transactions.stream()
+                .filter(tx -> tx.getTransactionType() == com.thesystem.modules.xp.enums.TransactionType.TASK_COMPLETION)
+                .findFirst().orElseThrow();
+        assertThat(taskTx.getAmount()).isEqualTo(11);
+
+        com.thesystem.modules.xp.entity.UserAchievement userAchievement = userAchievementRepository
+                .findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, streak3.getId()).orElseThrow();
+        assertThat(userAchievement.getIsUnlocked()).isTrue();
+        assertThat(userAchievement.getCurrentProgress()).isEqualTo(3);
+
+        XpTransaction rewardTx = transactions.stream()
+                .filter(tx -> tx.getTransactionType() == com.thesystem.modules.xp.enums.TransactionType.ACHIEVEMENT)
+                .findFirst().orElseThrow();
+        assertThat(rewardTx.getAmount()).isEqualTo(50);
+        assertThat(rewardTx.getSourceType()).isEqualTo("ACHIEVEMENT");
     }
 }
