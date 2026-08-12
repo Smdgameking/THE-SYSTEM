@@ -13,6 +13,8 @@ import java.util.UUID;
 @RestControllerAdvice(basePackages = "com.thesystem.modules.user")
 public class UserExceptionHandler {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserExceptionHandler.class);
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Object>> handleBusinessException(BusinessException ex) {
         String requestId = UUID.randomUUID().toString();
@@ -34,6 +36,7 @@ public class UserExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
         String requestId = UUID.randomUUID().toString();
+        log.error("Unhandled exception in user module", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred", requestId));
     }
