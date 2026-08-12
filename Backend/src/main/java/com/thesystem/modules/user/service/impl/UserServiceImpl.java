@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UserProfileResponse getMyProfile(UUID userId) {
         UserProfile profile = userProfileRepository.findByUserIdAndDeletedAtIsNull(userId)
                 .orElseGet(() -> createDefaultProfile(userId));

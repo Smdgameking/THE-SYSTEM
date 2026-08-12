@@ -3,6 +3,7 @@ package com.thesystem.modules.user.entity;
 import com.thesystem.shared.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class UserProfile extends BaseEntity {
 
     @Id
+    @GeneratedValue
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
