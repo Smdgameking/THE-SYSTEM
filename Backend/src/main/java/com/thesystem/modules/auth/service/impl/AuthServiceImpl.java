@@ -88,7 +88,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public TokenResponse login(LoginRequest request) {
         User user = userRepository.findByEmailAndDeletedAtIsNull(request.email())
                 .orElseThrow(() -> new BusinessException(ErrorCodes.UNAUTHORIZED, "Invalid email or password"));
