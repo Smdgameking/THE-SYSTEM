@@ -61,8 +61,16 @@ class UserServiceUnitTest {
     }
 
     @Test
-    void shouldCreateDefaultProfileWhenNotExists() {
+    void shouldThrowNotFoundWhenMyProfileDoesNotExist() {
         when(userProfileRepository.findByUserIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
+
+        assertThrows(BusinessException.class, () -> userService.getMyProfile(userId));
+        verify(userProfileRepository, never()).save(any(UserProfile.class));
+    }
+
+    @Test
+    void shouldCreateProfileForNewUser() {
+        UUID newUserId = UUID.randomUUID();
         when(userProfileRepository.save(any(UserProfile.class))).thenAnswer(invocation -> {
             UserProfile p = invocation.getArgument(0);
             if (p.getId() == null) {
@@ -71,13 +79,16 @@ class UserServiceUnitTest {
             return p;
         });
         when(userProfileMapper.toUserProfileResponse(any(UserProfile.class))).thenReturn(new UserProfileResponse(
-                UUID.randomUUID(), userId, null, null, null, null, null, null, null, "ACTIVE", Instant.now(), Instant.now(), Instant.now()
+                UUID.randomUUID(), newUserId, "newuser", "New User", null, null, null, null, null, "ACTIVE", Instant.now(), Instant.now(), Instant.now()
         ));
 
-        UserProfileResponse response = userService.getMyProfile(userId);
+        UserProfileResponse response = userService.createProfileForNewUser(newUserId, "newuser");
 
         assertThat(response).isNotNull();
-        verify(userProfileRepository, times(2)).save(any(UserProfile.class));
+        assertThat(response.username()).isEqualTo("newuser");
+        assertThat(response.userId()).isEqualTo(newUserId);
+        assertThat(response.accountStatus()).isEqualTo("ACTIVE");
+        verify(userProfileRepository).save(any(UserProfile.class));
     }
 
     @Test

@@ -51,9 +51,9 @@ export function AuthProvider({ children }) {
     initialize();
   });
 
-  const register = useCallback(async (email, password) => {
+  const register = useCallback(async (username, email, password) => {
     setError(null);
-    const result = await authApi.register(email, password);
+    const result = await authApi.register(username, email, password);
     if (result.status === 201 && result.data?.data) {
       const { accessToken: at, refreshToken: rt } = result.data.data;
       localStorage.setItem('accessToken', at);
@@ -65,9 +65,9 @@ export function AuthProvider({ children }) {
     return { success: false, status: result.status, data: result.data };
   }, [syncTokens, loadCurrentUser]);
 
-  const login = useCallback(async (email, password) => {
+  const login = useCallback(async (username, password) => {
     setError(null);
-    const result = await authApi.login(email, password);
+    const result = await authApi.login(username, password);
     if (result.status === 200 && result.data?.data) {
       const { accessToken: at, refreshToken: rt } = result.data.data;
       localStorage.setItem('accessToken', at);

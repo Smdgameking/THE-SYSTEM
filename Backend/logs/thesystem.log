@@ -101,3 +101,154 @@ Caused by: java.lang.IllegalStateException: JWT secret must be configured via TH
 	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401)
 	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219)
 	... 66 common frames omitted
+2026-08-13 16:05:26.012 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - Starting AuthControllerIntegrationTest using Java 21.0.12 with PID 85957 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-13 16:05:26.014 [Test worker] DEBUG c.t.m.a.c.AuthControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-13 16:05:26.016 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-13 16:05:27.447 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-13 16:05:27.609 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 144 ms. Found 20 JPA repository interfaces.
+2026-08-13 16:05:31.568 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-13 16:05:31.629 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-13 16:05:31.920 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:thesystem user=SA
+2026-08-13 16:05:31.924 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-13 16:05:31.971 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-13 16:05:33.605 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-13 16:05:34.957 [Test worker] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-13 16:05:36.722 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-13 16:05:37.575 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-13 16:05:38.727 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-13 16:05:38.728 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-13 16:05:38.733 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 5 ms
+2026-08-13 16:05:38.868 [Test worker] INFO  c.t.m.a.c.AuthControllerIntegrationTest - Started AuthControllerIntegrationTest in 13.476 seconds (process running for 15.252)
+2026-08-13 16:05:40.519 [Test worker] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.thesystem.TheSystemApplication for test class com.thesystem.modules.user.controller.UserControllerIntegrationTest
+2026-08-13 16:05:40.578 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - Starting UserControllerIntegrationTest using Java 21.0.12 with PID 85957 (started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-13 16:05:40.579 [Test worker] DEBUG c.t.m.u.c.UserControllerIntegrationTest - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-13 16:05:40.580 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-08-13 16:05:41.199 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-13 16:05:41.285 [Test worker] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 81 ms. Found 20 JPA repository interfaces.
+2026-08-13 16:05:42.170 [Test worker] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-13 16:05:42.172 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-08-13 16:05:42.175 [Test worker] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:thesystem user=SA
+2026-08-13 16:05:42.176 [Test worker] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-08-13 16:05:42.178 [Test worker] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-13 16:05:42.612 [Test worker] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-13 16:05:44.104 [Test worker] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-13 16:05:44.562 [Test worker] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-08-13 16:05:45.366 [Test worker] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-08-13 16:05:45.367 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-08-13 16:05:45.370 [Test worker] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 3 ms
+2026-08-13 16:05:45.442 [Test worker] INFO  c.t.m.u.c.UserControllerIntegrationTest - Started UserControllerIntegrationTest in 4.915 seconds (process running for 21.826)
+2026-08-13 16:05:45.954 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-13 16:05:45.959 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-08-13 16:05:45.964 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-08-13 16:05:45.972 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-13 16:05:45.973 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-08-13 16:05:45.975 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2026-08-13 16:29:21.403 [main] INFO  com.thesystem.TheSystemApplication - Starting TheSystemApplication using Java 21.0.12 with PID 103562 (/home/naga/Workspace/Projects/THE-SYSTEM/Backend/build/classes/java/main started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-13 16:29:21.405 [main] DEBUG com.thesystem.TheSystemApplication - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-13 16:29:21.406 [main] INFO  com.thesystem.TheSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-08-13 16:29:22.859 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-13 16:29:23.062 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 181 ms. Found 20 JPA repository interfaces.
+2026-08-13 16:29:25.499 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 9000 (http)
+2026-08-13 16:29:25.520 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-9000"]
+2026-08-13 16:29:25.525 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-08-13 16:29:25.526 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-08-13 16:29:25.623 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-08-13 16:29:25.624 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 4151 ms
+2026-08-13 16:29:26.438 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-13 16:29:26.559 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@236a4d30
+2026-08-13 16:29:26.563 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-13 16:29:26.620 [main] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://localhost:5432/thesystem (PostgreSQL 18.4)
+2026-08-13 16:29:26.646 [main] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-08-13 16:29:26.750 [main] INFO  o.f.core.internal.command.DbValidate - Successfully validated 19 migrations (execution time 00:00.084s)
+2026-08-13 16:29:26.778 [main] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 19
+2026-08-13 16:29:26.784 [main] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-08-13 16:29:27.767 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-13 16:29:30.528 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-13 16:29:31.315 [main] DEBUG c.t.s.jwt.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-08-13 16:29:31.981 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-13 16:29:33.322 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-13 16:29:33.735 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 2 endpoints beneath base path '/actuator'
+2026-08-13 16:29:34.540 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-9000"]
+2026-08-13 16:29:34.583 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 9000 (http) with context path '/'
+2026-08-13 16:29:34.602 [main] INFO  com.thesystem.TheSystemApplication - Started TheSystemApplication in 14.299 seconds (process running for 14.798)
+2026-08-13 16:29:54.678 [http-nio-9000-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-13 16:29:54.678 [http-nio-9000-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-08-13 16:29:54.680 [http-nio-9000-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2026-08-13 16:32:50.221 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-13 16:32:50.232 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-08-13 16:32:50.254 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-13 16:32:50.259 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-08-13 16:32:50.288 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-08-13 18:07:26.494 [main] INFO  com.thesystem.TheSystemApplication - Starting TheSystemApplication using Java 21.0.12 with PID 6496 (/home/naga/Workspace/Projects/THE-SYSTEM/Backend/build/classes/java/main started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-13 18:07:26.498 [main] DEBUG com.thesystem.TheSystemApplication - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-13 18:07:26.500 [main] INFO  com.thesystem.TheSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-08-13 18:07:28.341 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-13 18:07:28.490 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 135 ms. Found 20 JPA repository interfaces.
+2026-08-13 18:07:30.090 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 9000 (http)
+2026-08-13 18:07:30.105 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-9000"]
+2026-08-13 18:07:30.108 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-08-13 18:07:30.108 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-08-13 18:07:30.169 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-08-13 18:07:30.170 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3574 ms
+2026-08-13 18:07:30.704 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-13 18:07:30.805 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@460e5ffe
+2026-08-13 18:07:30.807 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-13 18:07:30.839 [main] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://localhost:5432/thesystem (PostgreSQL 18.4)
+2026-08-13 18:07:30.853 [main] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-08-13 18:07:30.911 [main] INFO  o.f.core.internal.command.DbValidate - Successfully validated 19 migrations (execution time 00:00.045s)
+2026-08-13 18:07:30.934 [main] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 19
+2026-08-13 18:07:30.939 [main] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-08-13 18:07:31.545 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-13 18:07:33.324 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-13 18:07:33.870 [main] DEBUG c.t.s.jwt.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-08-13 18:07:34.307 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-13 18:07:35.495 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-13 18:07:36.009 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 2 endpoints beneath base path '/actuator'
+2026-08-13 18:07:36.946 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-9000"]
+2026-08-13 18:07:36.967 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 9000 (http) with context path '/'
+2026-08-13 18:07:36.983 [main] INFO  com.thesystem.TheSystemApplication - Started TheSystemApplication in 11.938 seconds (process running for 12.627)
+2026-08-13 18:08:00.085 [http-nio-9000-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-13 18:08:00.085 [http-nio-9000-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-08-13 18:08:00.089 [http-nio-9000-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2026-08-13 18:08:30.900 [http-nio-9000-exec-3] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 0, SQLState: 23505
+2026-08-13 18:08:30.900 [http-nio-9000-exec-3] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - ERROR: duplicate key value violates unique constraint "uq_user_profiles_username"
+  Detail: Key (username)=(verifyuser1786624709) already exists.
+2026-08-13 18:09:03.717 [http-nio-9000-exec-5] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 0, SQLState: 23505
+2026-08-13 18:09:03.717 [http-nio-9000-exec-5] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - ERROR: duplicate key value violates unique constraint "uq_user_profiles_username"
+  Detail: Key (username)=(verifyuser1786624743) already exists.
+2026-08-13 18:11:04.372 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-13 18:11:04.376 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-08-13 18:11:04.384 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-13 18:11:04.394 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-08-13 18:11:04.400 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-08-13 18:13:30.065 [main] INFO  com.thesystem.TheSystemApplication - Starting TheSystemApplication using Java 21.0.12 with PID 9077 (/home/naga/Workspace/Projects/THE-SYSTEM/Backend/build/classes/java/main started by naga in /home/naga/Workspace/Projects/THE-SYSTEM/Backend)
+2026-08-13 18:13:30.070 [main] DEBUG com.thesystem.TheSystemApplication - Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-08-13 18:13:30.073 [main] INFO  com.thesystem.TheSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-08-13 18:13:31.880 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-13 18:13:32.089 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 188 ms. Found 20 JPA repository interfaces.
+2026-08-13 18:13:34.431 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 9000 (http)
+2026-08-13 18:13:34.451 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-9000"]
+2026-08-13 18:13:34.457 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-08-13 18:13:34.458 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-08-13 18:13:34.550 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-08-13 18:13:34.551 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 4361 ms
+2026-08-13 18:13:35.396 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-13 18:13:35.561 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@460e5ffe
+2026-08-13 18:13:35.565 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-13 18:13:35.620 [main] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://localhost:5432/thesystem (PostgreSQL 18.4)
+2026-08-13 18:13:35.640 [main] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-08-13 18:13:35.742 [main] INFO  o.f.core.internal.command.DbValidate - Successfully validated 19 migrations (execution time 00:00.084s)
+2026-08-13 18:13:35.773 [main] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 19
+2026-08-13 18:13:35.779 [main] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-08-13 18:13:36.580 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-13 18:13:37.988 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-13 18:13:38.379 [main] DEBUG c.t.s.jwt.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-08-13 18:13:38.770 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-13 18:13:39.795 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-08-13 18:13:40.244 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 2 endpoints beneath base path '/actuator'
+2026-08-13 18:13:41.041 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-9000"]
+2026-08-13 18:13:41.055 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 9000 (http) with context path '/'
+2026-08-13 18:13:41.070 [main] INFO  com.thesystem.TheSystemApplication - Started TheSystemApplication in 12.375 seconds (process running for 12.993)
+2026-08-13 18:14:00.210 [http-nio-9000-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-13 18:14:00.210 [http-nio-9000-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-08-13 18:14:00.214 [http-nio-9000-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms

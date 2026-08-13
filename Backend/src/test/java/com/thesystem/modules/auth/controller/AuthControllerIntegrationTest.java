@@ -42,7 +42,7 @@ class AuthControllerIntegrationTest {
 
     @Test
     void shouldRegisterUser() throws Exception {
-        RegisterRequest request = new RegisterRequest("test@example.com", "password123");
+        RegisterRequest request = new RegisterRequest("testuser", "test@example.com", "password123");
         TokenResponse tokenResponse = new TokenResponse("accessToken", "refreshToken", "Bearer", 900L);
 
         Mockito.when(TestConfig.authService.register(any(RegisterRequest.class))).thenReturn(tokenResponse);
@@ -59,7 +59,7 @@ class AuthControllerIntegrationTest {
 
     @Test
     void shouldLoginUser() throws Exception {
-        LoginRequest request = new LoginRequest("test@example.com", "password123");
+        LoginRequest request = new LoginRequest("testuser", "password123");
         TokenResponse tokenResponse = new TokenResponse("accessToken", "refreshToken", "Bearer", 900L);
 
         Mockito.when(TestConfig.authService.login(any(LoginRequest.class))).thenReturn(tokenResponse);
@@ -100,10 +100,10 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    void shouldReturnBadRequestForInvalidEmail() throws Exception {
-        RegisterRequest request = new RegisterRequest("invalid-email", "password123");
+    void shouldReturnBadRequestForInvalidUsername() throws Exception {
+        LoginRequest request = new LoginRequest("ab", "password123");
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -113,7 +113,7 @@ class AuthControllerIntegrationTest {
 
     @Test
     void shouldReturnBadRequestForShortPassword() throws Exception {
-        RegisterRequest request = new RegisterRequest("test@example.com", "short");
+        RegisterRequest request = new RegisterRequest("testuser", "test@example.com", "short");
 
         mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -15,4 +15,8 @@ public interface UserService {
     PublicUserResponse getPublicProfile(UUID userId);
 
     PublicUserResponse getPublicProfileByUsername(String username);
+
+    UserProfileResponse createProfileForNewUser(UUID userId, String username);
+
+    UserProfileResponse findProfileByUsername(String username);
 }

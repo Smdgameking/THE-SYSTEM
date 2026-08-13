@@ -14,6 +14,8 @@ import com.thesystem.modules.auth.repository.RoleRepository;
 import com.thesystem.modules.auth.repository.UserRepository;
 import com.thesystem.modules.auth.repository.UserRoleRepository;
 import com.thesystem.modules.auth.service.impl.AuthServiceImpl;
+import com.thesystem.modules.user.dto.UserProfileResponse;
+import com.thesystem.modules.user.service.UserService;
 import com.thesystem.security.service.JwtTokenService;
 import com.thesystem.security.service.PasswordEncoderService;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,19 +60,22 @@ class AuthServiceUnitTest {
     @Mock
     private com.thesystem.modules.auth.mapper.UserMapper userMapper;
 
+    @Mock
+    private UserService userService;
+
     private AuthServiceImpl authService;
 
     @BeforeEach
     void setUp() {
         authService = new AuthServiceImpl(
                 userRepository, roleRepository, userRoleRepository, refreshTokenRepository,
-                passwordEncoderService, jwtTokenService, userMapper
+                passwordEncoderService, jwtTokenService, userMapper, userService
         );
     }
 
     @Test
     void shouldRegisterUserSuccessfully() {
-        RegisterRequest request = new RegisterRequest("test@example.com", "password123");
+        RegisterRequest request = new RegisterRequest("testuser", "test@example.com", "password123");
 
         when(userRepository.existsByEmailAndDeletedAtIsNull("test@example.com")).thenReturn(false);
         when(passwordEncoderService.encode("password123")).thenReturn("hashedPassword");
@@ -96,25 +101,33 @@ class AuthServiceUnitTest {
 
         verify(userRepository).save(any(User.class));
         verify(userRoleRepository).save(any());
+        verify(userService).createProfileForNewUser(any(UUID.class), eq("testuser"));
     }
 
     @Test
     void shouldThrowConflictWhenEmailExists() {
-        RegisterRequest request = new RegisterRequest("existing@example.com", "password123");
+        RegisterRequest request = new RegisterRequest("testuser", "existing@example.com", "password123");
 
         when(userRepository.existsByEmailAndDeletedAtIsNull("existing@example.com")).thenReturn(true);
 
         assertThrows(BusinessException.class, () -> authService.register(request));
 
         verify(userRepository, never()).save(any());
+        verify(userService, never()).createProfileForNewUser(any(), any());
     }
 
     @Test
-    void shouldLoginSuccessfully() {
-        LoginRequest request = new LoginRequest("test@example.com", "password123");
-        User user = new User(UUID.randomUUID(), "test@example.com", "hashedPassword", false);
+    void shouldLoginSuccessfullyWithUsername() {
+        LoginRequest request = new LoginRequest("testuser", "password123");
+        UUID userId = UUID.randomUUID();
+        User user = new User(userId, "test@example.com", "hashedPassword", false);
+        UserProfileResponse profileResponse = new UserProfileResponse(
+                UUID.randomUUID(), userId, "testuser", "Test User", null, null, null, null, null, "ACTIVE",
+                Instant.now(), Instant.now(), Instant.now()
+        );
 
-        when(userRepository.findByEmailAndDeletedAtIsNull("test@example.com")).thenReturn(Optional.of(user));
+        when(userService.findProfileByUsername("testuser")).thenReturn(profileResponse);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(passwordEncoderService.matches("password123", "hashedPassword")).thenReturn(true);
         when(jwtTokenService.generateAccessToken(user.getId(), user.getEmail())).thenReturn("accessToken");
         when(jwtTokenService.generateRefreshToken(user.getId())).thenReturn("refreshToken");
@@ -127,10 +140,53 @@ class AuthServiceUnitTest {
     }
 
     @Test
-    void shouldThrowUnauthorizedWhenLoginWithInvalidEmail() {
-        LoginRequest request = new LoginRequest("nonexistent@example.com", "password123");
+    void shouldThrowUnauthorizedWhenUsernameNotFound() {
+        LoginRequest request = new LoginRequest("nonexistent", "password123");
 
-        when(userRepository.findByEmailAndDeletedAtIsNull("nonexistent@example.com")).thenReturn(Optional.empty());
+        when(userService.findProfileByUsername("nonexistent"))
+                .thenThrow(new BusinessException(ErrorCodes.NOT_FOUND, "Profile not found"));
+
+        assertThrows(BusinessException.class, () -> authService.login(request));
+    }
+
+    @Test
+    void shouldThrowUnauthorizedWhenUserNotFoundForProfile() {
+        LoginRequest request = new LoginRequest("testuser", "password123");
+        UUID userId = UUID.randomUUID();
+        UserProfileResponse profileResponse = new UserProfileResponse(
+                UUID.randomUUID(), userId, "testuser", "Test User", null, null, null, null, null, "ACTIVE",
+                Instant.now(), Instant.now(), Instant.now()
+        );
+
+        when(userService.findProfileByUsername("testuser")).thenReturn(profileResponse);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
+
+        assertThrows(BusinessException.class, () -> authService.login(request));
+    }
+
+    @Test
+    void shouldThrowUnauthorizedWhenPasswordIsWrong() {
+        LoginRequest request = new LoginRequest("testuser", "wrongpassword");
+        UUID userId = UUID.randomUUID();
+        User user = new User(userId, "test@example.com", "hashedPassword", false);
+        UserProfileResponse profileResponse = new UserProfileResponse(
+                UUID.randomUUID(), userId, "testuser", "Test User", null, null, null, null, null, "ACTIVE",
+                Instant.now(), Instant.now(), Instant.now()
+        );
+
+        when(userService.findProfileByUsername("testuser")).thenReturn(profileResponse);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoderService.matches("wrongpassword", "hashedPassword")).thenReturn(false);
+
+        assertThrows(BusinessException.class, () -> authService.login(request));
+    }
+
+    @Test
+    void shouldThrowUnauthorizedWhenUsernameIsBlank() {
+        LoginRequest request = new LoginRequest("", "password123");
+
+        when(userService.findProfileByUsername(""))
+                .thenThrow(new BusinessException(ErrorCodes.NOT_FOUND, "Profile not found"));
 
         assertThrows(BusinessException.class, () -> authService.login(request));
     }

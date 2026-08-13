@@ -8,9 +8,9 @@ export default function DashboardPage() {
       <h1 style={{ fontSize: '28px', marginBottom: '16px', color: '#333' }}>
         Welcome to THE SYSTEM
       </h1>
-      {user?.email && (
+      {user?.username && (
         <p style={{ fontSize: '16px', color: '#666', marginBottom: '24px' }}>
-          Signed in as <strong>{user.email}</strong>
+          Signed in as <strong>{user.username}</strong>
         </p>
       )}
       <button

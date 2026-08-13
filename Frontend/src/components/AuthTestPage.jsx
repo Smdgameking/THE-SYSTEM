@@ -16,9 +16,10 @@ export default function AuthTestPage() {
     loadCurrentUser,
   } = useAuth();
 
+  const [registerUsername, setRegisterUsername] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
-  const [loginEmail, setLoginEmail] = useState('');
+  const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [lastResponse, setLastResponse] = useState(null);
   const [lastStatus, setLastStatus] = useState(null);
@@ -27,7 +28,7 @@ export default function AuthTestPage() {
     e.preventDefault();
     setLastResponse(null);
     setLastStatus(null);
-    const result = await register(registerEmail, registerPassword);
+    const result = await register(registerUsername, registerEmail, registerPassword);
     setLastStatus(result.status);
     setLastResponse(result.data);
   };
@@ -36,7 +37,7 @@ export default function AuthTestPage() {
     e.preventDefault();
     setLastResponse(null);
     setLastStatus(null);
-    const result = await login(loginEmail, loginPassword);
+    const result = await login(loginUsername, loginPassword);
     setLastStatus(result.status);
     setLastResponse(result.data);
   };
@@ -73,6 +74,18 @@ export default function AuthTestPage() {
         <h2>Register</h2>
         <form onSubmit={handleRegister}>
           <div style={{ marginBottom: '10px' }}>
+            <label>Username: </label>
+            <input
+              type="text"
+              value={registerUsername}
+              onChange={(e) => setRegisterUsername(e.target.value)}
+              required
+              minLength={3}
+              maxLength={50}
+              style={{ width: '300px', marginLeft: '10px' }}
+            />
+          </div>
+          <div style={{ marginBottom: '10px' }}>
             <label>Email: </label>
             <input
               type="email"
@@ -101,11 +114,11 @@ export default function AuthTestPage() {
         <h2>Login</h2>
         <form onSubmit={handleLogin}>
           <div style={{ marginBottom: '10px' }}>
-            <label>Email: </label>
+            <label>Username: </label>
             <input
-              type="email"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
+              type="text"
+              value={loginUsername}
+              onChange={(e) => setLoginUsername(e.target.value)}
               required
               style={{ width: '300px', marginLeft: '10px' }}
             />

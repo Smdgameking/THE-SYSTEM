@@ -17,6 +17,8 @@ import com.thesystem.modules.auth.repository.UserRepository;
 import com.thesystem.modules.auth.repository.UserRoleRepository;
 import com.thesystem.modules.auth.mapper.UserMapper;
 import com.thesystem.modules.auth.service.AuthService;
+import com.thesystem.modules.user.dto.UserProfileResponse;
+import com.thesystem.modules.user.service.UserService;
 import com.thesystem.security.service.JwtTokenService;
 import com.thesystem.security.service.PasswordEncoderService;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoderService passwordEncoderService;
     private final JwtTokenService jwtTokenService;
     private final UserMapper userMapper;
+    private final UserService userService;
 
     public AuthServiceImpl(
             UserRepository userRepository,
@@ -47,7 +50,8 @@ public class AuthServiceImpl implements AuthService {
             RefreshTokenRepository refreshTokenRepository,
             PasswordEncoderService passwordEncoderService,
             JwtTokenService jwtTokenService,
-            UserMapper userMapper
+            UserMapper userMapper,
+            UserService userService
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -56,6 +60,7 @@ public class AuthServiceImpl implements AuthService {
         this.passwordEncoderService = passwordEncoderService;
         this.jwtTokenService = jwtTokenService;
         this.userMapper = userMapper;
+        this.userService = userService;
     }
 
     @Override
@@ -80,6 +85,8 @@ public class AuthServiceImpl implements AuthService {
 
         userRoleRepository.save(new UserRole(savedUser.getId(), userRole.getId()));
 
+        userService.createProfileForNewUser(savedUser.getId(), request.username());
+
         String accessToken = jwtTokenService.generateAccessToken(savedUser.getId(), savedUser.getEmail());
         String refreshToken = jwtTokenService.generateRefreshToken(savedUser.getId());
         saveRefreshToken(savedUser.getId(), refreshToken);
@@ -90,11 +97,18 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public TokenResponse login(LoginRequest request) {
-        User user = userRepository.findByEmailAndDeletedAtIsNull(request.email())
-                .orElseThrow(() -> new BusinessException(ErrorCodes.UNAUTHORIZED, "Invalid email or password"));
+        UserProfileResponse profile;
+        try {
+            profile = userService.findProfileByUsername(request.username());
+        } catch (BusinessException e) {
+            throw new BusinessException(ErrorCodes.UNAUTHORIZED, "Invalid username or password");
+        }
+
+        User user = userRepository.findByIdAndDeletedAtIsNull(profile.userId())
+                .orElseThrow(() -> new BusinessException(ErrorCodes.UNAUTHORIZED, "Invalid username or password"));
 
         if (!passwordEncoderService.matches(request.password(), user.getPasswordHash())) {
-            throw new BusinessException(ErrorCodes.UNAUTHORIZED, "Invalid email or password");
+            throw new BusinessException(ErrorCodes.UNAUTHORIZED, "Invalid username or password");
         }
 
         String accessToken = jwtTokenService.generateAccessToken(user.getId(), user.getEmail());

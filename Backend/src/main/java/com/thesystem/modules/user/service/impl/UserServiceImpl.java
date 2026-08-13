@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserProfileResponse getMyProfile(UUID userId) {
         UserProfile profile = userProfileRepository.findByUserIdAndDeletedAtIsNull(userId)
-                .orElseGet(() -> createDefaultProfile(userId));
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Profile not found"));
         updateLastActive(profile);
         return userProfileMapper.toUserProfileResponse(profile);
     }
@@ -87,6 +87,29 @@ public class UserServiceImpl implements UserService {
         UserProfile profile = userProfileRepository.findByUsernameAndDeletedAtIsNull(username)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Profile not found"));
         return userProfileMapper.toPublicUserResponse(profile);
+    }
+
+    @Override
+    @Transactional
+    public UserProfileResponse createProfileForNewUser(UUID userId, String username) {
+        if (userProfileRepository.existsByUsernameAndDeletedAtIsNull(username)) {
+            throw new BusinessException(ErrorCodes.CONFLICT, "Username already exists");
+        }
+
+        UserProfile profile = new UserProfile();
+        profile.setUserId(userId);
+        profile.setUsername(username);
+        profile.setAccountStatus("ACTIVE");
+        UserProfile saved = userProfileRepository.save(profile);
+        return userProfileMapper.toUserProfileResponse(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserProfileResponse findProfileByUsername(String username) {
+        UserProfile profile = userProfileRepository.findByUsernameAndDeletedAtIsNull(username)
+                .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Profile not found"));
+        return userProfileMapper.toUserProfileResponse(profile);
     }
 
     private UserProfile createDefaultProfile(UUID userId) {
