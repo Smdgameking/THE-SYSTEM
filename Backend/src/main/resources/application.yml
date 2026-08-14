@@ -1,8 +1,4 @@
 spring:
-  config:
-    activate:
-      on-profile: "!dev & !prod"
-
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/thesystem}
     username: ${DATABASE_USERNAME:thesystem}
@@ -31,6 +27,9 @@ server:
   error:
     include-message: always
     include-binding-errors: always
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
 
 management:
   endpoints:
@@ -48,6 +47,13 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
+
+logging:
+  level:
+    com.thesystem: ${LOG_LEVEL_COM_THESYSTEM:INFO}
+    org.springframework: ${LOG_LEVEL_SPRING:WARN}
+    org.hibernate: ${LOG_LEVEL_HIBERNATE:WARN}
+    org.flywaydb: ${LOG_LEVEL_FLYWAY:INFO}
 
 thesystem:
   jwt:

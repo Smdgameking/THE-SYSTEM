@@ -11,7 +11,7 @@ RUN chown -R thesystem:thesystem /app
 
 USER thesystem
 
-EXPOSE 8080
+EXPOSE 9000
 
 ENTRYPOINT ["java", \
   "-XX:+UseContainerSupport", \

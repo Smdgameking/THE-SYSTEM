@@ -26,15 +26,15 @@ services:
       dockerfile: Dockerfile
     container_name: thesystem-app
     environment:
-      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/thesystem
       SPRING_DATASOURCE_USERNAME: thesystem
       SPRING_DATASOURCE_PASSWORD: thesystem
       SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/thesystem
       SPRING_FLYWAY_USER: thesystem
       SPRING_FLYWAY_PASSWORD: thesystem
+      THE_SYSTEM_JWT_SECRET: ${THE_SYSTEM_JWT_SECRET}
     ports:
-      - "8080:8080"
+      - "9000:9000"
     depends_on:
       postgres:
         condition: service_healthy

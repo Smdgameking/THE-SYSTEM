@@ -6,6 +6,7 @@ src/main/resources/db/migration/*
 !src/main/resources/db/migration/.gitkeep
 .gradle
 build
+bin
 out
 *.iml
 .idea
