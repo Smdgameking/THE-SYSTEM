@@ -57,6 +57,7 @@ public class JwtTokenService {
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim("type", "refresh")
+                .id(UUID.randomUUID().toString())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusMillis(refreshTokenExpirationMs)))
                 .signWith(getSigningKey())

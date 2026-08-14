@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -8,6 +9,9 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { register } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,30 +24,14 @@ export default function RegisterPage() {
 
     setIsLoading(true);
 
-    try {
-      const response = await fetch('/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
-      });
+    const result = await register(username, email, password);
+    setIsLoading(false);
 
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        const message = data.error?.message || data.message || 'Registration failed';
-        setError(message);
-        setIsLoading(false);
-        return;
-      }
-
-      const { accessToken, refreshToken } = data.data;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-
-      window.location.href = '/dashboard';
-    } catch {
-      setError('Network error. Please try again.');
-      setIsLoading(false);
+    if (result.success) {
+      navigate('/dashboard', { replace: true });
+    } else {
+      const message = result.data?.error?.message || result.data?.message || 'Registration failed';
+      setError(message);
     }
   };
 
