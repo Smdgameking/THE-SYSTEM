@@ -11932,3 +11932,9 @@ Identify and stop the process that's listening on port 9000 or configure this ap
 2026-08-14 14:30:49.760 [main] INFO  o.f.core.internal.command.DbValidate - Successfully validated 19 migrations (execution time 00:00.088s)
 2026-08-14 14:30:49.790 [main] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 19
 2026-08-14 14:30:49.797 [main] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-08-14 14:30:59.842 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-9000"]
+2026-08-14 14:30:59.892 [main] INFO  com.thesystem.TheSystemApplication - Started TheSystemApplication in 17.351 seconds (process running for 18.0)
+2026-08-14 14:31:01.135 [http-nio-9000-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-14 14:31:12.181 [http-nio-9000-exec-3] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 0, SQLState: 23502
+2026-08-14 14:31:12.181 [http-nio-9000-exec-3] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - ERROR: null value in column "execution_type" of relation "tasks" violates not-null constraint
+  Detail: Failing row contains (c6b5205a-4a64-450c-85ca-2dc01f2bf9d7, 27028578-0d05-43a3-aa6e-106339c4124e, null, null, Smoke Test Task, created by phase2 smoke test, DRAFT, HIGH, Testing, null, null, null, null, 2026-09-01 12:00:00, null, null, f, null, ["smoke", "phase2"], null, null, null, null, null, PRIVATE, 2026-08-14 09:01:12.167839, 2026-08-14 09:01:12.167862, null, null, null, EASY).

@@ -93,7 +93,7 @@ public class TaskServiceImpl implements TaskService {
         task.setPriority(request.priority() != null ? request.priority() : TaskPriority.NORMAL);
         task.setDifficulty(request.difficulty() != null ? request.difficulty() : TaskDifficulty.NORMAL);
         task.setCategory(request.category());
-        task.setExecutionType(request.executionType());
+        task.setExecutionType(request.executionType() != null ? request.executionType() : TaskExecutionType.BOOLEAN);
         task.setEstimatedDuration(request.estimatedDuration());
         task.setStartDate(request.startDate());
         task.setDueDate(request.dueDate());
