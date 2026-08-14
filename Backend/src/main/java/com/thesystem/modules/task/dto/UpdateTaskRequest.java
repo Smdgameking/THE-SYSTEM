@@ -26,7 +26,7 @@ public record UpdateTaskRequest(
         TaskPriority priority,
         TaskDifficulty difficulty,
 
-        @Size(max = 100, message = "Category must not exceed 100 characters")
+        @Size(max = 50, message = "Category must not exceed 50 characters")
         String category,
 
         TaskExecutionType executionType,

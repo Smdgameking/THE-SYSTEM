@@ -54,3 +54,21 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+// Load local environment variables from Backend/.env (gitignored) so the
+// app runs without exporting THE_SYSTEM_JWT_SECRET manually in every shell.
+// Already-set OS/IDE environment variables always take precedence.
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    val dotEnv = file(".env")
+    if (dotEnv.exists()) {
+        dotEnv.readLines()
+            .filter { it.isNotBlank() && !it.trimStart().startsWith("#") && it.contains('=') }
+            .forEach { line ->
+                val key = line.substringBefore('=').trim()
+                val value = line.substringAfter('=').trim().trim('"', '\'')
+                if (System.getenv(key) == null) {
+                    environment(key, value)
+                }
+            }
+    }
+}

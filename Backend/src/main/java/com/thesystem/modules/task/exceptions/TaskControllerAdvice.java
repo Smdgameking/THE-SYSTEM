@@ -1,6 +1,8 @@
 package com.thesystem.modules.task.exceptions;
 
+import com.thesystem.common.exception.BusinessException;
 import com.thesystem.common.response.ApiResponse;
+import com.thesystem.common.constants.ErrorCodes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,6 +18,16 @@ public class TaskControllerAdvice {
     public ResponseEntity<ApiResponse<Object>> handleTaskException(TaskException ex) {
         String requestId = UUID.randomUUID().toString();
         return ResponseEntity.status(ex.getStatus())
+                .body(ApiResponse.error(ex.getErrorCode(), ex.getMessage(), requestId));
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Object>> handleBusinessException(BusinessException ex) {
+        String requestId = UUID.randomUUID().toString();
+        HttpStatus status = ErrorCodes.NOT_FOUND.equals(ex.getErrorCode())
+                ? HttpStatus.NOT_FOUND
+                : HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status)
                 .body(ApiResponse.error(ex.getErrorCode(), ex.getMessage(), requestId));
     }
 

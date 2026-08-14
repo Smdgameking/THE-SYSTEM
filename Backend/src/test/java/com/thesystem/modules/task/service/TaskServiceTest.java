@@ -184,6 +184,25 @@ class TaskServiceTest {
     }
 
     @Test
+    void shouldApplyStatusUpdateOnUpdateTask() {
+        UpdateTaskRequest request = new UpdateTaskRequest(
+                null, null, null, null, TaskStatus.IN_PROGRESS, null, null, null, null,
+                null, null, null, null, null, null, null, null, List.of(), List.of(), null,
+                null, null, null, null
+        );
+        when(taskRepository.findByIdAndUserIdAndDeletedAtIsNull(taskId, userId)).thenReturn(Optional.of(task));
+        ArgumentCaptor<Task> taskCaptor = ArgumentCaptor.forClass(Task.class);
+        when(taskRepository.save(taskCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(taskMapper.toTaskResponse(any(Task.class))).thenReturn(taskResponse(taskId, "Test Task", TaskStatus.IN_PROGRESS));
+
+        TaskResponse response = taskService.updateTask(userId, taskId, request);
+
+        assertThat(response.status()).isEqualTo(TaskStatus.IN_PROGRESS);
+        assertThat(taskCaptor.getValue().getStatus()).isEqualTo(TaskStatus.IN_PROGRESS);
+        verify(eventPublisher).publishEvent(any(TaskUpdatedEvent.class));
+    }
+
+    @Test
     void shouldDeleteTaskSuccessfully() {
         when(taskRepository.findByIdAndUserIdAndDeletedAtIsNull(taskId, userId)).thenReturn(Optional.of(task));
         when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -297,6 +316,8 @@ class TaskServiceTest {
                 null, null, null, null, null, null, List.of(), List.of(), null, null, null, null, null
         );
         when(taskRepository.findByIdAndUserIdAndDeletedAtIsNull(taskId, userId)).thenReturn(Optional.of(task));
+        when(executionProviderRegistry.getProvider(TaskExecutionType.BOOLEAN))
+                .thenReturn(new BooleanExecutionProvider());
         when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> {
             Task t = invocation.getArgument(0);
             t.setId(UUID.randomUUID());

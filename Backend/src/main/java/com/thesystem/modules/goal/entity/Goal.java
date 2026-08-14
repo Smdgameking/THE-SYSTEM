@@ -12,6 +12,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -73,9 +75,11 @@ public class Goal extends BaseEntity {
     @Column(name = "completion_strategy")
     private CompletionStrategy completionStrategy;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "tags", columnDefinition = "jsonb")
     private String tags;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "custom_metadata", columnDefinition = "jsonb")
     private String customMetadata;
 

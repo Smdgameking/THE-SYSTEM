@@ -131,6 +131,7 @@ public class XpServiceImpl implements XpService {
             throw new InvalidTransactionException("XP account already exists");
         }
         XpAccount account = new XpAccount();
+        account.setId(UUID.randomUUID());
         account.setUserId(userId);
         account.setCurrentXp(0);
         account.setCurrentLevel(1);
@@ -234,6 +235,7 @@ public class XpServiceImpl implements XpService {
 
     private XpAccount createDefaultAccount(UUID userId) {
         XpAccount account = new XpAccount();
+        account.setId(UUID.randomUUID());
         account.setUserId(userId);
         account.setCurrentXp(0);
         account.setCurrentLevel(1);
@@ -547,6 +549,7 @@ public class XpServiceImpl implements XpService {
                 .findByUserIdAndAchievementIdAndDeletedAtIsNull(userId, achievementId)
                 .orElseGet(() -> {
                     UserAchievement ua = new UserAchievement();
+                    ua.setId(UUID.randomUUID());
                     ua.setUserId(userId);
                     ua.setAchievementId(achievementId);
                     ua.setCurrentProgress(0);
@@ -856,6 +859,7 @@ public class XpServiceImpl implements XpService {
                 calculation.primaryPolicyId(), calculation.multiplier(), calculation.baseXp());
 
         RewardHistory rewardHistory = new RewardHistory();
+        rewardHistory.setId(UUID.randomUUID());
         rewardHistory.setUserId(userId);
         rewardHistory.setRewardType(com.thesystem.modules.xp.enums.RewardType.ADMIN);
         rewardHistory.setSourceType("REWARD");

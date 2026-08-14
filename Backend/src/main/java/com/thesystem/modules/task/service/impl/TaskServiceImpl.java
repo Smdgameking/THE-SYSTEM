@@ -155,6 +155,7 @@ public class TaskServiceImpl implements TaskService {
         if (request.goalId() != null) task.setGoalId(request.goalId());
         if (request.parentTaskId() != null) task.setParentTaskId(request.parentTaskId());
         if (request.priority() != null) task.setPriority(request.priority());
+        if (request.status() != null) task.setStatus(request.status());
         if (request.difficulty() != null) task.setDifficulty(request.difficulty());
         if (request.category() != null) task.setCategory(request.category());
         if (request.executionType() != null) task.setExecutionType(request.executionType());

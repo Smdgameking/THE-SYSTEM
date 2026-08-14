@@ -1,6 +1,8 @@
 package com.thesystem.modules.task.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thesystem.common.constants.ErrorCodes;
+import com.thesystem.common.exception.BusinessException;
 import com.thesystem.modules.task.dto.CreateTaskRequest;
 import com.thesystem.modules.task.dto.DependencyResponse;
 import com.thesystem.modules.task.dto.RecurringConfigResponse;
@@ -283,5 +285,29 @@ class TaskControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.frequency").value("DAILY"));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenTaskMissing() throws Exception {
+        UUID taskId = UUID.randomUUID();
+        Mockito.doThrow(new BusinessException(ErrorCodes.NOT_FOUND, "Task not found"))
+                .when(TestConfig.taskService).getTask(any(UUID.class), any(UUID.class));
+
+        mockMvc.perform(get("/api/v1/tasks/" + taskId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
+    }
+
+    @Test
+    void shouldReturnValidationErrorOnInvalidTransition() throws Exception {
+        UUID taskId = UUID.randomUUID();
+        Mockito.doThrow(new BusinessException(ErrorCodes.VALIDATION_ERROR, "Invalid state transition"))
+                .when(TestConfig.taskService).completeTask(any(UUID.class), any(UUID.class));
+
+        mockMvc.perform(post("/api/v1/tasks/" + taskId + "/complete"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
     }
 }

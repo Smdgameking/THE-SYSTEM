@@ -9,6 +9,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -40,6 +42,7 @@ public class AchievementDefinition extends BaseEntity {
     @Column(name = "requirement_type", nullable = false)
     private RequirementType requirementType;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "requirement_value", columnDefinition = "jsonb")
     private String requirementValue;
 
