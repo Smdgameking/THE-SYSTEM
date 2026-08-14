@@ -141,6 +141,50 @@ class TaskControllerIntegrationTest {
     }
 
     @Test
+    void shouldRejectCreateTaskWithBlankTitle() throws Exception {
+        String body = """
+                {"title": "", "priority": "NORMAL"}
+                """;
+
+        mockMvc.perform(post("/api/v1/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void shouldRejectCreateTaskWithOversizedDescription() throws Exception {
+        String oversized = "x".repeat(5001);
+        String body = """
+                {"title": "Valid Task", "description": "%s"}
+                """.formatted(oversized);
+
+        mockMvc.perform(post("/api/v1/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void shouldRejectUpdateTaskWithBlankTitle() throws Exception {
+        UUID taskId = UUID.randomUUID();
+        String body = """
+                {"title": ""}
+                """;
+
+        mockMvc.perform(patch("/api/v1/tasks/" + taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
     void shouldCompleteTask() throws Exception {
         UUID taskId = UUID.randomUUID();
         TaskResponse response = new TaskResponse(

@@ -5,8 +5,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -16,6 +19,7 @@ import java.util.UUID;
 public class RecurringTaskConfig {
 
     @Id
+    @GeneratedValue
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
@@ -32,6 +36,7 @@ public class RecurringTaskConfig {
     @Column(name = "cron_expression")
     private String cronExpression;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "days_of_week", columnDefinition = "jsonb")
     private String daysOfWeek;
 
@@ -41,6 +46,7 @@ public class RecurringTaskConfig {
     @Column(name = "month")
     private Integer month;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "exception_dates", columnDefinition = "jsonb")
     private String exceptionDates;
 

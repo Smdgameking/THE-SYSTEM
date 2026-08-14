@@ -99,7 +99,7 @@ public class TaskServiceImpl implements TaskService {
         task.setDueDate(request.dueDate());
         task.setReminderDate(request.reminderDate());
         task.setIsRecurring(false);
-        task.setTags(request.tags() != null ? String.join(",", request.tags()) : null);
+        task.setTags(toJson(request.tags()));
         task.setAttachments(toJson(request.attachments()));
         task.setNotes(request.notes());
         task.setCompletionEvidence(toJson(request.completionEvidence()));
@@ -166,7 +166,7 @@ public class TaskServiceImpl implements TaskService {
         if (request.reminderDate() != null) task.setReminderDate(request.reminderDate());
         if (request.isRecurring() != null) task.setIsRecurring(request.isRecurring());
         if (request.recurringConfigId() != null) task.setRecurringConfigId(request.recurringConfigId());
-        if (request.tags() != null) task.setTags(String.join(",", request.tags()));
+        if (request.tags() != null) task.setTags(toJson(request.tags()));
         if (request.attachments() != null) task.setAttachments(toJson(request.attachments()));
         if (request.notes() != null) task.setNotes(request.notes());
         if (request.completionEvidence() != null) task.setCompletionEvidence(toJson(request.completionEvidence()));
@@ -481,7 +481,7 @@ public class TaskServiceImpl implements TaskService {
         config.setFrequency(request.frequency());
         config.setIntervalValue(request.intervalValue());
         config.setCronExpression(request.cronExpression());
-        config.setDaysOfWeek(request.daysOfWeek() != null ? String.join(",", request.daysOfWeek().stream().map(String::valueOf).collect(Collectors.toList())) : null);
+        config.setDaysOfWeek(request.daysOfWeek() != null ? toJson(request.daysOfWeek()) : null);
         config.setDayOfMonth(request.dayOfMonth());
         config.setMonth(request.month());
         config.setExceptionDates(request.exceptionDates() != null ? toJson(request.exceptionDates()) : null);
@@ -504,7 +504,7 @@ public class TaskServiceImpl implements TaskService {
         config.setFrequency(request.frequency());
         config.setIntervalValue(request.intervalValue());
         config.setCronExpression(request.cronExpression());
-        config.setDaysOfWeek(request.daysOfWeek() != null ? String.join(",", request.daysOfWeek().stream().map(String::valueOf).collect(Collectors.toList())) : null);
+        config.setDaysOfWeek(request.daysOfWeek() != null ? toJson(request.daysOfWeek()) : null);
         config.setDayOfMonth(request.dayOfMonth());
         config.setMonth(request.month());
         config.setExceptionDates(request.exceptionDates() != null ? toJson(request.exceptionDates()) : null);

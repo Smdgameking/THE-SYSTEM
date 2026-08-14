@@ -1,32 +1,43 @@
 import { useAuth } from '../auth/useAuth';
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const displayName = user?.displayName || user?.username || 'Operator';
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px' }}>
-      <h1 style={{ fontSize: '28px', marginBottom: '16px', color: '#333' }}>
-        Welcome to THE SYSTEM
-      </h1>
-      {user?.username && (
-        <p style={{ fontSize: '16px', color: '#666', marginBottom: '24px' }}>
-          Signed in as <strong>{user.username}</strong>
-        </p>
-      )}
-      <button
-        onClick={logout}
-        style={{
-          padding: '10px 20px',
-          backgroundColor: '#333',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          fontSize: '14px',
-          cursor: 'pointer',
-        }}
-      >
-        Logout
-      </button>
+    <div className="page">
+      <header className="page-header">
+        <div>
+          <h1 className="page-title">Welcome back, {displayName}</h1>
+          <p className="page-subtitle">
+            The system is online. Your operational modules are standing by.
+          </p>
+        </div>
+      </header>
+
+      <div className="page-grid">
+        <section className="page-card">
+          <p className="page-card-label">Operator</p>
+          <p className="page-card-value">{user?.username ?? '—'}</p>
+          <p className="page-card-note">
+            {user?.accountStatus ? `${user.accountStatus}` : 'Active operator'}
+          </p>
+        </section>
+        <section className="page-card">
+          <p className="page-card-label">System Status</p>
+          <p className="page-card-value">Online</p>
+          <p className="page-card-note">
+            Authentication verified for this session.
+          </p>
+        </section>
+        <section className="page-card">
+          <p className="page-card-label">Modules</p>
+          <p className="page-card-value">5</p>
+          <p className="page-card-note">
+            Dashboard, Tasks, Goals, Progress, Settings.
+          </p>
+        </section>
+      </div>
     </div>
   );
 }

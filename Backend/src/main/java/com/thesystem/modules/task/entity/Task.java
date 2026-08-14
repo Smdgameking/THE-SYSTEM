@@ -10,8 +10,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -21,6 +24,7 @@ import java.util.UUID;
 public class Task extends BaseEntity {
 
     @Id
+    @GeneratedValue
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
@@ -82,21 +86,26 @@ public class Task extends BaseEntity {
     @Column(name = "recurring_config_id")
     private UUID recurringConfigId;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "tags", columnDefinition = "jsonb")
     private String tags;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "attachments", columnDefinition = "jsonb")
     private String attachments;
 
     @Column(name = "notes")
     private String notes;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "completion_evidence", columnDefinition = "jsonb")
     private String completionEvidence;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "execution_state", columnDefinition = "jsonb")
     private String executionState;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "custom_metadata", columnDefinition = "jsonb")
     private String customMetadata;
 
