@@ -80,7 +80,6 @@ class SecurityIntegrationTest {
         testUserEmail = "test-" + UUID.randomUUID() + "@example.com";
 
         User user = new User();
-        user.setId(UUID.randomUUID());
         user.setEmail(testUserEmail);
         user.setPasswordHash("hashed-password");
         user.setEmailVerified(true);
@@ -102,7 +101,6 @@ class SecurityIntegrationTest {
         userRoleRepository.save(userRole);
 
         UserProfile profile = new UserProfile();
-        profile.setId(testUserId);
         profile.setUserId(testUserId);
         profile.setAccountStatus("ACTIVE");
         userProfileRepository.save(profile);

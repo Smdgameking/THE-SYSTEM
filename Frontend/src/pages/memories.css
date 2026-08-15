@@ -1,0 +1,410 @@
+/* ------------------------------------------------------------------ */
+/* Buttons                                                             */
+/* ------------------------------------------------------------------ */
+
+.memory-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--sys-border);
+  background: transparent;
+  color: var(--sys-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.memory-btn:hover:not(:disabled) {
+  color: var(--sys-text);
+  border-color: var(--sys-border-strong);
+}
+
+.memory-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.memory-btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
+}
+
+.memory-btn-primary:hover:not(:disabled) {
+  color: #fff;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.45);
+}
+
+.memory-btn-ghost {
+  background: var(--sys-accent-soft);
+}
+
+.memory-btn-danger:hover:not(:disabled) {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: var(--sys-danger-soft);
+}
+
+.memory-new-btn {
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Create / edit form                                                  */
+/* ------------------------------------------------------------------ */
+
+.memory-form {
+  background: var(--sys-panel);
+  border: 1px solid var(--sys-border-strong);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.memory-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.memory-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.memory-form-title {
+  grid-column: span 2;
+}
+
+.memory-form-content {
+  grid-column: span 3;
+}
+
+.memory-form-field label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--sys-text-muted);
+}
+
+.memory-form-field input,
+.memory-form-field select,
+.memory-form-field textarea {
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--sys-border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--sys-text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.memory-form-field input:focus,
+.memory-form-field select:focus,
+.memory-form-field textarea:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.memory-form-field select {
+  cursor: pointer;
+}
+
+.memory-form-field select option {
+  background: #0c0c14;
+  color: var(--sys-text);
+}
+
+.memory-form-error {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: var(--sys-danger-soft);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.memory-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Toolbar (tabs + search)                                             */
+/* ------------------------------------------------------------------ */
+
+.memory-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.memory-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.memory-tab {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--sys-border);
+  background: transparent;
+  color: var(--sys-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.memory-tab:hover {
+  color: var(--sys-text);
+  border-color: var(--sys-border-strong);
+}
+
+.memory-tab-active {
+  color: #c7d2fe;
+  background: var(--sys-accent-soft);
+  border-color: var(--sys-border-strong);
+}
+
+.memory-search {
+  padding: 8px 12px;
+  min-width: 220px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--sys-border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--sys-text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+
+.memory-search:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* ------------------------------------------------------------------ */
+/* List                                                                */
+/* ------------------------------------------------------------------ */
+
+.memory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.memory-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  background: var(--sys-panel);
+  border: 1px solid var(--sys-border);
+  border-radius: 12px;
+  transition: border-color 0.15s ease;
+}
+
+.memory-card:hover {
+  border-color: var(--sys-border-strong);
+}
+
+.memory-card-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.memory-card-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.memory-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--sys-text);
+  margin: 0;
+}
+
+.memory-card-content {
+  font-size: 14px;
+  color: var(--sys-text-secondary);
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.memory-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+}
+
+.memory-meta-item {
+  font-size: 12px;
+  color: var(--sys-text-muted);
+}
+
+.memory-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Badges                                                              */
+/* ------------------------------------------------------------------ */
+
+.memory-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: 1px solid var(--sys-border);
+  color: var(--sys-text-secondary);
+}
+
+.memory-badge-type {
+  border-color: transparent;
+  background: var(--sys-accent-soft);
+  color: #c7d2fe;
+}
+
+.memory-type-note {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+}
+
+.memory-type-fact {
+  background: rgba(59, 130, 246, 0.14);
+  color: #60a5fa;
+}
+
+.memory-type-preference {
+  background: rgba(139, 92, 246, 0.14);
+  color: #a78bfa;
+}
+
+.memory-type-insight {
+  background: rgba(16, 185, 129, 0.14);
+  color: #34d399;
+}
+
+.memory-type-signal {
+  background: rgba(249, 115, 22, 0.14);
+  color: #fb923c;
+}
+
+.memory-badge-importance {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.memory-importance-low {
+  color: #94a3b8;
+}
+
+.memory-importance-high {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+}
+
+.memory-importance-critical {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+
+.memory-badge-source {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+}
+
+/* ------------------------------------------------------------------ */
+/* States                                                              */
+/* ------------------------------------------------------------------ */
+
+.memory-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 24px;
+  text-align: center;
+  border: 1px dashed var(--sys-border-strong);
+  border-radius: 12px;
+  background: var(--sys-panel);
+  color: var(--sys-text-secondary);
+  font-size: 14px;
+}
+
+.memory-state-error {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.memory-banner-error {
+  padding: 12px 16px;
+  background: var(--sys-danger-soft);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                          */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 720px) {
+  .memory-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .memory-form-title,
+  .memory-form-content {
+    grid-column: span 1;
+  }
+
+  .memory-card {
+    flex-direction: column;
+  }
+
+  .memory-card-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .memory-card-actions .memory-btn {
+    flex: 1;
+  }
+
+  .memory-search {
+    width: 100%;
+  }
+}

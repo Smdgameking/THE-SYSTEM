@@ -6,6 +6,7 @@ import './layout.css';
 
 const SECTION_TITLES = {
   '/dashboard': 'Dashboard',
+  '/profile': 'Profile',
   '/tasks': 'Tasks',
   '/goals': 'Goals',
   '/progress': 'Progress',

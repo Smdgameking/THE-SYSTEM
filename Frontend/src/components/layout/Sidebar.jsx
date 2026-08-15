@@ -3,6 +3,7 @@ import {
   GridIcon,
   ListIcon,
   TargetIcon,
+  MemoryIcon,
   TrendingUpIcon,
   SettingsIcon,
   UserIcon,
@@ -13,6 +14,7 @@ const NAV_SECTIONS = [
     label: 'Overview',
     items: [
       { to: '/dashboard', label: 'Dashboard', icon: GridIcon, end: true },
+      { to: '/profile', label: 'Profile', icon: UserIcon },
     ],
   },
   {
@@ -20,6 +22,7 @@ const NAV_SECTIONS = [
     items: [
       { to: '/tasks', label: 'Tasks', icon: ListIcon },
       { to: '/goals', label: 'Goals', icon: TargetIcon },
+      { to: '/memories', label: 'Memories', icon: MemoryIcon },
       { to: '/progress', label: 'Progress', icon: TrendingUpIcon },
     ],
   },

@@ -95,24 +95,21 @@ class StreakXpIntegrationTest {
     private GoalRepository goalRepository;
 
     private UUID userId;
-    private UUID taskId;
     private UUID goalId;
 
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        taskId = UUID.randomUUID();
         goalId = UUID.randomUUID();
 
         User user = new User();
-        user.setId(userId);
         user.setEmail("test-" + userId + "@example.com");
         user.setPasswordHash("hash");
         user.setEmailVerified(true);
         userRepository.save(user);
+        userId = user.getId();
 
         UserProfile profile = new UserProfile();
-        profile.setId(userId);
         profile.setUserId(userId);
         profile.setTimezone("UTC");
         profile.setAccountStatus("ACTIVE");
@@ -174,8 +171,8 @@ class StreakXpIntegrationTest {
         streak.setLastActivityDate(yesterday);
         userStreakRepository.save(streak);
 
-        Task task = createTask(taskId, userId);
-        taskService.completeTask(userId, taskId);
+        Task task = createTask(userId);
+        taskService.completeTask(userId, task.getId());
 
         UserStreak updatedStreak = userStreakRepository.findByUserIdAndDeletedAtIsNull(userId).orElseThrow();
         assertThat(updatedStreak.getCurrentStreak()).isEqualTo(3);
@@ -240,8 +237,8 @@ class StreakXpIntegrationTest {
         streak.setLastActivityDate(yesterday);
         userStreakRepository.save(streak);
 
-        Task task = createTask(taskId, userId);
-        taskService.completeTask(userId, taskId);
+        Task task = createTask(userId);
+        taskService.completeTask(userId, task.getId());
 
         Goal goal = createGoal(goalId, userId);
         goalService.completeGoal(userId, goalId);
@@ -274,9 +271,9 @@ class StreakXpIntegrationTest {
         streak.setLastActivityDate(yesterday);
         userStreakRepository.save(streak);
 
-        Task task = createTask(taskId, userId);
+        Task task = createTask(userId);
         Instant occurredAt = java.time.Instant.now();
-        TaskCompletedEvent event = new TaskCompletedEvent(taskId, userId, null, task.getTitle(),
+        TaskCompletedEvent event = new TaskCompletedEvent(task.getId(), userId, null, task.getTitle(),
                 task.getExecutionType() != null ? task.getExecutionType().name() : null,
                 task.getDifficulty() != null ? task.getDifficulty().name() : null,
                 occurredAt);
@@ -288,7 +285,7 @@ class StreakXpIntegrationTest {
         assertThat(updatedStreak.getCurrentStreak()).isEqualTo(3);
 
         long historyCount = userStreakHistoryRepository.findByUserIdAndDeletedAtIsNullOrderByActivityDateAscOccurredAtAsc(userId).stream()
-                .filter(h -> h.getSourceId().equals(taskId))
+                .filter(h -> h.getSourceId().equals(task.getId()))
                 .count();
         assertThat(historyCount).isEqualTo(1);
 
@@ -298,8 +295,8 @@ class StreakXpIntegrationTest {
 
     @Test
     void shouldUseZeroStreakWhenNoUserStreakExists() {
-        Task task = createTask(taskId, userId);
-        taskService.completeTask(userId, taskId);
+        Task task = createTask(userId);
+        taskService.completeTask(userId, task.getId());
 
         List<XpTransaction> transactions = xpTransactionRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId);
         assertThat(transactions).hasSize(1);
@@ -321,9 +318,8 @@ class StreakXpIntegrationTest {
         userStreakHistoryRepository.save(history);
     }
 
-    private Task createTask(UUID taskId, UUID userId) {
+    private Task createTask(UUID userId) {
         Task task = new Task();
-        task.setId(taskId);
         task.setUserId(userId);
         task.setTitle("Integration Test Task");
         task.setDescription("Test task for integration testing");
@@ -383,8 +379,8 @@ class StreakXpIntegrationTest {
         streak3.setSortOrder(1);
         achievementDefinitionRepository.save(streak3);
 
-        Task task = createTask(taskId, userId);
-        taskService.completeTask(userId, taskId);
+        Task task = createTask(userId);
+        taskService.completeTask(userId, task.getId());
 
         UserStreak updatedStreak = userStreakRepository.findByUserIdAndDeletedAtIsNull(userId).orElseThrow();
         assertThat(updatedStreak.getCurrentStreak()).isEqualTo(3);

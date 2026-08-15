@@ -6,6 +6,8 @@ import com.thesystem.modules.user.dto.PublicUserResponse;
 import com.thesystem.modules.user.dto.UpdateProfileRequest;
 import com.thesystem.modules.user.dto.UserProfileResponse;
 import com.thesystem.modules.user.entity.UserProfile;
+import com.thesystem.modules.user.events.UserProfileCreatedEvent;
+import com.thesystem.modules.user.events.UserProfileUpdatedEvent;
 import com.thesystem.modules.user.mapper.UserProfileMapper;
 import com.thesystem.modules.user.repository.UserProfileRepository;
 import com.thesystem.modules.user.service.impl.UserServiceImpl;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -33,6 +36,9 @@ class UserServiceUnitTest {
     @Mock
     private UserProfileMapper userProfileMapper;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private UserServiceImpl userService;
 
     private UUID userId;
@@ -40,7 +46,7 @@ class UserServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userProfileRepository, userProfileMapper);
+        userService = new UserServiceImpl(userProfileRepository, userProfileMapper, eventPublisher);
         userId = UUID.randomUUID();
         profile = new UserProfile(UUID.randomUUID(), userId, "johndoe", "John Doe");
     }
@@ -89,6 +95,7 @@ class UserServiceUnitTest {
         assertThat(response.userId()).isEqualTo(newUserId);
         assertThat(response.accountStatus()).isEqualTo("ACTIVE");
         verify(userProfileRepository).save(any(UserProfile.class));
+        verify(eventPublisher).publishEvent(any(UserProfileCreatedEvent.class));
     }
 
     @Test
@@ -105,6 +112,7 @@ class UserServiceUnitTest {
         assertThat(response).isNotNull();
         assertThat(response.username()).isEqualTo("newusername");
         verify(userProfileRepository).save(profile);
+        verify(eventPublisher).publishEvent(any(UserProfileUpdatedEvent.class));
     }
 
     @Test
@@ -116,6 +124,7 @@ class UserServiceUnitTest {
 
         assertThrows(BusinessException.class, () -> userService.updateMyProfile(userId, request));
         verify(userProfileRepository, never()).save(any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test

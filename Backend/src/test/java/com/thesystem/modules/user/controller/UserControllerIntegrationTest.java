@@ -1,6 +1,8 @@
 package com.thesystem.modules.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thesystem.common.constants.ErrorCodes;
+import com.thesystem.common.exception.BusinessException;
 import com.thesystem.modules.user.dto.PublicUserResponse;
 import com.thesystem.modules.user.dto.UpdateProfileRequest;
 import com.thesystem.modules.user.dto.UserProfileResponse;
@@ -131,5 +133,31 @@ class UserControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.username").value("johndoe"));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenProfileMissing() throws Exception {
+        Mockito.when(TestConfig.userService.getMyProfile(any(UUID.class)))
+                .thenThrow(new BusinessException(ErrorCodes.NOT_FOUND, "Profile not found"));
+
+        mockMvc.perform(get("/api/v1/users/me"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
+    }
+
+    @Test
+    void shouldReturnConflictWhenUsernameTaken() throws Exception {
+        Mockito.when(TestConfig.userService.updateMyProfile(any(UUID.class), any(UpdateProfileRequest.class)))
+                .thenThrow(new BusinessException(ErrorCodes.CONFLICT, "Username already exists"));
+
+        UpdateProfileRequest request = new UpdateProfileRequest("taken", null, null, null, null, null, null);
+
+        mockMvc.perform(put("/api/v1/users/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("CONFLICT"));
     }
 }

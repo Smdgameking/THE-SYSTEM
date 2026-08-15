@@ -79,6 +79,16 @@ export function AuthProvider({ children }) {
     return { success: false, status: result.status, data: result.data };
   }, [syncTokens, loadCurrentUser]);
 
+  const updateProfile = useCallback(async (payload) => {
+    setError(null);
+    const result = await userApi.updateProfile(payload);
+    if (result.status === 200 && result.data?.data) {
+      setUser(result.data.data);
+      return { success: true, status: result.status, data: result.data };
+    }
+    return { success: false, status: result.status, data: result.data };
+  }, []);
+
   const refresh = useCallback(async () => {
     setError(null);
     const rt = localStorage.getItem('refreshToken');
@@ -119,6 +129,7 @@ export function AuthProvider({ children }) {
     refresh,
     logout,
     loadCurrentUser,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

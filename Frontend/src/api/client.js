@@ -3,6 +3,27 @@ const API_BASE = 'http://localhost:9000';
 let isRefreshing = false;
 let refreshPromise = null;
 
+async function parseResponseBody(response) {
+  const text = await response.text();
+  if (!text) {
+    return null;
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+async function executeRequest(url, options, headers) {
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
+  const data = await parseResponseBody(response);
+  return { status: response.status, data };
+}
+
 export async function apiClient(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   const storedTokens = getStoredTokens();
@@ -15,14 +36,9 @@ export async function apiClient(endpoint, options = {}) {
     headers.Authorization = `Bearer ${storedTokens.accessToken}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  let result = await executeRequest(url, options, headers);
 
-  const data = await response.json();
-
-  if (response.status === 401 && !options._noAuthRetry) {
+  if (result.status === 401 && !options._noAuthRetry) {
     if (isRefreshing) {
       await refreshPromise;
     } else {
@@ -39,16 +55,11 @@ export async function apiClient(endpoint, options = {}) {
         ...headers,
         Authorization: `Bearer ${accessToken}`,
       };
-      const retryResponse = await fetch(url, {
-        ...options,
-        headers: retryHeaders,
-      });
-      const retryData = await retryResponse.json();
-      return { status: retryResponse.status, data: retryData };
+      result = await executeRequest(url, options, retryHeaders);
     }
   }
 
-  return { status: response.status, data };
+  return result;
 }
 
 async function attemptRefresh() {
@@ -65,9 +76,9 @@ async function attemptRefresh() {
       body: JSON.stringify({ refreshToken }),
     });
 
-    const data = await result.json();
+    const data = await parseResponseBody(result);
 
-    if (result.ok && data.data) {
+    if (result.ok && data && data.data) {
       localStorage.setItem('accessToken', data.data.accessToken);
       localStorage.setItem('refreshToken', data.data.refreshToken);
     } else {

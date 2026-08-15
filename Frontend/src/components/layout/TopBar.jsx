@@ -1,5 +1,5 @@
 import { useAuth } from '../../auth/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MenuIcon, LogoutIcon } from './icons';
 
 export default function TopBar({ title, onToggleSidebar }) {
@@ -28,7 +28,7 @@ export default function TopBar({ title, onToggleSidebar }) {
       <div className="app-topbar-title">{title}</div>
       <div className="app-topbar-spacer" />
       <div className="app-topbar-right">
-        <div className="app-user">
+        <Link to="/profile" className="app-user">
           <div className="app-user-avatar">
             {displayName.charAt(0)}
           </div>
@@ -38,7 +38,7 @@ export default function TopBar({ title, onToggleSidebar }) {
               <span className="app-user-id">@{user.username}</span>
             )}
           </div>
-        </div>
+        </Link>
         <button type="button" className="app-logout-btn" onClick={handleLogout}>
           <LogoutIcon width={15} height={15} />
           <span>Logout</span>

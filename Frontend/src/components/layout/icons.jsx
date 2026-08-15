@@ -84,3 +84,13 @@ export function UserIcon(props) {
     </svg>
   );
 }
+
+export function MemoryIcon(props) {
+  return (
+    <svg {...iconProps} {...props}>
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      <path d="M9 7h7M9 11h7M9 15h4" />
+    </svg>
+  );
+}
