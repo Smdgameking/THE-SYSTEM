@@ -4,7 +4,9 @@ import {
   ListIcon,
   TargetIcon,
   MemoryIcon,
+  AiIcon,
   TrendingUpIcon,
+  BellIcon,
   SettingsIcon,
   UserIcon,
 } from './icons';
@@ -23,7 +25,9 @@ const NAV_SECTIONS = [
       { to: '/tasks', label: 'Tasks', icon: ListIcon },
       { to: '/goals', label: 'Goals', icon: TargetIcon },
       { to: '/memories', label: 'Memories', icon: MemoryIcon },
+      { to: '/ai', label: 'AI', icon: AiIcon },
       { to: '/progress', label: 'Progress', icon: TrendingUpIcon },
+      { to: '/notifications', label: 'Notifications', icon: BellIcon },
     ],
   },
   {

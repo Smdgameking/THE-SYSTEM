@@ -22,4 +22,7 @@ public interface UserStreakHistoryRepository extends JpaRepository<UserStreakHis
 
     List<UserStreakHistory> findByUserIdAndActivityDateGreaterThanEqualAndDeletedAtIsNullOrderByActivityDateAsc(
             UUID userId, LocalDate activityDate);
+
+    List<UserStreakHistory> findByUserIdAndActivityDateGreaterThanEqualAndActivityDateLessThanAndDeletedAtIsNullOrderByActivityDateAsc(
+            UUID userId, LocalDate from, LocalDate to);
 }

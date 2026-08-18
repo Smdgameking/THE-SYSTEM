@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,4 +22,7 @@ public interface TaskTimeEntryRepository extends JpaRepository<TaskTimeEntry, UU
 
     @Query("SELECT SUM(t.durationMinutes) FROM TaskTimeEntry t WHERE t.taskId = :taskId AND t.deletedAt IS NULL")
     Integer sumDurationMinutesByTaskId(@Param("taskId") UUID taskId);
+
+    List<TaskTimeEntry> findByUserIdAndStartTimeGreaterThanEqualAndStartTimeLessThanAndDeletedAtIsNull(
+            UUID userId, Instant from, Instant to);
 }

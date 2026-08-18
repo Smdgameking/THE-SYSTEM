@@ -61,6 +61,7 @@ public class SettingsServiceImpl implements SettingsService {
         Setting setting = settingRepository.findByUserIdAndNamespaceAndKeyAndDeletedAtIsNull(userId, namespace, key)
                 .orElseGet(() -> {
                     Setting s = new Setting();
+                    s.setId(UUID.randomUUID());
                     s.setUserId(userId);
                     s.setNamespace(namespace);
                     s.setKey(key);
@@ -126,6 +127,7 @@ public class SettingsServiceImpl implements SettingsService {
         Setting setting = settingRepository.findByUserIdIsNullAndNamespaceAndKeyAndDeletedAtIsNull(namespace, key)
                 .orElseGet(() -> {
                     Setting s = new Setting();
+                    s.setId(UUID.randomUUID());
                     s.setUserId(null);
                     s.setNamespace(namespace);
                     s.setKey(key);

@@ -65,13 +65,16 @@ class GoalServiceUnitTest {
     @Mock
     private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
+    @Mock
+    private com.thesystem.modules.task.service.TaskService taskService;
+
     private GoalServiceImpl goalService;
     private UUID userId;
     private Goal goal;
 
     @BeforeEach
     void setUp() {
-        goalService = new GoalServiceImpl(goalRepository, milestoneRepository, goalMapper, objectMapper, eventPublisher);
+        goalService = new GoalServiceImpl(goalRepository, milestoneRepository, goalMapper, objectMapper, eventPublisher, taskService);
         userId = UUID.randomUUID();
         goal = new Goal();
         goal.setId(UUID.randomUUID());

@@ -8,9 +8,11 @@ import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
 import TasksPage from './pages/TasksPage';
 import MemoriesPage from './pages/MemoriesPage';
+import AiPage from './pages/AiPage';
 import GoalsPage from './pages/GoalsPage';
 import ProgressPage from './pages/ProgressPage';
 import SettingsPage from './pages/SettingsPage';
+import NotificationsPage from './pages/NotificationsPage';
 import AuthTestPage from './components/AuthTestPage';
 
 function App() {
@@ -32,8 +34,10 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/memories" element={<MemoriesPage />} />
+            <Route path="/ai" element={<AiPage />} />
             <Route path="/goals" element={<GoalsPage />} />
             <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

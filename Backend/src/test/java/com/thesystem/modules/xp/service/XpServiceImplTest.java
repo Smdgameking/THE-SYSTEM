@@ -37,6 +37,7 @@ import com.thesystem.modules.xp.mapper.XpMapper;
 import com.thesystem.modules.xp.repository.AchievementDefinitionRepository;
 import com.thesystem.modules.xp.repository.RewardHistoryRepository;
 import com.thesystem.modules.xp.repository.UserAchievementRepository;
+import com.thesystem.modules.xp.repository.UserStreakHistoryRepository;
 import com.thesystem.modules.xp.repository.UserStreakRepository;
 import com.thesystem.modules.xp.repository.XpAccountRepository;
 import com.thesystem.modules.xp.repository.XpPolicyRepository;
@@ -97,6 +98,9 @@ class XpServiceImplTest {
     private UserStreakRepository userStreakRepository;
 
     @Mock
+    private UserStreakHistoryRepository userStreakHistoryRepository;
+
+    @Mock
     private XpMapper xpMapper;
 
     @Mock
@@ -119,7 +123,7 @@ class XpServiceImplTest {
                 xpAccountRepository, xpTransactionRepository,
                 achievementDefinitionRepository, userAchievementRepository,
                 xpPolicyRepository, rewardHistoryRepository,
-                userStreakRepository,
+                userStreakRepository, userStreakHistoryRepository,
                 xpMapper, objectMapper, eventPublisher, userTimezoneResolver
         );
         userId = UUID.randomUUID();

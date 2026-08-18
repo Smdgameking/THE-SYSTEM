@@ -4,6 +4,7 @@ export async function getTasks(filter = {}) {
   const params = new URLSearchParams();
   if (filter.status) params.set('status', filter.status);
   if (filter.priority) params.set('priority', filter.priority);
+  if (filter.goalId) params.set('goalId', filter.goalId);
   if (filter.search) params.set('search', filter.search);
   if (filter.page) params.set('page', filter.page);
   if (filter.limit) params.set('limit', filter.limit);

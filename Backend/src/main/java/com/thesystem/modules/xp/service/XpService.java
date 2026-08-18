@@ -23,6 +23,7 @@ import com.thesystem.modules.xp.enums.PolicyType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -95,6 +96,20 @@ public interface XpService {
     // ========================
 
     UserStreakResponse getUserStreak(UUID userId);
+
+    /**
+     * Returns the count of qualifying activity records per day for the user
+     * within the inclusive-exclusive window {@code [from, to)}.
+     *
+     * @param userId the ID of the user
+     * @param from   the window start (inclusive)
+     * @param to     the window end (exclusive)
+     * @return the per-day activity counts, ordered by date ascending
+     */
+    List<ActivityDay> getActivityTrend(UUID userId, LocalDate from, LocalDate to);
+
+    record ActivityDay(LocalDate date, long count) {
+    }
 
     // ========================
     // Policy Operations

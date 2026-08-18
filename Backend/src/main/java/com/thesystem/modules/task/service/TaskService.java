@@ -207,6 +207,17 @@ public interface TaskService {
     List<TimeEntryResponse> listTimeEntries(UUID userId, UUID taskId);
 
     /**
+     * Lists all time entries owned by a user whose start time falls within the
+     * given inclusive-exclusive window {@code [from, to)}.
+     *
+     * @param userId the ID of the time entry owner
+     * @param from   the window start (inclusive)
+     * @param to     the window end (exclusive)
+     * @return a list of time entry responses within the window
+     */
+    List<TimeEntryResponse> listTimeEntriesForPeriod(UUID userId, Instant from, Instant to);
+
+    /**
      * Deletes a time entry from a task.
      *
      * @param userId  the ID of the task owner
@@ -222,6 +233,15 @@ public interface TaskService {
      * @return the task statistics response
      */
     TaskStatisticsResponse getStatistics(UUID userId);
+
+    /**
+     * Returns the completed/total counts of non-deleted tasks linked to a goal.
+     *
+     * @param userId the ID of the task owner
+     * @param goalId the ID of the goal
+     * @return the completed/total task counts for the goal
+     */
+    TaskGoalProgressSnapshot getGoalTaskProgress(UUID userId, UUID goalId);
 
     /**
      * Configures recurrence for a task.
@@ -283,6 +303,9 @@ public interface TaskService {
             UUID dependsOnTaskId,
             DependencyType dependencyType
     ) {
+    }
+
+    record TaskGoalProgressSnapshot(int completedCount, int totalCount) {
     }
 
     record StartTimeEntryRequest(

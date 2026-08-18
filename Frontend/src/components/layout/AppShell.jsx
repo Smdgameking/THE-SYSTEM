@@ -10,6 +10,7 @@ const SECTION_TITLES = {
   '/tasks': 'Tasks',
   '/goals': 'Goals',
   '/progress': 'Progress',
+  '/notifications': 'Notifications',
   '/settings': 'Settings',
 };
 

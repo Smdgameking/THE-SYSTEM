@@ -575,4 +575,35 @@ class TaskServiceTest {
                     .isInstanceOf(BusinessException.class);
         }
     }
+
+    @Test
+    void shouldReturnCompletedAndTotalCountsForGoal() {
+        UUID goalId = UUID.randomUUID();
+        Task completed = new Task();
+        completed.setId(UUID.randomUUID());
+        completed.setStatus(TaskStatus.COMPLETED);
+        Task draft = new Task();
+        draft.setId(UUID.randomUUID());
+        draft.setStatus(TaskStatus.DRAFT);
+        Task anotherCompleted = new Task();
+        anotherCompleted.setId(UUID.randomUUID());
+        anotherCompleted.setStatus(TaskStatus.COMPLETED);
+        when(taskRepository.findByUserIdAndGoalIdAndDeletedAtIsNull(userId, goalId)).thenReturn(List.of(completed, draft, anotherCompleted));
+
+        TaskService.TaskGoalProgressSnapshot snapshot = taskService.getGoalTaskProgress(userId, goalId);
+
+        assertThat(snapshot.completedCount()).isEqualTo(2);
+        assertThat(snapshot.totalCount()).isEqualTo(3);
+    }
+
+    @Test
+    void shouldReturnZeroCountsWhenGoalHasNoTasks() {
+        UUID goalId = UUID.randomUUID();
+        when(taskRepository.findByUserIdAndGoalIdAndDeletedAtIsNull(userId, goalId)).thenReturn(List.of());
+
+        TaskService.TaskGoalProgressSnapshot snapshot = taskService.getGoalTaskProgress(userId, goalId);
+
+        assertThat(snapshot.completedCount()).isZero();
+        assertThat(snapshot.totalCount()).isZero();
+    }
 }

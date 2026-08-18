@@ -62,7 +62,12 @@ public interface GoalMapper {
         if (value == null || value.isBlank()) {
             return List.of();
         }
-        return java.util.Arrays.asList(value.split(","));
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(value, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            return java.util.Arrays.asList(value.split(","));
+        }
     }
 
     @org.mapstruct.Named("stringToMap")

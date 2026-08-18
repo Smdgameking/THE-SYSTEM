@@ -1,0 +1,347 @@
+/* ------------------------------------------------------------------ */
+/* Buttons                                                             */
+/* ------------------------------------------------------------------ */
+
+.db-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--sys-border);
+  background: transparent;
+  color: var(--sys-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.db-btn:hover:not(:disabled) {
+  color: var(--sys-text);
+  border-color: var(--sys-border-strong);
+}
+
+.db-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.db-btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
+}
+
+.db-btn-primary:hover:not(:disabled) {
+  color: #fff;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.45);
+}
+
+.db-btn-ghost {
+  background: var(--sys-accent-soft);
+}
+
+/* ------------------------------------------------------------------ */
+/* Sections                                                            */
+/* ------------------------------------------------------------------ */
+
+.db-section {
+  margin-top: 20px;
+}
+
+.db-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--sys-text-muted);
+  margin: 0 0 12px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Level / XP widget                                                   */
+/* ------------------------------------------------------------------ */
+
+.db-level-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.db-level-main,
+.db-level-side {
+  background: var(--sys-panel);
+  border: 1px solid var(--sys-border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.db-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--sys-text-muted);
+  margin: 0 0 4px;
+}
+
+.db-level-number {
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--sys-text);
+  margin: 0 0 4px;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #c7d2fe 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.db-streak-number {
+  -webkit-text-fill-color: currentColor;
+  color: var(--sys-text);
+}
+
+.db-streak-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--sys-text);
+  margin: 0 0 4px;
+  line-height: 1.1;
+}
+
+.db-streak-unit {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sys-text-secondary);
+}
+
+.db-streak-label {
+  margin-top: 14px;
+}
+
+.db-level-progress-text {
+  font-size: 12px;
+  color: var(--sys-text-secondary);
+  margin: 0 0 8px;
+}
+
+.db-progress-track {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.db-progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.db-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 12px;
+}
+
+.db-meta-item {
+  font-size: 12px;
+  color: var(--sys-text-muted);
+}
+
+/* ------------------------------------------------------------------ */
+/* Cards                                                               */
+/* ------------------------------------------------------------------ */
+
+.db-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.db-card {
+  background: var(--sys-panel);
+  border: 1px solid var(--sys-border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.db-card-note {
+  font-size: 12px;
+  color: var(--sys-text-muted);
+  margin: 14px 0 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stats                                                               */
+/* ------------------------------------------------------------------ */
+
+.db-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 12px;
+}
+
+.db-stat {
+  background: var(--sys-panel);
+  border: 1px solid var(--sys-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.db-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--sys-text-muted);
+  margin: 0 0 6px;
+}
+
+.db-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--sys-text);
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Status chips                                                        */
+/* ------------------------------------------------------------------ */
+
+.db-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.db-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: 1px solid var(--sys-border);
+  color: var(--sys-text-secondary);
+}
+
+.db-chip-muted {
+  opacity: 0.7;
+}
+
+/* ------------------------------------------------------------------ */
+/* Quick facts                                                         */
+/* ------------------------------------------------------------------ */
+
+.db-quickfacts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Activity                                                            */
+/* ------------------------------------------------------------------ */
+
+.db-activity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.db-activity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--sys-panel);
+  border: 1px solid var(--sys-border);
+  border-radius: 8px;
+}
+
+.db-activity-main {
+  min-width: 0;
+}
+
+.db-activity-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sys-text);
+  margin: 0;
+}
+
+.db-activity-meta {
+  font-size: 12px;
+  color: var(--sys-text-muted);
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.db-activity-amount {
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.db-gain {
+  color: #34d399;
+}
+
+.db-loss {
+  color: #f87171;
+}
+
+/* ------------------------------------------------------------------ */
+/* States                                                              */
+/* ------------------------------------------------------------------ */
+
+.db-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 24px;
+  text-align: center;
+  border: 1px dashed var(--sys-border-strong);
+  border-radius: 12px;
+  background: var(--sys-panel);
+  color: var(--sys-text-secondary);
+  font-size: 14px;
+}
+
+.db-state-error {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.db-empty {
+  font-size: 13px;
+  color: var(--sys-text-secondary);
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                          */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 720px) {
+  .db-level-card,
+  .db-cards {
+    grid-template-columns: 1fr;
+  }
+}

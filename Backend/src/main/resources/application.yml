@@ -64,3 +64,5 @@ thesystem:
     secret: ${THE_SYSTEM_JWT_SECRET:}
     access-token-expiration-ms: ${THE_SYSTEM_JWT_ACCESS_EXPIRATION:900000}
     refresh-token-expiration-ms: ${THE_SYSTEM_JWT_REFRESH_EXPIRATION:604800000}
+  ai:
+    provider: ${THE_SYSTEM_AI_PROVIDER:}

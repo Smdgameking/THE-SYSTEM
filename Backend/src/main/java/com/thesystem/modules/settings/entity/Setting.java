@@ -51,6 +51,14 @@ public class Setting extends BaseEntity {
     public Setting() {
     }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public java.util.UUID getUserId() {
         return userId;
     }

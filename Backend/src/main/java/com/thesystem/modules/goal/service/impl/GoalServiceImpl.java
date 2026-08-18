@@ -31,6 +31,7 @@ import com.thesystem.modules.goal.mapper.GoalMapper;
 import com.thesystem.modules.goal.repository.GoalMilestoneRepository;
 import com.thesystem.modules.goal.repository.GoalRepository;
 import com.thesystem.modules.goal.service.GoalService;
+import com.thesystem.modules.task.service.TaskService;
 import com.thesystem.security.util.SecurityUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -50,25 +51,29 @@ public class GoalServiceImpl implements GoalService {
     private final GoalMapper goalMapper;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final TaskService taskService;
 
     public GoalServiceImpl(
             GoalRepository goalRepository,
             GoalMilestoneRepository milestoneRepository,
             GoalMapper goalMapper,
             ObjectMapper objectMapper,
-            ApplicationEventPublisher eventPublisher
+            ApplicationEventPublisher eventPublisher,
+            TaskService taskService
     ) {
         this.goalRepository = goalRepository;
         this.milestoneRepository = milestoneRepository;
         this.goalMapper = goalMapper;
         this.objectMapper = objectMapper;
         this.eventPublisher = eventPublisher;
+        this.taskService = taskService;
     }
 
     @Override
     @Transactional
     public GoalResponse createGoal(UUID userId, CreateGoalRequest request) {
         Goal goal = new Goal();
+        goal.setId(UUID.randomUUID());
         goal.setUserId(userId);
         goal.setTitle(request.title());
         goal.setDescription(request.description());
@@ -82,7 +87,7 @@ public class GoalServiceImpl implements GoalService {
         goal.setCompletionPercentage(0.0);
         goal.setTargetDate(request.targetDate());
         goal.setCompletionStrategy(request.completionStrategy() != null ? request.completionStrategy() : CompletionStrategy.MANUAL);
-        goal.setTags(request.tags() != null ? String.join(",", request.tags()) : null);
+        goal.setTags(request.tags() != null ? toJson(request.tags()) : null);
         goal.setCustomMetadata(toJson(request.customMetadata()));
 
         Goal saved = goalRepository.save(goal);
@@ -122,6 +127,7 @@ public class GoalServiceImpl implements GoalService {
         Goal goal = goalRepository.findByIdAndUserIdAndDeletedAtIsNull(goalId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Goal not found"));
 
+        CompletionStrategy previousStrategy = goal.getCompletionStrategy();
         if (request.title() != null) {
             goal.setTitle(request.title());
         }
@@ -150,7 +156,7 @@ public class GoalServiceImpl implements GoalService {
             goal.setCompletionStrategy(request.completionStrategy());
         }
         if (request.tags() != null) {
-            goal.setTags(String.join(",", request.tags()));
+            goal.setTags(toJson(request.tags()));
         }
         if (request.customMetadata() != null) {
             goal.setCustomMetadata(toJson(request.customMetadata()));
@@ -158,6 +164,9 @@ public class GoalServiceImpl implements GoalService {
 
         Goal saved = goalRepository.save(goal);
         eventPublisher.publishEvent(new GoalUpdatedEvent(saved.getId(), userId, saved.getTitle()));
+        if (request.completionStrategy() == CompletionStrategy.TASK_BASED && previousStrategy != CompletionStrategy.TASK_BASED) {
+            return recalculateGoalProgress(userId, saved, "TASK_BASED");
+        }
         return goalMapper.toGoalResponse(saved);
     }
 
@@ -211,6 +220,10 @@ public class GoalServiceImpl implements GoalService {
     public GoalResponse completeGoal(UUID userId, UUID goalId) {
         Goal goal = goalRepository.findByIdAndUserIdAndDeletedAtIsNull(goalId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Goal not found"));
+        if (goal.getCompletionStrategy() == CompletionStrategy.TASK_BASED) {
+            throw new BusinessException(ErrorCodes.BAD_REQUEST,
+                    "TASK_BASED goal progress is derived from linked tasks and cannot be completed manually");
+        }
         validateTransition(goal.getStatus(), GoalStatus.COMPLETED);
         goal.setStatus(GoalStatus.COMPLETED);
         Instant completedAt = Instant.now();
@@ -252,6 +265,10 @@ public class GoalServiceImpl implements GoalService {
     public GoalResponse updateProgress(UUID userId, UUID goalId, int progress) {
         Goal goal = goalRepository.findByIdAndUserIdAndDeletedAtIsNull(goalId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Goal not found"));
+        if (goal.getCompletionStrategy() == CompletionStrategy.TASK_BASED) {
+            throw new BusinessException(ErrorCodes.BAD_REQUEST,
+                    "TASK_BASED goal progress is derived from linked tasks and cannot be set manually");
+        }
         int oldProgress = goal.getCurrentProgress();
         double oldPercentage = goal.getCompletionPercentage();
         goal.setCurrentProgress(Math.max(0, Math.min(100, progress)));
@@ -272,27 +289,73 @@ public class GoalServiceImpl implements GoalService {
     public GoalResponse recalculateProgress(UUID userId, UUID goalId) {
         Goal goal = goalRepository.findByIdAndUserIdAndDeletedAtIsNull(goalId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Goal not found"));
+        return recalculateGoalProgress(userId, goal, "RECALCULATED");
+    }
+
+    @Override
+    @Transactional
+    public void recalculateTaskBasedProgress(UUID userId, UUID goalId) {
+        if (goalId == null) {
+            return;
+        }
+        goalRepository.findByIdAndUserIdAndDeletedAtIsNull(goalId, userId).ifPresent(goal -> {
+            if (goal.getCompletionStrategy() != CompletionStrategy.TASK_BASED) {
+                return;
+            }
+            if (goal.getStatus() == GoalStatus.FAILED || goal.getStatus() == GoalStatus.ARCHIVED) {
+                return;
+            }
+            recalculateGoalProgress(userId, goal, "TASK_BASED");
+        });
+    }
+
+    private GoalResponse recalculateGoalProgress(UUID userId, Goal goal, String source) {
         int oldProgress = goal.getCurrentProgress();
         double oldPercentage = goal.getCompletionPercentage();
+        GoalStatus previousStatus = goal.getStatus();
 
         int newProgress = oldProgress;
         double newPercentage = oldPercentage;
 
         if (goal.getCompletionStrategy() == CompletionStrategy.MILESTONE_BASED) {
-            List<GoalMilestone> milestones = milestoneRepository.findByGoalIdAndDeletedAtIsNullOrderByDisplayOrderAsc(goalId);
+            List<GoalMilestone> milestones = milestoneRepository.findByGoalIdAndDeletedAtIsNullOrderByDisplayOrderAsc(goal.getId());
             if (!milestones.isEmpty()) {
                 long completed = milestones.stream().filter(GoalMilestone::getIsCompleted).count();
                 newProgress = (int) Math.round((double) completed / milestones.size() * 100);
                 newPercentage = newProgress;
             }
+        } else if (goal.getCompletionStrategy() == CompletionStrategy.TASK_BASED) {
+            TaskService.TaskGoalProgressSnapshot snapshot = taskService.getGoalTaskProgress(userId, goal.getId());
+            newProgress = snapshot.totalCount() > 0
+                    ? (int) Math.round((double) snapshot.completedCount() / snapshot.totalCount() * 100)
+                    : 0;
+            newPercentage = newProgress;
         }
+
+        boolean taskBased = goal.getCompletionStrategy() == CompletionStrategy.TASK_BASED;
+        if (taskBased && newProgress >= 100 && previousStatus != GoalStatus.COMPLETED) {
+            goal.setStatus(GoalStatus.COMPLETED);
+            goal.setCompletedDate(Instant.now());
+        } else if (taskBased && newProgress < 100 && previousStatus == GoalStatus.COMPLETED) {
+            goal.setStatus(GoalStatus.ACTIVE);
+            goal.setCompletedDate(null);
+        }
+
+        boolean statusChanged = goal.getStatus() != previousStatus;
+        boolean valuesChanged = newProgress != oldProgress || newPercentage != oldPercentage;
 
         goal.setCurrentProgress(newProgress);
         goal.setCompletionPercentage(newPercentage);
         Goal saved = goalRepository.save(goal);
-        eventPublisher.publishEvent(new GoalProgressUpdatedEvent(
-                saved.getId(), userId, oldProgress, saved.getCurrentProgress(),
-                oldPercentage, saved.getCompletionPercentage(), "RECALCULATED"));
+
+        if (saved.getStatus() == GoalStatus.COMPLETED && previousStatus != GoalStatus.COMPLETED) {
+            eventPublisher.publishEvent(new GoalCompletedEvent(saved.getId(), userId, saved.getEstimatedXp(),
+                    saved.getDifficulty() != null ? saved.getDifficulty().name() : null, saved.getCompletedDate()));
+        } else if (statusChanged || valuesChanged) {
+            eventPublisher.publishEvent(new GoalProgressUpdatedEvent(
+                    saved.getId(), userId, oldProgress, saved.getCurrentProgress(),
+                    oldPercentage, saved.getCompletionPercentage(), source));
+        }
         return goalMapper.toGoalResponse(saved);
     }
 
@@ -309,6 +372,7 @@ public class GoalServiceImpl implements GoalService {
                 .orElse(-1);
 
         GoalMilestone milestone = new GoalMilestone();
+        milestone.setId(UUID.randomUUID());
         milestone.setGoalId(goalId);
         milestone.setTitle(request.title());
         milestone.setDescription(request.description());

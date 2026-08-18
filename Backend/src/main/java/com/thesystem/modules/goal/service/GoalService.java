@@ -45,6 +45,15 @@ public interface GoalService {
 
     GoalResponse recalculateProgress(UUID userId, UUID goalId);
 
+    /**
+     * Recalculates progress for a TASK_BASED goal from its linked tasks, if the goal exists,
+     * is not deleted, is not FAILED/ARCHIVED, and uses the TASK_BASED strategy. No-op otherwise.
+     *
+     * @param userId the ID of the goal owner
+     * @param goalId the ID of the goal
+     */
+    void recalculateTaskBasedProgress(UUID userId, UUID goalId);
+
     MilestoneResponse createMilestone(UUID userId, UUID goalId, CreateMilestoneRequest request);
 
     MilestoneResponse updateMilestone(UUID userId, UUID goalId, UUID milestoneId, UpdateMilestoneRequest request);

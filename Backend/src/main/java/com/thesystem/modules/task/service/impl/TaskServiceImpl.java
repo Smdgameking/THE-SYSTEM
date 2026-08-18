@@ -112,7 +112,7 @@ public class TaskServiceImpl implements TaskService {
         }
 
         Task saved = taskRepository.save(task);
-        eventPublisher.publishEvent(new TaskCreatedEvent(toLong(saved.getId()), toLong(userId), toLong(saved.getGoalId()), saved.getTitle()));
+        eventPublisher.publishEvent(new TaskCreatedEvent(saved.getId(), userId, saved.getGoalId(), saved.getTitle()));
         return taskMapper.toTaskResponse(saved);
     }
 
@@ -150,6 +150,7 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findByIdAndUserIdAndDeletedAtIsNull(taskId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Task not found"));
 
+        UUID previousGoalId = task.getGoalId();
         if (request.title() != null) task.setTitle(request.title());
         if (request.description() != null) task.setDescription(request.description());
         if (request.goalId() != null) task.setGoalId(request.goalId());
@@ -176,7 +177,7 @@ public class TaskServiceImpl implements TaskService {
         if (request.visibility() != null) task.setVisibility(request.visibility());
 
         Task saved = taskRepository.save(task);
-        eventPublisher.publishEvent(new TaskUpdatedEvent(toLong(saved.getId()), toLong(userId)));
+        eventPublisher.publishEvent(new TaskUpdatedEvent(saved.getId(), userId, saved.getGoalId(), previousGoalId, saved.getTitle()));
         return taskMapper.toTaskResponse(saved);
     }
 
@@ -187,7 +188,7 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new BusinessException(ErrorCodes.NOT_FOUND, "Task not found"));
         task.setDeletedAt(Instant.now());
         taskRepository.save(task);
-        eventPublisher.publishEvent(new TaskDeletedEvent(toLong(taskId), toLong(userId)));
+        eventPublisher.publishEvent(new TaskDeletedEvent(task.getId(), userId, task.getGoalId()));
     }
 
     @Override
@@ -290,6 +291,7 @@ public class TaskServiceImpl implements TaskService {
         }
         subtask.setDeletedAt(Instant.now());
         taskRepository.save(subtask);
+        eventPublisher.publishEvent(new TaskDeletedEvent(subtask.getId(), userId, subtask.getGoalId()));
     }
 
     @Override
@@ -406,6 +408,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<TimeEntryResponse> listTimeEntriesForPeriod(UUID userId, Instant from, Instant to) {
+        return taskTimeEntryRepository.findByUserIdAndStartTimeGreaterThanEqualAndStartTimeLessThanAndDeletedAtIsNull(userId, from, to)
+                .stream().map(taskMapper::toTimeEntryResponse).collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public void deleteTimeEntry(UUID userId, UUID taskId, UUID entryId) {
         TaskTimeEntry entry = taskTimeEntryRepository.findById(entryId)
@@ -467,6 +476,15 @@ public class TaskServiceImpl implements TaskService {
                 completionRate, total, completed, failed, cancelled, archived, overdue,
                 0.0, 0, focusTimeToday, focusTimeWeek, byStatus, byPriority, categoryBreakdown
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TaskGoalProgressSnapshot getGoalTaskProgress(UUID userId, UUID goalId) {
+        List<Task> tasks = taskRepository.findByUserIdAndGoalIdAndDeletedAtIsNull(userId, goalId);
+        int total = tasks.size();
+        int completed = (int) tasks.stream().filter(task -> task.getStatus() == TaskStatus.COMPLETED).count();
+        return new TaskGoalProgressSnapshot(completed, total);
     }
 
     @Override

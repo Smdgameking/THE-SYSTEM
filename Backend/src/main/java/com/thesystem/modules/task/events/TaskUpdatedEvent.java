@@ -2,9 +2,10 @@ package com.thesystem.modules.task.events;
 
 import com.thesystem.shared.event.DomainEvent;
 import java.time.Instant;
+import java.util.UUID;
 
-public record TaskUpdatedEvent(Long taskId, Long userId, Instant occurredAt) implements DomainEvent {
-    public TaskUpdatedEvent(Long taskId, Long userId) {
-        this(taskId, userId, Instant.now());
+public record TaskUpdatedEvent(UUID taskId, UUID userId, UUID goalId, UUID previousGoalId, String title, Instant occurredAt) implements DomainEvent {
+    public TaskUpdatedEvent(UUID taskId, UUID userId, UUID goalId, UUID previousGoalId, String title) {
+        this(taskId, userId, goalId, previousGoalId, title, Instant.now());
     }
 }

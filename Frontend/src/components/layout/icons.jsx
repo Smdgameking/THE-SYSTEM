@@ -94,3 +94,22 @@ export function MemoryIcon(props) {
     </svg>
   );
 }
+
+export function AiIcon(props) {
+  return (
+    <svg {...iconProps} {...props}>
+      <path d="M12 2l1.7 4.3L18 8l-4.3 1.7L12 14l-1.7-4.3L6 8l4.3-1.7z" />
+      <path d="M19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9z" />
+      <path d="M5 15l.8 1.7L7.5 17.5l-1.7.8L5 20l-.8-1.7L2.5 17.5l1.7-.8z" />
+    </svg>
+  );
+}
+
+export function BellIcon(props) {
+  return (
+    <svg {...iconProps} {...props}>
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}

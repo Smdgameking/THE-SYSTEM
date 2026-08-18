@@ -25,6 +25,7 @@ import com.thesystem.modules.xp.entity.AchievementDefinition;
 import com.thesystem.modules.xp.entity.RewardHistory;
 import com.thesystem.modules.xp.entity.UserAchievement;
 import com.thesystem.modules.xp.entity.UserStreak;
+import com.thesystem.modules.xp.entity.UserStreakHistory;
 import com.thesystem.modules.xp.entity.XpAccount;
 import com.thesystem.modules.xp.entity.XpPolicy;
 import com.thesystem.modules.xp.entity.XpTransaction;
@@ -54,6 +55,7 @@ import com.thesystem.modules.xp.mapper.XpMapper;
 import com.thesystem.modules.xp.repository.AchievementDefinitionRepository;
 import com.thesystem.modules.xp.repository.RewardHistoryRepository;
 import com.thesystem.modules.xp.repository.UserAchievementRepository;
+import com.thesystem.modules.xp.repository.UserStreakHistoryRepository;
 import com.thesystem.modules.xp.repository.UserStreakRepository;
 import com.thesystem.modules.xp.repository.XpAccountRepository;
 import com.thesystem.modules.xp.repository.XpPolicyRepository;
@@ -68,6 +70,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +88,7 @@ public class XpServiceImpl implements XpService {
     private final XpPolicyRepository xpPolicyRepository;
     private final RewardHistoryRepository rewardHistoryRepository;
     private final UserStreakRepository userStreakRepository;
+    private final UserStreakHistoryRepository userStreakHistoryRepository;
     private final XpMapper xpMapper;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
@@ -98,6 +102,7 @@ public class XpServiceImpl implements XpService {
             XpPolicyRepository xpPolicyRepository,
             RewardHistoryRepository rewardHistoryRepository,
             UserStreakRepository userStreakRepository,
+            UserStreakHistoryRepository userStreakHistoryRepository,
             XpMapper xpMapper,
             ObjectMapper objectMapper,
             ApplicationEventPublisher eventPublisher,
@@ -109,6 +114,7 @@ public class XpServiceImpl implements XpService {
         this.xpPolicyRepository = xpPolicyRepository;
         this.rewardHistoryRepository = rewardHistoryRepository;
         this.userStreakRepository = userStreakRepository;
+        this.userStreakHistoryRepository = userStreakHistoryRepository;
         this.xpMapper = xpMapper;
         this.objectMapper = objectMapper;
         this.eventPublisher = eventPublisher;
@@ -609,6 +615,19 @@ public class XpServiceImpl implements XpService {
                 userStreak.getCurrentStreakStartDate(),
                 userStreak.getLastActivityDate()
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ActivityDay> getActivityTrend(UUID userId, LocalDate from, LocalDate to) {
+        return userStreakHistoryRepository
+                .findByUserIdAndActivityDateGreaterThanEqualAndActivityDateLessThanAndDeletedAtIsNullOrderByActivityDateAsc(userId, from, to)
+                .stream()
+                .collect(Collectors.groupingBy(UserStreakHistory::getActivityDate, Collectors.counting()))
+                .entrySet().stream()
+                .map(e -> new ActivityDay(e.getKey(), e.getValue()))
+                .sorted(java.util.Comparator.comparing(ActivityDay::date))
+                .toList();
     }
 
     @Override
